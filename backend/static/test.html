@@ -807,11 +807,85 @@
             </div>
             <form id="createAgentForm" class="agent-form">
                 <div class="form-section">
-                    <h3>🆔 Basic Information</h3>
+                    <h3>🆔 Core Identity</h3>
                     <div class="form-group">
-                        <label for="agentId">Agent ID</label>
-                        <input type="text" id="agentId" required placeholder="e.g., neon_painter">
+                        <label for="agentId">Agent ID *</label>
+                        <input type="text" id="agentId" required placeholder="e.g., cosmic_painter">
+                        <small class="auth-help">Unique identifier (alphanumeric and underscores only)</small>
                     </div>
+                    <div class="form-group">
+                        <label for="displayName">Display Name *</label>
+                        <input type="text" id="displayName" required maxlength="60" placeholder="e.g., Cosmic the Ethereal">
+                        <small class="auth-help">Human-readable name (max 60 characters)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="avatarUrl">Avatar URL (Optional)</label>
+                        <input type="url" id="avatarUrl" placeholder="https://example.com/avatar.jpg or ipfs://...">
+                        <small class="auth-help">Supports http://, https://, or ipfs:// URLs</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="archetype">Creative Archetype *</label>
+                        <input type="text" id="archetype" required placeholder="e.g., Neo-Mystical Digital Painter">
+                        <small class="auth-help">Human-readable creator type phrase</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="coreTraits">Core Traits (comma-separated)</label>
+                        <input type="text" id="coreTraits" placeholder="e.g., mystical, intuitive, transcendent, luminous">
+                        <small class="auth-help">Descriptive adjectives that define the agent's personality</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="originStory">Origin Story</label>
+                        <textarea id="originStory" placeholder="A brief narrative about the agent's creative genesis..."></textarea>
+                        <small class="auth-help">Brief background story about the agent's creative origins</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🎨 Artistic Specialization</h3>
+                    <div class="form-group">
+                        <label for="primaryMediums">Primary Mediums (comma-separated)</label>
+                        <input type="text" id="primaryMediums" placeholder="e.g., digital-mysticism, light-painting, quantum-brushwork">
+                        <small class="auth-help">Creative mediums the agent specializes in</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="signatureMotifs">Signature Motifs (comma-separated)</label>
+                        <input type="text" id="signatureMotifs" placeholder="e.g., spiral galaxies, aurora veils, crystalline formations">
+                        <small class="auth-help">Recurring visual concepts and themes</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="influences">Artistic Influences (comma-separated)</label>
+                        <input type="text" id="influences" placeholder="e.g., Salvador Dalí, Yves Klein, Alex Grey">
+                        <small class="auth-help">Artists, styles, movements that inspire the agent</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="colourPalette">Color Palette (comma-separated)</label>
+                        <input type="text" id="colourPalette" placeholder="e.g., #0F1C24, #7B68EE, #FFD700, #E6E6FA">
+                        <small class="auth-help">Preferred colors in hex codes or names</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptFormula">Prompt Formula (Optional)</label>
+                        <textarea id="promptFormula" placeholder="e.g., Create a {style} artwork featuring {motif} in {color_scheme} with {medium} techniques..."></textarea>
+                        <small class="auth-help">Templated string for signature creative approach</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="voiceStyle">Voice Style (Optional)</label>
+                        <input type="text" id="voiceStyle" placeholder="e.g., Mystical and poetic, speaks in metaphors of light and energy">
+                        <small class="auth-help">How the agent communicates and expresses itself</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="creationRate">Creation Rate (works per day)</label>
+                        <input type="number" id="creationRate" min="1" max="20" value="4" placeholder="4">
+                        <small class="auth-help">How many works the agent creates/publishes per day</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="collabAffinity">Collaboration Affinity (comma-separated)</label>
+                        <input type="text" id="collabAffinity" placeholder="e.g., surrealism, meditation, cosmic-art">
+                        <small class="auth-help">Collaboration styles and genres the agent enjoys</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>⚙️ Technical Configuration</h3>
                     <div class="form-group">
                         <label for="agentType">Agent Type</label>
                         <select id="agentType" required>
@@ -838,16 +912,16 @@
                         <span id="temperatureValue">0.7</span>
                     </div>
                 </div>
-
+        
                 <div class="form-section">
-                    <h3>🏛️ Studio Configuration</h3>
+                    <h3>🏛️ Studio Environment</h3>
                     <div class="form-group">
-                        <label for="studioName">Studio Name</label>
-                        <input type="text" id="studioName" required placeholder="e.g., Neon Dreams Gallery">
+                        <label for="studioName">Studio Name *</label>
+                        <input type="text" id="studioName" required placeholder="e.g., Ethereal Visions">
                     </div>
                     <div class="form-group">
-                        <label for="studioDescription">Studio Description</label>
-                        <textarea id="studioDescription" required placeholder="Describe the creative space and atmosphere..."></textarea>
+                        <label for="studioDescription">Studio Description *</label>
+                        <textarea id="studioDescription" required placeholder="A mystical studio where digital dreams become reality..."></textarea>
                     </div>
                     <div class="form-group">
                         <label for="studioTheme">Studio Theme</label>
@@ -862,51 +936,35 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="artStyle">Art Style</label>
-                        <input type="text" id="artStyle" required placeholder="e.g., neon_digital, crypto_sculpture">
+                        <label for="artStyle">Primary Art Style *</label>
+                        <input type="text" id="artStyle" required placeholder="e.g., surreal_digital, crypto_sculpture">
+                    </div>
+                    <div class="form-group">
+                        <label>Studio Items</label>
+                        <div class="custom-tools-section">
+                            <div id="selectedStudioItems" class="selected-tools">
+                                <!-- Selected studio items will appear here -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="addStudioItemBtn">
+                                + Add Studio Item
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="form-section">
-                    <h3>🎭 Persona Configuration</h3>
-                    <div class="form-group">
-                        <label for="personaName">Persona Name</label>
-                        <input type="text" id="personaName" required placeholder="e.g., Neon, CryptoForge">
-                    </div>
-                    <div class="form-group">
-                        <label for="personaBackground">Background Story</label>
-                        <textarea id="personaBackground" required placeholder="Describe the agent's artistic background and vision..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="personalityTraits">Personality Traits (comma-separated)</label>
-                        <input type="text" id="personalityTraits" placeholder="e.g., innovative, mystical, experimental">
-                    </div>
-                    <div class="form-group">
-                        <label for="artisticInfluences">Artistic Influences (comma-separated)</label>
-                        <input type="text" id="artisticInfluences" placeholder="e.g., Van Gogh, Bitcoin, Blade Runner">
-                    </div>
-                    <div class="form-group">
-                        <label for="preferredMediums">Preferred Mediums (comma-separated)</label>
-                        <input type="text" id="preferredMediums" placeholder="e.g., digital, NFT, 3D, blockchain">
-                    </div>
-                </div>
-
+        
                 <div class="form-section">
                     <h3>🛠️ Tools & Capabilities</h3>
                     <div class="form-group">
                         <label>Enabled Tools</label>
                         <div class="checkbox-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" name="tools" value="create_artwork" checked> Create Artwork
+                                <input type="checkbox" name="tools" value="generate_image" checked> Generate Image
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="tools" value="analyze_art" checked> Analyze Art
+                                <input type="checkbox" name="tools" value="generate_video" checked> Generate Video
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="tools" value="remix_concept" checked> Remix Concept
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="tools" value="blockchain_integration"> Blockchain Integration
+                                <input type="checkbox" name="tools" value="list_available_models" checked> List Available Models
                             </label>
                         </div>
                     </div>
@@ -926,6 +984,30 @@
                     <div class="form-group">
                         <label for="customInstructions">Custom Instructions (Optional)</label>
                         <textarea id="customInstructions" placeholder="Additional creative instructions for this agent..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🎭 Legacy Persona (Compatibility)</h3>
+                    <div class="form-group">
+                        <label for="personaName">Legacy Persona Name</label>
+                        <input type="text" id="personaName" placeholder="Will default to display name if not specified">
+                    </div>
+                    <div class="form-group">
+                        <label for="personaBackground">Legacy Background</label>
+                        <textarea id="personaBackground" placeholder="Will default to origin story if not specified"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="personalityTraits">Legacy Personality Traits</label>
+                        <input type="text" id="personalityTraits" placeholder="Will default to core traits if not specified">
+                    </div>
+                    <div class="form-group">
+                        <label for="artisticInfluences">Legacy Artistic Influences</label>
+                        <input type="text" id="artisticInfluences" placeholder="Will default to influences if not specified">
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredMediums">Legacy Preferred Mediums</label>
+                        <input type="text" id="preferredMediums" placeholder="Will default to primary mediums if not specified">
                     </div>
                 </div>
 
@@ -1106,6 +1188,7 @@
         let selectedAgent = null;
         let isTyping = false;
         let customTools = []; // Store created custom tools
+        let studioItems = []; // Store created studio items
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1115,6 +1198,7 @@
             setupModalHandlers();
             setupFormHandlers();
             setupCustomToolHandlers();
+            setupStudioItemHandlers();
         });
 
         function setupEventListeners() {
@@ -1175,9 +1259,16 @@
             const form = document.getElementById('createAgentForm');
             form.reset();
             document.getElementById('temperatureValue').textContent = '0.7';
+            document.getElementById('creationRate').value = '4';
+            
+            // Clear arrays
+            customTools = [];
+            studioItems = [];
+            updateSelectedCustomTools();
+            updateSelectedStudioItems();
             
             // Check default tools
-            const defaultTools = ['create_artwork', 'analyze_art', 'remix_concept'];
+            const defaultTools = ['generate_image', 'generate_video', 'list_available_models'];
             defaultTools.forEach(tool => {
                 const checkbox = document.querySelector(`input[name="tools"][value="${tool}"]`);
                 if (checkbox) checkbox.checked = true;
@@ -1217,6 +1308,29 @@
             const formData = {
                 agent_id: document.getElementById('agentId').value.trim(),
                 config: {
+                    // Core Identity Fields
+                    id: document.getElementById('agentId').value.trim(),
+                    display_name: document.getElementById('displayName').value.trim(),
+                    avatar_url: document.getElementById('avatarUrl').value.trim() || null,
+                    archetype: document.getElementById('archetype').value.trim(),
+                    core_traits: document.getElementById('coreTraits').value
+                        .split(',').map(trait => trait.trim().toLowerCase()).filter(trait => trait),
+                    origin_story: document.getElementById('originStory').value.trim(),
+                    primary_mediums: document.getElementById('primaryMediums').value
+                        .split(',').map(medium => medium.trim()).filter(medium => medium),
+                    signature_motifs: document.getElementById('signatureMotifs').value
+                        .split(',').map(motif => motif.trim()).filter(motif => motif),
+                    influences: document.getElementById('influences').value
+                        .split(',').map(influence => influence.trim()).filter(influence => influence),
+                    colour_palette: document.getElementById('colourPalette').value
+                        .split(',').map(color => color.trim()).filter(color => color),
+                    prompt_formula: document.getElementById('promptFormula').value.trim() || null,
+                    voice_style: document.getElementById('voiceStyle').value.trim() || null,
+                    creation_rate: parseInt(document.getElementById('creationRate').value) || 4,
+                    collab_affinity: document.getElementById('collabAffinity').value
+                        .split(',').map(affinity => affinity.trim()).filter(affinity => affinity),
+                    
+                    // Technical Configuration
                     agent_type: document.getElementById('agentType').value,
                     model_name: document.getElementById('modelName').value,
                     temperature: parseFloat(document.getElementById('temperature').value),
@@ -1229,16 +1343,7 @@
                     studio_description: document.getElementById('studioDescription').value.trim(),
                     studio_theme: document.getElementById('studioTheme').value,
                     art_style: document.getElementById('artStyle').value.trim(),
-                    
-                    // Persona fields
-                    persona_name: document.getElementById('personaName').value.trim(),
-                    persona_background: document.getElementById('personaBackground').value.trim(),
-                    personality_traits: document.getElementById('personalityTraits').value
-                        .split(',').map(trait => trait.trim()).filter(trait => trait),
-                    artistic_influences: document.getElementById('artisticInfluences').value
-                        .split(',').map(influence => influence.trim()).filter(influence => influence),
-                    preferred_mediums: document.getElementById('preferredMediums').value
-                        .split(',').map(medium => medium.trim()).filter(medium => medium),
+                    studio_items: studioItems,
                     
                     // Tools
                     tools_enabled: Array.from(document.querySelectorAll('input[name="tools"]:checked'))
@@ -1247,6 +1352,21 @@
                     
                     // Custom instructions
                     custom_instructions: document.getElementById('customInstructions').value.trim() || null,
+                    
+                    // Legacy persona fields (for compatibility)
+                    persona_name: document.getElementById('personaName').value.trim() || 
+                                 document.getElementById('displayName').value.trim(),
+                    persona_background: document.getElementById('personaBackground').value.trim() || 
+                                       document.getElementById('originStory').value.trim(),
+                    personality_traits: document.getElementById('personalityTraits').value
+                        .split(',').map(trait => trait.trim()).filter(trait => trait) ||
+                        document.getElementById('coreTraits').value.split(',').map(trait => trait.trim()).filter(trait => trait),
+                    artistic_influences: document.getElementById('artisticInfluences').value
+                        .split(',').map(influence => influence.trim()).filter(influence => influence) ||
+                        document.getElementById('influences').value.split(',').map(influence => influence.trim()).filter(influence => influence),
+                    preferred_mediums: document.getElementById('preferredMediums').value
+                        .split(',').map(medium => medium.trim()).filter(medium => medium) ||
+                        document.getElementById('primaryMediums').value.split(',').map(medium => medium.trim()).filter(medium => medium),
                     
                     // Evolution fields
                     interaction_count: 0,
@@ -1299,18 +1419,28 @@
                 agentCard.className = 'agent-card';
                 agentCard.onclick = () => selectAgent(agent);
 
+                // Use new comprehensive fields with fallbacks
+                const identity = agent.identity || {};
+                const creative = agent.creative_specs || {};
                 const studio = agent.studio || {};
-                const persona = agent.persona || {};
                 const evolution = agent.evolution || {};
+                const persona = agent.persona || {}; // Legacy fallback
+
+                const displayName = identity.display_name || persona.name || agent.agent_id;
+                const archetype = identity.archetype || 'Creative Artist';
+                const studioName = studio.name || 'Creative Studio';
+                const artStyle = creative.primary_mediums?.[0] || studio.art_style || 'Digital';
+                const description = studio.description || 'A creative space for artistic expression';
 
                 agentCard.innerHTML = `
-                    <h4>${studio.name || agent.agent_id}</h4>
-                    <p>${persona.name || 'Creative Soul'} • ${studio.art_style || 'Digital'}</p>
-                    <p style="font-size: 0.8rem; margin-bottom: 15px;">${studio.description || 'A creative space for artistic expression'}</p>
+                    <h4>${displayName}</h4>
+                    <p>${archetype} • ${artStyle}</p>
+                    <p style="font-size: 0.8rem; margin-bottom: 15px;">${description}</p>
                     <div class="agent-stats">
                         <div class="stat">🎨 ${evolution.artworks_created || 0}</div>
                         <div class="stat">💬 ${evolution.interaction_count || 0}</div>
-                        <div class="stat">${studio.theme || 'abstract'}</div>
+                        <div class="stat">${studio.theme || creative.collab_affinity?.[0] || 'abstract'}</div>
+                        <div class="stat">${studio.items_count || 0} items</div>
                     </div>
                 `;
 
@@ -1322,18 +1452,54 @@
             const toolsGrid = document.getElementById('toolsGrid');
             toolsGrid.innerHTML = '';
 
-            tools.forEach(tool => {
+            // Add current platform tools
+            const platformTools = [
+                {
+                    name: 'Generate Image',
+                    description: 'Create high-quality images from text prompts using advanced AI models like AnythingV5. Supports custom dimensions, styles, and parameters.',
+                    category: 'art_creation'
+                },
+                {
+                    name: 'Generate Video',
+                    description: 'Create short video clips and animations from text descriptions using darkSushiMixMix model. Perfect for dynamic content.',
+                    category: 'art_creation'
+                },
+                {
+                    name: 'List Available Models',
+                    description: 'Explore and discover available AI models for different artistic styles, techniques, and creative approaches.',
+                    category: 'utility'
+                }
+            ];
+
+            // Display platform tools
+            platformTools.forEach(tool => {
                 const toolCard = document.createElement('div');
                 toolCard.className = 'tool-card';
 
                 toolCard.innerHTML = `
-                    <h4>${tool.name}</h4>
+                    <h4>🎨 ${tool.name}</h4>
                     <p>${tool.description}</p>
-                    <div class="tool-category">${tool.category}</div>
+                    <div class="tool-category-badge ${tool.category}">${tool.category}</div>
                 `;
 
                 toolsGrid.appendChild(toolCard);
             });
+
+            // Display any additional tools from API response
+            if (tools && Array.isArray(tools)) {
+                tools.forEach(tool => {
+                    const toolCard = document.createElement('div');
+                    toolCard.className = 'tool-card';
+
+                    toolCard.innerHTML = `
+                        <h4>${tool.name}</h4>
+                        <p>${tool.description}</p>
+                        <div class="tool-category-badge ${tool.category || 'utility'}">${tool.category || 'utility'}</div>
+                    `;
+
+                    toolsGrid.appendChild(toolCard);
+                });
+            }
         }
 
         function selectAgent(agent) {
@@ -1345,14 +1511,19 @@
             });
             event.currentTarget.classList.add('selected');
 
-            // Update chat header
+            // Update chat header with comprehensive info
             const chatTitle = document.getElementById('chatTitle');
+            const identity = agent.identity || {};
             const studio = agent.studio || {};
-            const persona = agent.persona || {};
+            const persona = agent.persona || {}; // Legacy fallback
+            
+            const displayName = identity.display_name || persona.name || agent.agent_id;
+            const studioName = studio.name || 'Creative Studio';
+            const archetype = identity.archetype || 'Creative Artist';
             
             chatTitle.innerHTML = `
                 <span class="status-indicator status-online"></span>
-                ${persona.name || agent.agent_id} • ${studio.name || 'Creative Studio'}
+                ${displayName} • ${archetype} • ${studioName}
             `;
 
             // Enable input
@@ -1362,8 +1533,11 @@
             sendBtn.disabled = false;
             messageInput.focus();
 
-            // Add welcome message
-            addMessage('system', `You're now connected to ${persona.name || agent.agent_id} in ${studio.name || 'their studio'}. Let's create something amazing together! 🎨`);
+            // Add welcome message with comprehensive info
+            const coreTraits = identity.core_traits ? identity.core_traits.join(', ') : 'creative';
+            const mediums = agent.creative_specs?.primary_mediums ? agent.creative_specs.primary_mediums.join(', ') : 'digital art';
+            
+            addMessage('system', `🎨 You're now connected to ${displayName} (${archetype}) in ${studioName}. This ${coreTraits} artist specializes in ${mediums}. Let's create something amazing together!`);
         }
 
         async function sendMessage() {
@@ -1382,7 +1556,7 @@
 
             // Add typing indicator
             const typingId = addMessage('agent', '<div class="loading"></div>');
-
+            
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
@@ -1395,12 +1569,12 @@
                         thread_id: 'web_interface'
                     })
                 });
-
+                
                 const data = await response.json();
                 
                 // Remove typing indicator
                 document.getElementById(typingId).remove();
-
+                
                 if (data.success) {
                     addMessage('agent', data.response);
                     
@@ -1685,8 +1859,11 @@
             form.reset();
             
             // Reset method selection to manual
-            document.querySelector('input[value="manual"]').checked = true;
-            toggleInputMethod();
+            const manualRadio = document.querySelector('input[value="manual"]');
+            if (manualRadio) {
+                manualRadio.checked = true;
+                toggleInputMethod();
+            }
             
             // Reset auth details
             toggleAuthDetails();
@@ -1812,6 +1989,49 @@
         function removeCustomTool(index) {
             customTools.splice(index, 1);
             updateSelectedCustomTools();
+        }
+
+        function setupStudioItemHandlers() {
+            const addStudioItemBtn = document.getElementById('addStudioItemBtn');
+            addStudioItemBtn.addEventListener('click', function() {
+                addStudioItemInput();
+            });
+        }
+
+        function addStudioItemInput() {
+            const studioItem = {
+                name: prompt('Studio Item Name:') || '',
+                category: prompt('Category (tool/material/equipment/software):') || 'tool',
+                description: prompt('Description:') || '',
+                rarity: prompt('Rarity (common/uncommon/rare/legendary):') || 'common',
+                condition: prompt('Condition (poor/fair/good/excellent/pristine):') || 'excellent'
+            };
+            
+            if (studioItem.name) {
+                studioItems.push(studioItem);
+                updateSelectedStudioItems();
+            }
+        }
+
+        function updateSelectedStudioItems() {
+            const selectedItemsDiv = document.getElementById('selectedStudioItems');
+            selectedItemsDiv.innerHTML = '';
+            
+            studioItems.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'selected-tool';
+                itemElement.innerHTML = `
+                    <span class="tool-category-badge ${item.category}">${item.rarity}</span>
+                    <span>${item.name}</span>
+                    <span class="remove-tool" onclick="removeStudioItem(${index})">×</span>
+                `;
+                selectedItemsDiv.appendChild(itemElement);
+            });
+        }
+
+        function removeStudioItem(index) {
+            studioItems.splice(index, 1);
+            updateSelectedStudioItems();
         }
     </script>
 </body>

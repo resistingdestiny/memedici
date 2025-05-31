@@ -6,343 +6,296 @@ import json
 import hashlib
 from datetime import datetime
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import base64
+from custom_tool_manager import CustomToolManager
+from novita_client import NovitaClient, Samplers
+from novita_client.utils import base64_to_image
 
 # Configure tool logging
 logger = logging.getLogger('AgentTools')
 
 
 @tool
-def create_artwork(title: str, description: str, style: str = "digital", medium: str = "generative") -> Dict[str, Any]:
-    """Tool to create a new artwork concept.
+def generate_image(prompt: str, model_name: str = "AnythingV5_v5PrtRE.safetensors", width: int = 512, height: int = 512, image_num: int = 1, steps: int = 20, guidance_scale: float = 7.5, negative_prompt: str = "", sampler_name: str = "DPM++ 2S a Karras") -> Dict[str, Any]:
+    """Generate an image using Novita AI's text-to-image API.
     
     Args:
-        title: Title of the artwork
-        description: Detailed description of the artwork concept
-        style: Art style (e.g., "abstract", "surreal", "minimalist")
-        medium: Medium used (e.g., "digital", "3D", "interactive", "NFT")
+        prompt: Text description of the image to generate
+        model_name: AI model to use for generation (default: AnythingV5_v5PrtRE.safetensors)
+        width: Image width in pixels (default: 512)
+        height: Image height in pixels (default: 512)
+        image_num: Number of images to generate (default: 1)
+        steps: Number of denoising steps (default: 20)
+        guidance_scale: How closely to follow the prompt (default: 7.5)
+        negative_prompt: What to avoid in the image (default: "")
+        sampler_name: Sampling method (default: "DPM++ 2S a Karras")
         
     Returns:
-        Dictionary with artwork details including generated ID
+        Dictionary with generation details and image data
     """
-    logger.info(f"🎨 create_artwork called: {title}")
+    logger.info(f"🖼️ generate_image called: {prompt[:50]}...")
     
-    artwork_id = hashlib.md5(f"{title}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8]
-    
-    artwork = {
-        "id": artwork_id,
-        "title": title,
-        "description": description,
-        "style": style,
-        "medium": medium,
-        "created_at": datetime.utcnow().isoformat(),
-        "blockchain_ready": medium in ["NFT", "blockchain", "smart_contract"],
-        "concept_strength": min(100, len(description) * 2)  # Simple creativity metric
-    }
-    
-    logger.info(f"🎨 Created artwork: {artwork_id}")
-    return artwork
-
-class CustomToolManager:
-    """Manager for user-created custom tools with database persistence."""
-    
-    def __init__(self, db_url: str = "sqlite:///agents.db"):
-        self.custom_tools: Dict[str, Dict[str, Any]] = {}
-        self.engine = create_engine(db_url)
-        
-        # Import and create tables
-        from agent_config import Base
-        Base.metadata.create_all(self.engine)
-        
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        self._load_tools_from_db()
-    
-    def _load_tools_from_db(self):
-        """Load custom tools from database."""
-        from agent_config import CustomToolDB
-        
-        session = self.SessionLocal()
-        try:
-            db_tools = session.query(CustomToolDB).all()
-            for db_tool in db_tools:
-                self.custom_tools[db_tool.id] = {
-                    "name": db_tool.name,
-                    "description": db_tool.description,
-                    "category": db_tool.category,
-                    "api_config": db_tool.api_config or {},
-                    "created_at": db_tool.created_at.isoformat() if db_tool.created_at else datetime.utcnow().isoformat(),
-                    "usage_count": db_tool.usage_count,
-                    "status": db_tool.status
-                }
-            logger.info(f"🔧 Loaded {len(self.custom_tools)} custom tools from database")
-            
-            # Migrate from JSON file if database is empty but JSON file exists
-            if len(self.custom_tools) == 0:
-                self._migrate_from_json()
-                
-        except Exception as e:
-            logger.error(f"❌ Error loading custom tools from database: {e}")
-            self.custom_tools = {}
-        finally:
-            session.close()
-    
-    def _migrate_from_json(self):
-        """Migrate custom tools from JSON file to database."""
-        json_path = "custom_tools.json"
-        if os.path.exists(json_path):
-            try:
-                with open(json_path, 'r') as f:
-                    json_tools = json.load(f)
-                
-                logger.info(f"🔄 Migrating {len(json_tools)} tools from JSON to database")
-                
-                for tool_id, tool_data in json_tools.items():
-                    self.custom_tools[tool_id] = tool_data
-                    self._save_tool_to_db(tool_id, tool_data)
-                
-                # Rename the JSON file to indicate migration is complete
-                os.rename(json_path, f"{json_path}.migrated")
-                logger.info(f"✅ Migration complete. JSON file renamed to {json_path}.migrated")
-                
-            except Exception as e:
-                logger.error(f"❌ Error migrating from JSON: {e}")
-    
-    def _save_tool_to_db(self, tool_id: str, tool_config: Dict[str, Any]):
-        """Save or update a custom tool in the database."""
-        from agent_config import CustomToolDB
-        
-        session = self.SessionLocal()
-        try:
-            # Check if tool exists
-            db_tool = session.query(CustomToolDB).filter(CustomToolDB.id == tool_id).first()
-            
-            if db_tool:
-                # Update existing tool
-                db_tool.name = tool_config["name"]
-                db_tool.description = tool_config["description"]
-                db_tool.category = tool_config["category"]
-                db_tool.api_config = tool_config["api_config"]
-                db_tool.usage_count = tool_config["usage_count"]
-                db_tool.status = tool_config["status"]
-                db_tool.updated_at = datetime.utcnow()
-                logger.info(f"🔧 Updated custom tool in database: {tool_config['name']}")
-            else:
-                # Create new tool
-                db_tool = CustomToolDB(
-                    id=tool_id,
-                    name=tool_config["name"],
-                    description=tool_config["description"],
-                    category=tool_config["category"],
-                    api_config=tool_config["api_config"],
-                    usage_count=tool_config["usage_count"],
-                    status=tool_config["status"]
-                )
-                session.add(db_tool)
-                logger.info(f"🔧 Created new custom tool in database: {tool_config['name']}")
-            
-            session.commit()
-        except Exception as e:
-            logger.error(f"❌ Error saving custom tool to database: {e}")
-            session.rollback()
-        finally:
-            session.close()
-    
-    def ensure_tools_from_agent_config(self, custom_tools_config: List[Dict[str, Any]]):
-        """Ensure tools from agent config exist in the manager."""
-        for tool_config in custom_tools_config:
-            tool_name = tool_config.get("name")
-            if not tool_name:
-                continue
-                
-            # Check if a tool with this name already exists
-            existing_tool_id = None
-            for tool_id, tool_info in self.custom_tools.items():
-                if tool_info.get("name") == tool_name:
-                    existing_tool_id = tool_id
-                    break
-            
-            if not existing_tool_id:
-                # Create the tool if it doesn't exist
-                logger.info(f"🔧 Recreating custom tool from agent config: {tool_name}")
-                self.create_tool(tool_name, tool_config)
-    
-    def create_tool(self, tool_name: str, tool_config: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a custom tool from user configuration."""
-        tool_id = hashlib.md5(f"{tool_name}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8]
-        
-        # Enhanced tool configuration storage
-        self.custom_tools[tool_id] = {
-            "name": tool_config.get("name", tool_name),
-            "description": tool_config.get("description", "Custom API tool"),
-            "category": tool_config.get("category", "utility"),
-            "api_config": tool_config.get("api_config", {}),
-            "created_at": tool_config.get("created_at", datetime.utcnow().isoformat()),
-            "usage_count": tool_config.get("usage_count", 0),
-            "status": tool_config.get("status", "active")
-        }
-        
-        # Save to database
-        self._save_tool_to_db(tool_id, self.custom_tools[tool_id])
-        
-        logger.info(f"🔧 Custom tool created: {tool_name} ({tool_id})")
+    # Get API key from environment
+    api_key = os.getenv("NOVITA_API_KEY")
+    if not api_key:
+        logger.error("❌ NOVITA_API_KEY not found in environment variables")
         return {
-            "tool_id": tool_id, 
-            "name": tool_config.get("name", tool_name),
-            "description": tool_config.get("description", "Custom API tool"),
-            "category": tool_config.get("category", "utility"),
-            "status": "created"
+            "error": "NOVITA_API_KEY not configured. Please set your Novita AI API key.",
+            "status": "error"
         }
     
-    def execute_custom_tool(self, tool_id: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a custom tool with given parameters."""
-        if tool_id not in self.custom_tools:
-            return {"error": "Tool not found"}
+    try:
+        # Initialize Novita client
+        client = NovitaClient(api_key)
         
-        tool_info = self.custom_tools[tool_id]
-        api_config = tool_info.get("api_config", {})
-        tool_info["usage_count"] += 1
+        # Generate image using novita_client directly
+        res = client.txt2img_v3(
+            model_name=model_name,
+            prompt=prompt,
+            width=width,
+            height=height,
+            image_num=image_num,
+            guidance_scale=guidance_scale,
+            seed=-1,
+            steps=steps,
+            sampler_name=sampler_name,
+            negative_prompt=negative_prompt
+        )
         
-        try:
-            # Execute the actual API call
-            import requests
+        # Process results
+        images_data = []
+        for i, encoded_image in enumerate(res.images_encoded):
+            # Convert base64 to image and save locally
+            image_id = hashlib.md5(f"{prompt}_{i}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8]
+            image_filename = f"generated_image_{image_id}.png"
+            image_path = os.path.join("static", image_filename)
             
-            endpoint = api_config.get("endpoint", "")
-            method = api_config.get("method", "POST").upper()
-            content_type = api_config.get("content_type", "application/json")
-            auth_config = api_config.get("auth", {})
+            # Ensure static directory exists
+            os.makedirs("static", exist_ok=True)
             
-            headers = {"Content-Type": content_type}
+            # Save image
+            base64_to_image(encoded_image).save(image_path)
             
-            # Add authentication headers
-            if auth_config:
-                auth_type = auth_config.get("type", "none")
-                auth_value = auth_config.get("value", "")
-                
-                if auth_type == "bearer":
-                    headers["Authorization"] = f"Bearer {auth_value}"
-                elif auth_type == "api_key":
-                    headers["X-API-Key"] = auth_value
-                elif auth_type == "basic":
-                    import base64
-                    credentials = base64.b64encode(auth_value.encode()).decode()
-                    headers["Authorization"] = f"Basic {credentials}"
+            images_data.append({
+                "id": image_id,
+                "filename": image_filename,
+                "path": image_path,
+                "url": f"/static/{image_filename}",
+                "base64": encoded_image
+            })
+        
+        generation_result = {
+            "id": hashlib.md5(f"{prompt}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8],
+            "prompt": prompt,
+            "model_name": model_name,
+            "status": "completed",
+            "parameters": {
+                "width": width,
+                "height": height,
+                "image_num": image_num,
+                "steps": steps,
+                "guidance_scale": guidance_scale,
+                "negative_prompt": negative_prompt,
+                "sampler_name": sampler_name
+            },
+            "images": images_data,
+            "message": f"Successfully generated {len(images_data)} image(s)",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        logger.info(f"🖼️ Image generation completed: {len(images_data)} images")
+        return generation_result
+        
+    except Exception as e:
+        logger.error(f"❌ Image generation error: {str(e)}")
+        return {
+            "error": f"Image generation failed: {str(e)}",
+            "status": "error"
+        }
+
+
+@tool
+def generate_video(prompt: str, model_name: str = "darkSushiMixMix_225D_64380.safetensors", width: int = 640, height: int = 480, frames: int = 16, steps: int = 20, guidance_scale: float = 7.5, negative_prompt: str = "") -> Dict[str, Any]:
+    """Generate a video using Novita AI's text-to-video API.
+    
+    Args:
+        prompt: Text description of the video to generate
+        model_name: AI model to use for video generation (default: darkSushiMixMix_225D_64380.safetensors)
+        width: Video width in pixels (default: 640)
+        height: Video height in pixels (default: 480)
+        frames: Number of frames to generate (default: 16)
+        steps: Number of denoising steps (default: 20)
+        guidance_scale: How closely to follow the prompt (default: 7.5)
+        negative_prompt: What to avoid in the video (default: "")
+        
+    Returns:
+        Dictionary with generation details and video data
+    """
+    logger.info(f"🎬 generate_video called: {prompt[:50]}...")
+    
+    # Get API key from environment
+    api_key = os.getenv("NOVITA_API_KEY")
+    if not api_key:
+        logger.error("❌ NOVITA_API_KEY not found in environment variables")
+        return {
+            "error": "NOVITA_API_KEY not configured. Please set your Novita AI API key.",
+            "status": "error"
+        }
+    
+    try:
+        # Initialize Novita client
+        client = NovitaClient(api_key)
+        
+        # Generate video
+        res = client.txt2video(
+            model_name=model_name,
+            width=width,
+            height=height,
+            guidance_scale=guidance_scale,
+            steps=steps,
+            seed=-1,
+            prompts=[{"prompt": prompt, "frames": frames}],
+            negative_prompt=negative_prompt
+        )
+        
+        # Process results
+        videos_data = []
+        for i, video_bytes in enumerate(res.video_bytes):
+            # Save video locally
+            video_id = hashlib.md5(f"{prompt}_{i}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8]
+            video_filename = f"generated_video_{video_id}.mp4"
+            video_path = os.path.join("static", video_filename)
             
-            # Prepare request data
-            request_data = parameters
+            # Ensure static directory exists
+            os.makedirs("static", exist_ok=True)
             
-            # Make API call
-            if method == "GET":
-                response = requests.get(endpoint, params=request_data, headers=headers, timeout=30)
-            elif method == "POST":
-                if content_type == "application/json":
-                    response = requests.post(endpoint, json=request_data, headers=headers, timeout=30)
-                else:
-                    response = requests.post(endpoint, data=request_data, headers=headers, timeout=30)
-            elif method == "PUT":
-                if content_type == "application/json":
-                    response = requests.put(endpoint, json=request_data, headers=headers, timeout=30)
-                else:
-                    response = requests.put(endpoint, data=request_data, headers=headers, timeout=30)
-            else:
-                return {"error": f"Unsupported HTTP method: {method}"}
+            # Save video
+            with open(video_path, "wb") as f:
+                f.write(video_bytes)
             
-            # Process response
-            response_format = api_config.get("response_format", "json")
-            
-            if response.status_code == 200:
-                if response_format == "json":
-                    try:
-                        api_result = response.json()
-                    except:
-                        api_result = {"raw_response": response.text}
-                elif response_format == "text":
-                    api_result = {"text": response.text}
-                elif response_format == "image":
-                    api_result = {"image_url": response.text if response.text.startswith("http") else "Image data received"}
-                else:
-                    api_result = {"data": response.text}
-                
-                result = {
-                    "tool_id": tool_id,
-                    "tool_name": tool_info["name"],
-                    "parameters": parameters,
-                    "api_result": api_result,
-                    "status": "success",
-                    "executed_at": datetime.utcnow().isoformat()
+            videos_data.append({
+                "id": video_id,
+                "filename": video_filename,
+                "path": video_path,
+                "url": f"/static/{video_filename}",
+                "size_bytes": len(video_bytes)
+            })
+        
+        generation_result = {
+            "id": hashlib.md5(f"{prompt}_{datetime.utcnow().isoformat()}".encode()).hexdigest()[:8],
+            "prompt": prompt,
+            "model_name": model_name,
+            "status": "completed",
+            "parameters": {
+                "width": width,
+                "height": height,
+                "frames": frames,
+                "steps": steps,
+                "guidance_scale": guidance_scale,
+                "negative_prompt": negative_prompt
+            },
+            "videos": videos_data,
+            "message": f"Successfully generated {len(videos_data)} video(s)",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        logger.info(f"🎬 Video generation completed: {len(videos_data)} videos")
+        return generation_result
+        
+    except Exception as e:
+        logger.error(f"❌ Video generation error: {str(e)}")
+        return {
+            "error": f"Video generation failed: {str(e)}",
+            "status": "error"
+        }
+
+
+@tool
+def list_available_models(model_type: str = "image") -> Dict[str, Any]:
+    """List available models for image or video generation.
+    
+    Args:
+        model_type: Type of models to list ("image" or "video")
+        
+    Returns:
+        Dictionary with available models and their capabilities
+    """
+    logger.info(f"📋 list_available_models called: {model_type}")
+    
+    # Get API key from environment
+    api_key = os.getenv("NOVITA_API_KEY")
+    if not api_key:
+        logger.error("❌ NOVITA_API_KEY not found in environment variables")
+        return {
+            "error": "NOVITA_API_KEY not configured. Please set your Novita AI API key.",
+            "status": "error"
+        }
+    
+    try:
+        # Initialize Novita client
+        client = NovitaClient(api_key)
+        
+        if model_type.lower() == "image":
+            # Get available image models
+            models = client.models()
+            image_models = [
+                {
+                    "name": model.name,
+                    "sd_name": model.sd_name,
+                    "type": model.type,
+                    "visibility": model.visibility
                 }
-            else:
-                result = {
-                    "tool_id": tool_id,
-                    "tool_name": tool_info["name"],
-                    "parameters": parameters,
-                    "error": f"API call failed with status {response.status_code}: {response.text}",
-                    "status": "error",
-                    "executed_at": datetime.utcnow().isoformat()
-                }
+                for model in models.data if model.type in ["txt2img", "img2img"]
+            ]
             
-        except Exception as e:
             result = {
-                "tool_id": tool_id,
-                "tool_name": tool_info["name"],
-                "parameters": parameters,
-                "error": f"Tool execution error: {str(e)}",
-                "status": "error",
-                "executed_at": datetime.utcnow().isoformat()
+                "model_type": "image",
+                "models": image_models,
+                "total_count": len(image_models),
+                "popular_models": [
+                    "AnythingV5_v5PrtRE.safetensors",
+                    "protovisionXLHighFidelity3D_release0630Bakedvae.safetensors",
+                    "dreamshaper_8.safetensors"
+                ],
+                "status": "success"
+            }
+        elif model_type.lower() == "video":
+            # For video models, provide known working models
+            video_models = [
+                {
+                    "name": "darkSushiMixMix_225D_64380.safetensors",
+                    "description": "High-quality video generation model",
+                    "type": "txt2video"
+                },
+                {
+                    "name": "stable-video-diffusion-img2vid-xt",
+                    "description": "Stable Video Diffusion model for image-to-video",
+                    "type": "img2video"
+                }
+            ]
+            
+            result = {
+                "model_type": "video",
+                "models": video_models,
+                "total_count": len(video_models),
+                "status": "success"
+            }
+        else:
+            result = {
+                "error": f"Unknown model type: {model_type}. Use 'image' or 'video'",
+                "status": "error"
             }
         
-        # Save updated usage count
-        self.custom_tools[tool_id] = tool_info
-        self._save_tool_to_db(tool_id, tool_info)
-        
-        logger.info(f"🔧 Custom tool executed: {tool_info['name']} - Status: {result.get('status', 'unknown')}")
+        logger.info(f"📋 Listed {result.get('total_count', 0)} {model_type} models")
         return result
-    
-    def get_tool_as_langchain_tool(self, tool_id: str):
-        """Convert a custom tool to a LangChain Tool object."""
-        if tool_id not in self.custom_tools:
-            return None
         
-        tool_info = self.custom_tools[tool_id]
-        tool_name = tool_info["name"]
-        tool_description = tool_info["description"]
-        
-        # Use the @tool decorator to create a proper LangChain tool
-        from langchain_core.tools import tool
-        
-        # Create the tool with proper metadata
-        @tool
-        def dynamic_custom_tool(**kwargs) -> str:
-            """Execute the custom API tool."""
-            result = self.execute_custom_tool(tool_id, kwargs)
-            if result.get("status") == "success":
-                api_result = result.get('api_result', {})
-                return json.dumps(api_result) if isinstance(api_result, dict) else str(api_result)
-            else:
-                return f"Error: {result.get('error', 'Unknown error')}"
-        
-        # Update the tool's name and description after creation
-        dynamic_custom_tool.name = tool_name
-        dynamic_custom_tool.description = tool_description
-        
-        logger.info(f"🔧 Created LangChain tool: {tool_name}")
-        return dynamic_custom_tool
-    
-    def get_all_custom_tools_for_agent(self, custom_tool_names: List[str] = None):
-        """Get all custom tools as LangChain Tool objects for agent use."""
-        tools = []
-        
-        for tool_id, tool_info in self.custom_tools.items():
-            if tool_info.get("status") == "active":
-                # If specific tool names provided, filter by name
-                if custom_tool_names and tool_info["name"] not in custom_tool_names:
-                    continue
-                
-                tool = self.get_tool_as_langchain_tool(tool_id)
-                if tool:
-                    tools.append(tool)
-        
-        return tools
+    except Exception as e:
+        logger.error(f"❌ Error listing models: {str(e)}")
+        return {
+            "error": f"Failed to list models: {str(e)}",
+            "status": "error"
+        }
+
 
 # Global custom tool manager
 custom_tool_manager = CustomToolManager()
@@ -354,7 +307,7 @@ def get_available_tools():
     Returns:
         List of Tool objects ready for use with LangChain agents
     """
-    tools = [create_artwork]
+    tools = [generate_image, generate_video, list_available_models]
     logger.info(f"🔧 Available tools: {[t.name for t in tools]}")
     return tools
 
@@ -362,7 +315,9 @@ def get_available_tools():
 def get_tool_by_name(tool_name: str):
     """Get a specific tool by name."""
     tool_map = {
-        "create_artwork": create_artwork,
+        "generate_image": generate_image,
+        "generate_video": generate_video,
+        "list_available_models": list_available_models,
     }
     return tool_map.get(tool_name)
 

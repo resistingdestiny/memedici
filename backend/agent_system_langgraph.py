@@ -13,7 +13,6 @@ import logging
 
 from agent_tools import get_available_tools, get_tools_by_names, custom_tool_manager
 from agent_config import agent_registry, AgentConfig
-from prompts.system_prompts import get_system_prompt
 
 # Configure logging for agent thoughts and actions
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
