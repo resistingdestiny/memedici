@@ -45,8 +45,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def startup_event():
     """Startup event to ensure crypto artist agents are loaded."""
     logger.info("🚀 Starting Memedici server...")
-    ensure_crypto_artists_loaded()
-    logger.info("✅ Server startup complete")
+    try:
+        ensure_crypto_artists_loaded()
+        # Refresh the main agent registry to ensure it has the latest data
+        agent_registry.reload_agents()
+        logger.info(f"✅ Server startup complete - {len(agent_registry.list_agents())} agents loaded")
+    except Exception as e:
+        logger.error(f"❌ Error during startup: {e}")
+        import traceback
+        traceback.print_exc()
 
 class ChatRequest(BaseModel):
     message: str
