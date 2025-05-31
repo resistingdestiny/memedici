@@ -32,6 +32,8 @@ interface CityState {
   // Agent hubs and marketplaces
   pinnedAgentHub: string | null;
   pinnedMarketplace: string | null;
+  hoveredAgentHub: string | null;
+  hoveredMarketplace: string | null;
   
   // Gallery view
   isInGalleryMode: boolean;
@@ -58,6 +60,8 @@ interface CityState {
   stopTour: () => void;
   moveToStudio: (studioId: string) => void;
   initializeStudios: () => void;
+  setHoveredAgentHub: (hubId: string | null) => void;
+  setHoveredMarketplace: (marketId: string | null) => void;
 }
 
 export const useCityStore = create<CityState>((set, get) => ({
@@ -72,6 +76,8 @@ export const useCityStore = create<CityState>((set, get) => ({
   
   pinnedAgentHub: null,
   pinnedMarketplace: null,
+  hoveredAgentHub: null,
+  hoveredMarketplace: null,
   
   isInGalleryMode: false,
   currentGalleryStudio: null,
@@ -400,5 +406,7 @@ export const useCityStore = create<CityState>((set, get) => ({
     ];
     
     set({ studios });
-  }
+  },
+  setHoveredAgentHub: (hubId: string | null) => set({ hoveredAgentHub: hubId }),
+  setHoveredMarketplace: (marketId: string | null) => set({ hoveredMarketplace: marketId })
 })); 

@@ -28,6 +28,9 @@ import { useCityStore } from "@/lib/stores/use-city";
 import * as THREE from "three";
 import { CityUI } from "./city-ui";
 
+// Module-level variable to track building clicks
+let lastBuildingClickTime = 0;
+
 // KEYBOARD CONTROLS MAPPING 🎮
 const MOVEMENT_KEYS = [
   { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
@@ -147,9 +150,9 @@ function StudioBuilding({ studio }: { studio: any }) {
         };
       case "da-vinci-studio":
         return {
-          primaryColor: "#228B22", // Forest green
-          secondaryColor: "#32CD32", // Lime green
-          emissiveColor: isActive ? "#00FF00" : isHovered ? "#32CD32" : "#228B22",
+          primaryColor: "#8B4513", // Changed from forest green to brown
+          secondaryColor: "#DAA520", // Changed from lime green to golden rod  
+          emissiveColor: isActive ? "#D2691E" : isHovered ? "#DAA520" : "#8B4513", // Changed from bright green to orange/brown tones
           shape: "innovative", // Complex, multi-level
           height: 14,
           width: 7
@@ -358,7 +361,7 @@ function StudioBuilding({ studio }: { studio: any }) {
               <mesh key={i} position={[Math.cos(i) * 3, 1 + i, Math.sin(i) * 3]} rotation={[-Math.PI/2, 0, 0]}>
                 <ringGeometry args={[0.5, 2, 8]} />
                 <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} transparent opacity={0.8} />
-              </mesh>
+          </mesh>
             ))}
           </>
         );
@@ -382,8 +385,8 @@ function StudioBuilding({ studio }: { studio: any }) {
               ]} rotation={[0, i * Math.PI/2, 0]}>
                 <torusGeometry args={[1.5, 0.3, 6, 12]} />
                 <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1.5} />
-              </mesh>
-            ))}
+        </mesh>
+      ))}
           </>
         );
 
@@ -406,15 +409,15 @@ function StudioBuilding({ studio }: { studio: any }) {
       {/* ARTIST-SPECIFIC NEON GLOW OUTLINE */}
       <mesh ref={glowRef} position={[0, style.height/2, 0]}>
         <sphereGeometry args={[style.width/2 + 2, 16, 16]} />
-          <meshStandardMaterial
+        <meshStandardMaterial
           color={style.emissiveColor}
           emissive={style.emissiveColor}
           emissiveIntensity={0.8} // Reduced from 1.5 to prevent harsh flickering
-            transparent
+          transparent
           opacity={0.15} // Reduced opacity for subtlety
-          />
-        </mesh>
-
+        />
+      </mesh>
+      
       {/* CYBERPUNK AI AGENT */}
       <CyberpunkAgent agentId={studio.agentId} position={[0, 1, style.width/2 + 1]} isActive={isActive} />
       
@@ -426,55 +429,7 @@ function StudioBuilding({ studio }: { studio: any }) {
         </>
       )}
 
-      {/* INTERACTIVE UI PANEL */}
-      {showInterface && (
-        <Html position={[0, style.height + 3, 0]} center>
-          <div className={`text-center transition-all duration-500 backdrop-blur-xl rounded-2xl shadow-2xl p-6 max-w-sm ${
-            isActive 
-              ? 'bg-black/95 border-2 shadow-lg scale-110' 
-              : 'bg-black/80 border border-opacity-50 scale-100'
-          }`} style={{ 
-            borderColor: style.emissiveColor,
-            boxShadow: `0 0 30px ${style.emissiveColor}50`,
-            color: style.emissiveColor
-          }}>
-            <div className="text-xs opacity-70 font-mono mb-2">NEURAL_STUDIO.exe</div>
-            <div className="text-2xl font-black mb-3">{studio.name}</div>
-            <div className="text-sm opacity-80 mb-4">Agent: {studio.agentId.toUpperCase()}</div>
-            
-            {isActive && (
-              <div className="space-y-3" style={{ pointerEvents: 'auto' }}>
-              <button 
-                  className="w-full px-4 py-2 font-bold rounded-lg transition-colors cursor-pointer shadow-lg"
-                  style={{ 
-                    backgroundColor: style.emissiveColor,
-                    color: '#000000'
-                  }}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.opacity = '0.8'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.opacity = '1'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                    console.log('Entering gallery for:', studio.id);
-                    enterGalleryMode(studio.id);
-                  }}
-                >
-                  🏛️ Visit Studio
-              </button>
-                <div className="text-xs opacity-60">
-                  Experience {studio.name} in VR
-                  </div>
-                  </div>
-                )}
-            
-            {!isActive && (
-              <div className="text-xs opacity-60">
-                Click to explore this studio
-              </div>
-            )}
-          </div>
-        </Html>
-      )}
+      {/* Removed extra popup - only keeping bottom left interface via city-ui.tsx */}
     </group>
   );
 }
@@ -569,7 +524,7 @@ function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; posi
       ))}
       
       {/* PARTICLE AURA */}
-      <Sparkles count={50} scale={3} size={2} speed={2} color={isActive ? "#00ff88" : "#0088ff"} />
+      <Sparkles count={50} scale={3} size={2} speed={2} color={isActive ? "#0088ff" : "#0088ff"} />
       
       {/* DATA STREAMS */}
       <Sparkles count={30} scale={1.5} size={1} speed={3} color="#ffff00" />
@@ -775,7 +730,7 @@ function HolographicArt({ artwork, position, isActive }: { artwork: any; positio
       >
         <meshStandardMaterial 
           color="#ffffff"
-          emissive={isActive ? "#00ff88" : "#0088ff"}
+          emissive={isActive ? "#0088ff" : "#0088ff"} // Changed from green to blue
           emissiveIntensity={0.5}
           metalness={1}
           roughness={0}
@@ -785,9 +740,9 @@ function HolographicArt({ artwork, position, isActive }: { artwork: any; positio
       {/* GLOWING BORDER */}
       <RoundedBox ref={glowRef} args={[2.7, 2.2, 0.05]} radius={0.1} position={[0, 0, 0.1]}>
         <meshStandardMaterial
-          color={isActive ? "#00ff88" : "#ff00ff"}
-          emissive={isActive ? "#00ff88" : "#ff00ff"}
-          emissiveIntensity={2}
+          color={isActive ? "#0088ff" : "#ff00ff"} // Changed from green to blue
+          emissive={isActive ? "#0088ff" : "#ff00ff"} // Changed from green to blue
+          emissiveIntensity={1.5} // Reduced intensity
           transparent
           opacity={0.6}
         />
@@ -897,7 +852,7 @@ function Ground() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
       <planeGeometry args={[100, 100]} />
-      <meshLambertMaterial color="#4CAF50" />
+      <meshLambertMaterial color="#2a2a2a" />
     </mesh>
   );
 }
@@ -976,7 +931,7 @@ function CyberpunkPlaza() {
               <meshStandardMaterial
                 color="#ffffff"
                 emissive="#00ff88"
-                emissiveIntensity={2}
+                emissiveIntensity={1.0} // Reduced from 2 to prevent flickering
                 metalness={1}
                 roughness={0}
               />
@@ -991,7 +946,7 @@ function CyberpunkPlaza() {
         <meshStandardMaterial 
           color="#2196F3" 
           emissive="#2196F3"
-          emissiveIntensity={1.5}
+          emissiveIntensity={0.8} // Reduced from 1.5 to prevent flickering
           transparent 
           opacity={0.8}
         />
@@ -1166,9 +1121,9 @@ function LoadingFallback() {
 function AgentBuildingHub({ position, hubId }: { position: [number, number, number]; hubId: string }) {
   const hubRef = useRef<THREE.Group>(null);
   const beaconRef = useRef<THREE.Mesh>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const { pinnedAgentHub, setPinnedAgentHub } = useCityStore();
+  const { pinnedAgentHub, hoveredAgentHub, setPinnedAgentHub, setHoveredAgentHub } = useCityStore();
   const isPinned = pinnedAgentHub === hubId;
+  const isHovered = hoveredAgentHub === hubId;
   
   useFrame((state) => {
     if (hubRef.current && beaconRef.current) {
@@ -1191,16 +1146,26 @@ function AgentBuildingHub({ position, hubId }: { position: [number, number, numb
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
-          console.log('Agent Hub clicked!', hubId, 'isPinned:', isPinned);
+          // Mark the time of this building click
+          lastBuildingClickTime = Date.now();
+          console.log('🔥🔥🔥 AGENT HUB CLICKED! 🔥🔥🔥');
+          console.log('  Current isPinned:', isPinned);
+          console.log('  Current hubId:', hubId);
+          console.log('  Will set pinnedAgentHub to:', isPinned ? null : hubId);
           setPinnedAgentHub(isPinned ? null : hubId);
+          console.log('  ✅ setPinnedAgentHub called successfully');
         }}
-        onPointerEnter={() => {
-          console.log('Agent Hub hovered:', hubId);
-          setIsHovered(true);
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          console.log('🔥 AGENT HUB HOVERED! Setting hover state');
+          console.log('  Setting hoveredAgentHub to:', hubId);
+          setHoveredAgentHub(hubId);
         }}
-        onPointerLeave={() => {
-          console.log('Agent Hub unhovered:', hubId);
-          setIsHovered(false);
+        onPointerLeave={(e) => {
+          e.stopPropagation();
+          console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
+          console.log('  Setting hoveredAgentHub to: null');
+          setHoveredAgentHub(null);
         }}
       >
         <meshStandardMaterial
@@ -1263,90 +1228,13 @@ function AgentBuildingHub({ position, hubId }: { position: [number, number, numb
             <meshStandardMaterial
               color="#ffffff"
               emissive="#00ff88"
-              emissiveIntensity={1.5}
+              emissiveIntensity={1.0}
               metalness={1}
               roughness={0}
             />
           </mesh>
         </Float>
       ))}
-      
-      {/* INTERACTIVE HOLOGRAPHIC INTERFACE - Show when hovered or pinned */}
-      {(isHovered || isPinned) && (
-        <Html position={[0, 25, 0]} center>
-          <div 
-            className={`text-2xl font-black px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 backdrop-blur-xl ${
-              isPinned
-                ? 'text-yellow-400 bg-black/90 border-2 border-yellow-400 shadow-yellow-400/50'
-                : isHovered
-                ? 'text-pink-400 bg-black/90 border-2 border-pink-400 shadow-pink-400/50'
-                : 'text-cyan-400 bg-black/90 border-2 border-cyan-400 shadow-cyan-400/50'
-            } transform hover:scale-105 animate-in fade-in duration-300`}
-            style={{ 
-              pointerEvents: 'auto',
-              zIndex: 1000,
-              position: 'relative'
-            }}
-          >
-            <div className="font-mono text-xs opacity-70">AGENT_HUB.exe</div>
-            <div className="mb-2">🤖 AGENT BUILDER v3.0</div>
-            
-            {/* Interactive buttons when pinned */}
-            {isPinned && (
-              <div className="space-y-2" style={{ pointerEvents: 'auto' }}>
-                <button 
-                  className="w-full px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Entering Agent Builder');
-                    alert('🤖 Welcome to the Agent Builder! Create your AI agent here.');
-                  }}
-                >
-                  🚀 ENTER BUILDER
-                </button>
-                <button 
-                  className="w-full px-3 py-1 bg-green-500 hover:bg-green-400 text-black text-sm rounded transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Creating new agent');
-                    alert('✨ Starting new agent creation process!');
-                  }}
-                >
-                  ⚡ CREATE NEW AGENT
-                </button>
-                <button 
-                  className="w-full px-3 py-1 bg-purple-500 hover:bg-purple-400 text-white text-sm rounded transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Viewing agent gallery');
-                    alert('🎭 AGENT GALLERY');
-                  }}
-                >
-                  🎭 AGENT GALLERY
-                </button>
-                <div className="text-xs text-gray-300 text-center mt-2">
-                  <div>Neural Networks: ONLINE</div>
-                  <div>Quantum Processing: 99.7%</div>
-                  <div>Click building again to close</div>
-                </div>
-              </div>
-            )}
-            
-            {/* Show click instruction when not pinned */}
-            {!isPinned && (
-              <div className="text-xs text-gray-300 text-center mt-1">
-                Click to pin open
-              </div>
-            )}
-          </div>
-        </Html>
-      )}
       
       {/* MASSIVE PARTICLE EFFECTS */}
       <Sparkles count={300} scale={25} size={4} speed={1} color={isPinned ? "#ffff00" : "#00ffff"} />
@@ -1359,184 +1247,51 @@ function AgentBuildingHub({ position, hubId }: { position: [number, number, numb
   );
 }
 
-// TRADING MARKETPLACE 💰
+// TRADING MARKETPLACE 💰 - SIMPLIFIED VERSION
 function TradingMarketplace({ position, marketId }: { position: [number, number, number]; marketId: string }) {
-  const marketRef = useRef<THREE.Group>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const { pinnedMarketplace, setPinnedMarketplace } = useCityStore();
+  const { pinnedMarketplace, hoveredMarketplace, setPinnedMarketplace, setHoveredMarketplace } = useCityStore();
   const isPinned = pinnedMarketplace === marketId;
-  
-  useFrame((state) => {
-    if (marketRef.current) {
-      // Gentle floating
-      marketRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.2;
-    }
-  });
+  const isHovered = hoveredMarketplace === marketId;
   
   return (
-    <group ref={marketRef} position={position}>
-      {/* MAIN MARKETPLACE PLATFORM */}
+    <group position={position}>
+      {/* SIMPLE MARKETPLACE PLATFORM */}
       <mesh 
         position={[0, 0, 0]} 
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
-          console.log('Marketplace clicked!', marketId, 'isPinned:', isPinned);
+          // Mark the time of this building click
+          lastBuildingClickTime = Date.now();
+          console.log('🔥🔥🔥 MARKETPLACE CLICKED! 🔥🔥🔥');
+          console.log('  Current isPinned:', isPinned);
+          console.log('  Current marketId:', marketId);
+          console.log('  Will set pinnedMarketplace to:', isPinned ? null : marketId);
           setPinnedMarketplace(isPinned ? null : marketId);
+          console.log('  ✅ setPinnedMarketplace called successfully');
         }}
-        onPointerEnter={() => {
-          console.log('Marketplace hovered:', marketId);
-          setIsHovered(true);
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
+          console.log('  Setting hoveredMarketplace to:', marketId);
+          setHoveredMarketplace(marketId);
         }}
-        onPointerLeave={() => {
-          console.log('Marketplace unhovered:', marketId);
-          setIsHovered(false);
+        onPointerLeave={(e) => {
+          e.stopPropagation();
+          console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
+          console.log('  Setting hoveredMarketplace to: null');
+          setHoveredMarketplace(null);
         }}
       >
         <cylinderGeometry args={[25, 25, 3, 16]} />
         <meshStandardMaterial
           color={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#2a2a2a"}
           emissive={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#ff00ff"}
-          emissiveIntensity={0.3}
+          emissiveIntensity={0.5}
           metalness={0.7}
           roughness={0.3}
         />
       </mesh>
-      
-      {/* TRADING BOOTHS */}
-      {Array.from({length: 8}).map((_, i) => {
-        const angle = (i / 8) * Math.PI * 2;
-        const x = Math.cos(angle) * 18;
-        const z = Math.sin(angle) * 18;
-        
-        return (
-          <group key={i} position={[x, 3, z]} rotation={[0, -angle, 0]}>
-            <RoundedBox args={[4, 6, 2]} radius={0.2} castShadow>
-              <meshStandardMaterial
-                color="#ffffff"
-                emissive={isPinned ? "#ffff00" : "#ff00ff"}
-                emissiveIntensity={0.4}
-                metalness={0.6}
-                roughness={0.4}
-              />
-            </RoundedBox>
-          </group>
-        );
-      })}
-      
-      {/* CENTRAL TRADING TERMINAL */}
-      <mesh position={[0, 8, 0]} castShadow>
-        <sphereGeometry args={[4, 32, 32]} />
-        <MeshTransmissionMaterial
-          samples={16}
-          resolution={512}
-          transmission={0.9}
-          roughness={0.1}
-          clearcoat={1}
-          thickness={0.5}
-          chromaticAberration={0.8}
-          distortionScale={0.2}
-          temporalDistortion={0.1}
-          color={isPinned ? "#ffff00" : "#ff00ff"}
-        />
-      </mesh>
-      
-      {/* INTERACTIVE TRADING INTERFACE - Show when hovered or pinned */}
-      {(isHovered || isPinned) && (
-        <Html position={[0, 15, 0]} center>
-          <div 
-            className={`text-2xl font-black px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 backdrop-blur-xl ${
-              isPinned
-                ? 'text-yellow-400 bg-black/90 border-2 border-yellow-400 shadow-yellow-400/50'
-                : isHovered
-                ? 'text-pink-400 bg-black/90 border-2 border-pink-400 shadow-pink-400/50'
-                : 'text-yellow-400 bg-black/90 border-2 border-yellow-400 shadow-yellow-400/50'
-            } transform hover:scale-105 animate-in fade-in duration-300`}
-            style={{ 
-              pointerEvents: 'auto',
-              zIndex: 1000,
-              position: 'relative'
-            }}
-          >
-            <div className="font-mono text-xs opacity-70">EXCHANGE.exe</div>
-            <div className="mb-2">💎 MEDI EXCHANGE</div>
-            
-            {/* Interactive buttons when pinned */}
-            {isPinned && (
-              <div className="space-y-3" style={{ pointerEvents: 'auto' }}>
-                {/* Live Market Data */}
-                <div className="text-sm space-y-1 mb-4">
-                  <div className="flex justify-between">
-                    <span>$MEDI/USD</span>
-                    <span className="text-green-400">$1,247.89 ↗</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>AI Agents</span>
-                    <span className="text-blue-400">89,432 active</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Volume 24h</span>
-                    <span className="text-purple-400">$2.4M</span>
-                  </div>
-                </div>
-                
-                {/* Trading Buttons */}
-                <button 
-                  className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Opening trading interface');
-                    alert('💰 Opening MEDI Exchange trading interface!');
-                  }}
-                >
-                  💹 START TRADING
-                </button>
-                <button 
-                  className="w-full px-3 py-1 bg-blue-500 hover:bg-blue-400 text-white text-sm rounded transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Viewing wallet');
-                    alert('👛 Opening your MEDI wallet!');
-                  }}
-                >
-                  👛 MY WALLET
-                </button>
-                <button 
-                  className="w-full px-3 py-1 bg-purple-500 hover:bg-purple-400 text-white text-sm rounded transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Viewing market analytics');
-                    alert('📊 Opening market analytics dashboard!');
-                  }}
-                >
-                  📊 MARKET DATA
-                </button>
-                <div className="text-xs text-gray-300 text-center mt-2">
-                  <div>Market Status: ONLINE</div>
-                  <div>Click platform again to close</div>
-                </div>
-              </div>
-            )}
-            
-            {/* Show click instruction when not pinned */}
-            {!isPinned && (
-              <div className="text-xs text-gray-300 text-center mt-1">
-                Click to pin open
-              </div>
-            )}
-          </div>
-        </Html>
-      )}
-      
-      {/* MARKETPLACE EFFECTS */}
-      <Sparkles count={400} scale={30} size={3} speed={0.8} color={isPinned ? "#ffff00" : "#ff00ff"} />
-      <Sparkles count={200} scale={20} size={2} speed={1.2} color={isPinned ? "#ffaa00" : "#ffff00"} />
       
       {/* MARKETPLACE LIGHTING */}
       <pointLight position={[0, 15, 0]} intensity={4} color="#ff00ff" distance={40} />
@@ -1545,12 +1300,11 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
 }
 
 // FLOATING ARTWORK WITH HOVER LABELS 🖼️
-function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: number; studio: any }) {
+function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: any; index: number; studio: any; onLightboxOpen?: (artwork: any, studio: any) => void }) {
   const [isHovered, setIsHovered] = useState(false);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [showLightbox, setShowLightbox] = useState(false);
   
   useEffect(() => {
     console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image}`);
@@ -1648,7 +1402,7 @@ function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: numb
           onClick={(e) => {
             e.stopPropagation();
             console.log(`🖼️ Clicked artwork: ${artwork.title}`);
-            setShowLightbox(true);
+            onLightboxOpen?.(artwork, studio);
           }}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
@@ -1662,7 +1416,7 @@ function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: numb
             <meshStandardMaterial 
               color="#ffffff"
               emissive="#00ffff"
-              emissiveIntensity={1.5}
+              emissiveIntensity={0.8} // Reduced from 1.5 to prevent flickering
               metalness={1}
               roughness={0}
               transparent
@@ -1679,7 +1433,7 @@ function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: numb
             <meshStandardMaterial
               color="#ff00ff"
               emissive="#ff00ff"
-              emissiveIntensity={2}
+              emissiveIntensity={1.0} // Reduced from 2 to prevent flickering
               transparent
               opacity={0.7}
             />
@@ -1746,73 +1500,12 @@ function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: numb
           </div>
         </Html>
       )}
-
-      {/* LIGHTBOX MODAL for full-size viewing */}
-      {showLightbox && (
-        <Html fullscreen>
-          <div 
-            className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 animate-in fade-in duration-300"
-            onClick={() => setShowLightbox(false)}
-          >
-            {/* Close button - positioned at very top */}
-            <button 
-              onClick={() => setShowLightbox(false)}
-              className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors z-10 bg-black/70 rounded-full p-3 border border-red-400/50 hover:border-red-400"
-            >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            
-            {/* Container for image and info side by side */}
-            <div className="w-full max-w-[95vw] flex items-center justify-center gap-8">
-              {/* Full-size image - Left side */}
-              <div className="flex-shrink-0">
-                <img 
-                  src={artwork.image} 
-                  alt={artwork.title}
-                  className="max-w-[60vw] max-h-[80vh] object-contain rounded-lg shadow-2xl border-4 border-cyan-400 shadow-cyan-400/50"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-              
-              {/* Image info - Right side */}
-              <div className="flex-shrink-0 max-w-[30vw] text-left bg-black/90 backdrop-blur-xl rounded-2xl px-8 py-8 border-2 border-cyan-400/70 shadow-lg shadow-cyan-400/30">
-                <h2 className="text-4xl font-bold text-white mb-4">{artwork.title}</h2>
-                <p className="text-cyan-400 text-xl mb-3">Studio: {studio.name}</p>
-                <p className="text-purple-400 text-lg mt-4 font-medium">Neural Art Exhibition - MEDICI CITY</p>
-                {artwork.title.includes('NIGHTCAFE') && (
-                  <p className="text-yellow-400 text-xl mt-4 font-bold">🎨 Your Personal NightCafe Creation</p>
-                )}
-                
-                {/* Gallery link button */}
-                <div className="mt-8 space-y-4">
-                  <button 
-                    className="w-full px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors cursor-pointer shadow-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowLightbox(false);
-                      // Gallery is already open, just close lightbox
-                    }}
-                  >
-                    🏛️ Back to Gallery
-                  </button>
-                  
-                  <div className="text-gray-400 text-sm text-center">
-                    Click outside to close
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Html>
-      )}
     </>
   );
 }
 
 // STUDIO 3D GALLERY VIEW - SICKO MODE VR EXPERIENCE 🎨🔥
-function StudioGallery({ studio }: { studio: any }) {
+function StudioGallery({ studio, onLightboxOpen }: { studio: any; onLightboxOpen?: (artwork: any, studio: any) => void }) {
   const { exitGalleryMode } = useCityStore();
   const galleryRef = useRef<THREE.Group>(null);
   const particleRef = useRef<THREE.Group>(null);
@@ -1940,56 +1633,31 @@ function StudioGallery({ studio }: { studio: any }) {
       <pointLight position={[0, 25, 0]} intensity={4} color="#ffffff" distance={60} />
       
       {/* NEON ACCENT LIGHTS */}
-      <spotLight position={[20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#00ff88" />
+      <spotLight position={[20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={2} color="#D2691E" />
       <spotLight position={[-20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#ff0088" />
       <spotLight position={[0, 15, 20]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#8800ff" />
       
       {/* CYBERPUNK FOG */}
       <fog attach="fog" args={["#000511", 20, 100]} />
       
-      {/* HOLOGRAPHIC FLOOR */}
+      {/* SIMPLE GALLERY FLOOR - NO FLICKERING */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
         <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial 
+        <meshLambertMaterial 
           color="#001122"
-          emissive="#001155"
-          emissiveIntensity={0.5}
-          metalness={1}
-          roughness={0.1}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-
-      {/* NEON GRID FLOOR OVERLAY */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, 0]}>
-        <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={1}
-          transparent
-          opacity={0.2}
-          wireframe
-        />
-        </mesh>
-
-      {/* FLOATING ENERGY CEILING */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 25, 0]}>
-        <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial 
-          color="#000033"
-          emissive="#000066"
-          emissiveIntensity={1}
-          transparent
-          opacity={0.6}
         />
       </mesh>
 
       {/* INSANE FLOATING ARTWORKS - VR STYLE */}
       <group ref={galleryRef}>
         {realArtworks.map((artwork, index) => (
-          <FloatingArtwork key={artwork.id} artwork={artwork} index={index} studio={studio} />
+          <FloatingArtwork 
+            key={artwork.id} 
+            artwork={artwork} 
+            index={index} 
+            studio={studio}
+            onLightboxOpen={onLightboxOpen}
+          />
         ))}
       </group>
 
@@ -2035,13 +1703,12 @@ function StudioGallery({ studio }: { studio: any }) {
               />
             </mesh>
           ))}
-            </group>
+        </group>
       </Float>
 
-      {/* MASSIVE PARTICLE SYSTEMS */}
-      <Sparkles count={1000} scale={50} size={2} speed={0.5} color="#00ffff" />
-      <Sparkles count={500} scale={30} size={1.5} speed={0.8} color="#ff00ff" />
-      <Sparkles count={300} scale={20} size={1} speed={1.2} color="#ffff00" />
+      {/* PARTICLE SYSTEMS */}
+      <Sparkles count={500} scale={50} size={2} speed={0.5} color="#00ffff" />
+      <Sparkles count={300} scale={30} size={1.5} speed={0.8} color="#ff00ff" />
       
       {/* FLOATING DATA STREAMS */}
       <group ref={particleRef}>
@@ -2056,15 +1723,15 @@ function StudioGallery({ studio }: { studio: any }) {
               <meshStandardMaterial
                 color="#00ffff"
                 emissive="#00ffff"
-                emissiveIntensity={3}
+                emissiveIntensity={1.5}
                 transparent
                 opacity={0.8}
               />
-        </mesh>
-      </Float>
+            </mesh>
+          </Float>
         ))}
       </group>
-
+      
       {/* CYBERPUNK EXIT PORTAL */}
       <Float speed={2} rotationIntensity={0.3} floatIntensity={0.2}>
         <group position={[0, 3, 25]}>
@@ -2079,16 +1746,16 @@ function StudioGallery({ studio }: { studio: any }) {
             />
           </mesh>
           <Html position={[0, 0, 0]} center>
-        <button 
+            <button 
               className="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-500/50 border-2 border-red-500 backdrop-blur-xl"
-          onClick={(e) => {
-            e.stopPropagation();
-            exitGalleryMode();
-          }}
-        >
-          🚪 EXIT GALLERY
-        </button>
-      </Html>
+              onClick={(e) => {
+                e.stopPropagation();
+                exitGalleryMode();
+              }}
+            >
+              🚪 EXIT GALLERY
+            </button>
+          </Html>
           <Sparkles count={100} scale={8} size={3} speed={2} color="#ff0000" />
         </group>
       </Float>
@@ -2100,17 +1767,17 @@ function StudioGallery({ studio }: { studio: any }) {
         enableRotate={true}
         enableDamping={true}
         dampingFactor={0.05}
-        maxDistance={60} // Increased for the spread-out layout
+        maxDistance={60}
         minDistance={3}
-        target={[0, 6, -2]} // Better target for the new layout
+        target={[0, 6, -2]}
         maxPolarAngle={Math.PI / 2.2}
-        minPolarAngle={Math.PI / 8} // Allow looking more upward
+        minPolarAngle={Math.PI / 8}
       />
     </>
   );
 }
 
-// SIMPLIFIED GROUND - NO FLASHING 🌍
+// SIMPLIFIED GROUND - NO FLICKERING 🌍
 function SimpleGround() {
   return (
     <group>
@@ -2153,14 +1820,25 @@ export function CityScene() {
   const { studios, initializeStudios, closeAllPinnedOverlays, currentGalleryStudio } = useCityStore();
   const [showControls, setShowControls] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [lightboxData, setLightboxData] = useState<{ artwork: any; studio: any } | null>(null);
   
   useEffect(() => {
     initializeStudios();
   }, [initializeStudios]);
   
-  // Close pinned overlays when clicking outside
+  // Close pinned overlays when clicking outside - but not immediately after building clicks
   const handleSceneClick = (e: any) => {
-    // Only close if we didn't click on a building (which has stopPropagation)
+    const timeSinceLastBuildingClick = Date.now() - lastBuildingClickTime;
+    console.log('🌍 Scene clicked - checking if should close overlays');
+    console.log('  Time since last building click:', timeSinceLastBuildingClick, 'ms');
+    
+    // Don't close panels if a building was clicked recently (within 100ms)
+    if (timeSinceLastBuildingClick < 100) {
+      console.log('  ❌ NOT closing overlays - building was clicked recently');
+      return;
+    }
+    
+    console.log('  ✅ Will call closeAllPinnedOverlays');
     closeAllPinnedOverlays();
   };
 
@@ -2235,7 +1913,17 @@ export function CityScene() {
           <Suspense fallback={<LoadingFallback />}>
             {currentStudio ? (
               // GALLERY MODE - Show 3D Studio Gallery
-              <StudioGallery studio={currentStudio} />
+              <StudioGallery 
+                studio={currentStudio} 
+                onLightboxOpen={(artwork, studio) => {
+                  console.log('🖼️ Lightbox triggered:', { artwork, studio });
+                  if (artwork && studio) {
+                    setLightboxData({ artwork, studio });
+                  } else {
+                    console.error('❌ Invalid lightbox data:', { artwork, studio });
+                  }
+                }}
+              />
             ) : (
               // CITY MODE - Show main cyberpunk city
               <>
@@ -2263,7 +1951,7 @@ export function CityScene() {
                 <pointLight position={[45, 20, -25]} intensity={3} color="#4169E1" distance={60} /> {/* Raphael area */}
                 <pointLight position={[0, 20, 50]} intensity={4} color="#DC143C" distance={80} /> {/* Michelangelo area */}
                 <pointLight position={[-35, 20, 35]} intensity={3} color="#8A2BE2" distance={60} /> {/* Caravaggio area */}
-                <pointLight position={[40, 20, 30]} intensity={3} color="#228B22" distance={60} /> {/* Da Vinci area */}
+                <pointLight position={[40, 20, 30]} intensity={1.5} color="#D2691E" distance={60} /> {/* Da Vinci area - changed from green to orange */}
                 <pointLight position={[-60, 20, 0]} intensity={3} color="#696969" distance={60} /> {/* Picasso area */}
                 <pointLight position={[25, 15, -45]} intensity={2} color="#98FB98" distance={50} /> {/* Monet area */}
                 <pointLight position={[-25, 15, -40]} intensity={3} color="#FFD700" distance={50} /> {/* Van Gogh area */}
@@ -2298,32 +1986,17 @@ export function CityScene() {
                   <Cloud position={[30, 35, 70]} speed={0.12} opacity={0.18} color="#ffff00" />
                 </Float>
                 
-                {/* EXPANDED GROUND FOR LARGER CITY */}
+                {/* SIMPLE NON-FLICKERING GROUND */}
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-                  <planeGeometry args={[400, 400]} /> {/* Much larger ground plane */}
-                  <meshStandardMaterial 
-                    color="#1a1a1a"
-                    roughness={0.8}
-                    metalness={0.2}
-                  />
-                </mesh>
-
-                {/* ENHANCED GRID OVERLAY FOR NAVIGATION */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.49, 0]}>
                   <planeGeometry args={[400, 400]} />
-                  <meshBasicMaterial
-                    color="#00ffff"
-                    transparent
-                    opacity={0.1}
-                    wireframe
-                  />
+                  <meshLambertMaterial color="#1a1a1a" />
                 </mesh>
 
-                {/* CONTACT SHADOWS FOR LARGER AREA */}
+                {/* BASIC CONTACT SHADOWS ONLY */}
                 <ContactShadows
                   position={[0, -0.48, 0]}
-                  opacity={0.4}
-                  scale={200} // Much larger shadow area
+                  opacity={0.3}
+                  scale={200}
                   blur={1}
                   far={30}
                   color="#000000"
@@ -2353,6 +2026,69 @@ export function CityScene() {
           </Suspense>
         </Canvas>
       </KeyboardControls>
+      
+      {/* CITY UI OVERLAY - Map, Studio Info, Controls */}
+      <CityUI />
+
+      {/* CENTERED LIGHTBOX - COMPLETELY OUTSIDE OF THREE.JS */}
+      {lightboxData && lightboxData.artwork && lightboxData.studio && (
+        <div 
+          className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[9999] animate-in fade-in duration-300"
+          onClick={() => setLightboxData(null)}
+        >
+          {/* Close button - positioned at very top */}
+          <button 
+            onClick={() => setLightboxData(null)}
+            className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors z-10 bg-black/70 rounded-full p-3 border border-red-400/50 hover:border-red-400"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          {/* Container for image and info side by side */}
+          <div className="w-full max-w-[95vw] flex items-center justify-center gap-8">
+            {/* Full-size image - Left side */}
+            <div className="flex-shrink-0">
+              {lightboxData.artwork.image && (
+                <img 
+                  src={lightboxData.artwork.image} 
+                  alt={lightboxData.artwork.title || 'Artwork'}
+                  className="max-w-[60vw] max-h-[80vh] object-contain rounded-lg shadow-2xl border-4 border-cyan-400 shadow-cyan-400/50"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+            </div>
+            
+            {/* Image info - Right side */}
+            <div className="flex-shrink-0 max-w-[30vw] text-left bg-black/90 backdrop-blur-xl rounded-2xl px-8 py-8 border-2 border-cyan-400/70 shadow-lg shadow-cyan-400/30">
+              <h2 className="text-4xl font-bold text-white mb-4">{lightboxData.artwork.title || 'Untitled Artwork'}</h2>
+              <p className="text-cyan-400 text-xl mb-3">Studio: {lightboxData.studio.name || 'Unknown Studio'}</p>
+              <p className="text-purple-400 text-lg mt-4 font-medium">Neural Art Exhibition - MEDICI CITY</p>
+              {lightboxData.artwork.title && lightboxData.artwork.title.includes('NIGHTCAFE') && (
+                <p className="text-yellow-400 text-xl mt-4 font-bold">🎨 Your Personal NightCafe Creation</p>
+              )}
+              
+              {/* Gallery link button */}
+              <div className="mt-8 space-y-4">
+                <button 
+                  className="w-full px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors cursor-pointer shadow-lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxData(null);
+                  }}
+                >
+                  🏛️ Back to Gallery
+                </button>
+                
+                <div className="text-gray-400 text-sm text-center">
+                  Click outside to close
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

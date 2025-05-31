@@ -25,6 +25,10 @@ export function CityUI() {
     studios,
     activeStudio,
     hoveredStudio,
+    pinnedAgentHub,
+    pinnedMarketplace,
+    hoveredAgentHub,
+    hoveredMarketplace,
     showMinimap,
     showUI,
     tourMode,
@@ -46,9 +50,31 @@ export function CityUI() {
     }
   }, [agents.length, fetchAgents]);
   
+  // Enhanced Debug: Log state changes with more detail
+  useEffect(() => {
+    console.log('🔍 CityUI Enhanced Debug:');
+    console.log('  📍 pinnedAgentHub:', pinnedAgentHub);
+    console.log('  👆 hoveredAgentHub:', hoveredAgentHub);
+    console.log('  📍 pinnedMarketplace:', pinnedMarketplace);
+    console.log('  👆 hoveredMarketplace:', hoveredMarketplace);
+    console.log('  🎯 showAgentHub:', !!(pinnedAgentHub || hoveredAgentHub));
+    console.log('  🎯 showMarketplace:', !!(pinnedMarketplace || hoveredMarketplace));
+  }, [pinnedAgentHub, hoveredAgentHub, pinnedMarketplace, hoveredMarketplace]);
+  
   const activeStudioData = studios.find(s => s.id === activeStudio);
   const hoveredStudioData = studios.find(s => s.id === hoveredStudio);
   const displayStudio = activeStudioData || hoveredStudioData;
+  
+  // Agent Hub and Marketplace display logic - show on hover OR pin
+  const showAgentHub = pinnedAgentHub || hoveredAgentHub;
+  const showMarketplace = pinnedMarketplace || hoveredMarketplace;
+  
+  // Additional debug logging for show states
+  useEffect(() => {
+    console.log('🎯 Panel Display States:');
+    console.log('  Agent Hub Panel:', showAgentHub ? 'VISIBLE' : 'HIDDEN');
+    console.log('  Marketplace Panel:', showMarketplace ? 'VISIBLE' : 'HIDDEN');
+  }, [showAgentHub, showMarketplace]);
   
   const getAgentForStudio = (studioAgentId: string) => {
     return agents.find(agent => agent.id === studioAgentId);
@@ -95,6 +121,19 @@ export function CityUI() {
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset View
           </Button>
+          {/* DEBUG BUTTON */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              console.log('🔥 DEBUG: Forcing Agent Hub panel to show');
+              const { setPinnedAgentHub } = useCityStore.getState();
+              setPinnedAgentHub(pinnedAgentHub ? null : 'hub1');
+            }}
+            className="backdrop-blur-md bg-cyan-500/20 border-cyan-400/50 text-cyan-400 hover:bg-cyan-500/30 transition-all duration-300 shadow-lg"
+          >
+            🤖 Test Agent Panel
+          </Button>
         </div>
         
         <div className="flex gap-3">
@@ -135,8 +174,9 @@ export function CityUI() {
               
               {/* Enhanced studios on minimap */}
               {studios.map((studio) => {
-                const x = (studio.position[0] + 20) / 40 * 100;
-                const z = (studio.position[2] + 20) / 40 * 100;
+                // Fixed coordinate mapping for spread-out studios (range -80 to +80)
+                const x = (studio.position[0] + 80) / 160 * 100;
+                const z = (studio.position[2] + 80) / 160 * 100;
                 const isActive = activeStudio === studio.id;
                 const isHovered = hoveredStudio === studio.id;
                 
@@ -155,6 +195,36 @@ export function CityUI() {
                   />
                 );
               })}
+              
+              {/* Agent Builder Hub on minimap */}
+              <button
+                className={`absolute w-5 h-5 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                  showAgentHub
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 scale-150 shadow-lg shadow-cyan-500/50'
+                    : 'bg-cyan-400/80 hover:bg-cyan-400 hover:scale-125'
+                }`}
+                style={{ left: '85%', top: '85%' }} // Position at [80, 0, 80]
+                onClick={() => {
+                  setCameraPosition([88, 25, 88]);
+                  setCameraTarget([80, 0, 80]);
+                }}
+                title="Agent Builder Hub"
+              />
+              
+              {/* Trading Exchange on minimap */}
+              <button
+                className={`absolute w-5 h-5 rounded-full transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                  showMarketplace
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 scale-150 shadow-lg shadow-yellow-500/50'
+                    : 'bg-yellow-400/80 hover:bg-yellow-400 hover:scale-125'
+                }`}
+                style={{ left: '50%', top: '95%' }} // Position at [0, 5, 120]
+                onClick={() => {
+                  setCameraPosition([8, 25, 128]);
+                  setCameraTarget([0, 5, 120]);
+                }}
+                title="MEDI Exchange"
+              />
             </div>
           </CardContent>
         </Card>
@@ -242,8 +312,196 @@ export function CityUI() {
         </Card>
       )}
       
-      {/* Enhanced Studios list */}
-      <Card className="absolute bottom-4 right-4 w-80 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl">
+      {/* Agent Builder Hub info panel - ENHANCED VISIBILITY */}
+      {showAgentHub && (
+        <Card className="absolute bottom-4 left-4 w-[500px] z-50 backdrop-blur-md bg-black/30 border-4 border-cyan-400 shadow-2xl shadow-cyan-400/50 animate-pulse">
+          <CardContent className="p-8">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="font-bold text-3xl text-cyan-400 mb-3 animate-bounce">🤖 AGENT BUILDER HUB</h3>
+                <div className="flex items-center gap-3 mt-2">
+                  <Badge 
+                    variant="secondary" 
+                    className="text-sm bg-gradient-to-r from-cyan-500/40 to-blue-500/40 text-white border-cyan-500/50 px-3 py-1"
+                  >
+                    ✨ ACTIVE v3.0
+                  </Badge>
+                  <span className="text-lg text-cyan-300 flex items-center font-bold">
+                    <Sparkles className="h-5 w-5 mr-2 animate-spin" />
+                    Neural Networks ONLINE
+                  </span>
+                </div>
+                {/* Close button */}
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    const { setPinnedAgentHub } = useCityStore.getState();
+                    setPinnedAgentHub(null);
+                  }}
+                  className="mt-2 bg-red-500/20 border-red-400 text-red-400 hover:bg-red-500/30"
+                >
+                  ✕ Close
+                </Button>
+              </div>
+              <Button 
+                size="lg" 
+                asChild
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 border-0 shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 text-lg px-6 py-3 animate-pulse"
+              >
+                <Link href="/agents">
+                  🚀 ENTER BUILDER NOW
+                </Link>
+              </Button>
+            </div>
+            
+            <p className="text-sm text-white/80 mb-6 leading-relaxed">
+              Create powerful AI agents using advanced neural networks. Build, train, and deploy your custom AI assistants for various tasks including art creation, data analysis, and automation.
+            </p>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm flex items-center text-white">
+                <Sparkles className="h-4 w-4 mr-2 text-cyan-400" />
+                Agent Builder Features
+              </h4>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="font-medium text-sm text-white mb-1">⚡ Neural Network Design</div>
+                  <div className="text-xs text-white/70">Build custom AI architectures</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="font-medium text-sm text-white mb-1">🎭 Personality Engine</div>
+                  <div className="text-xs text-white/70">Define unique AI personalities</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="font-medium text-sm text-white mb-1">📊 Performance Analytics</div>
+                  <div className="text-xs text-white/70">Monitor agent performance</div>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/agents">
+                    ⚡ Create Agent
+                  </Link>
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/agents">
+                    🎭 View Agents
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Trading Exchange info panel - POSITIONED TO THE RIGHT */}
+      {showMarketplace && (
+        <Card className="absolute bottom-4 right-4 w-96 z-50 backdrop-blur-md bg-black/30 border-4 border-yellow-400 shadow-2xl shadow-yellow-400/50 animate-pulse">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-2xl text-yellow-400 mb-2 animate-bounce">💎 MEDI EXCHANGE</h3>
+                <div className="flex items-center gap-3 mt-2">
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs bg-gradient-to-r from-yellow-500/40 to-orange-500/40 text-white border-yellow-500/50"
+                  >
+                    LIVE TRADING
+                  </Badge>
+                  <span className="text-sm text-yellow-300 flex items-center font-bold">
+                    <Sparkles className="h-3 w-3 mr-1 animate-spin" />
+                    $2.4M Volume 24h
+                  </span>
+                </div>
+                {/* Close button */}
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    const { setPinnedMarketplace } = useCityStore.getState();
+                    setPinnedMarketplace(null);
+                  }}
+                  className="mt-2 bg-red-500/20 border-red-400 text-red-400 hover:bg-red-500/30"
+                >
+                  ✕ Close
+                </Button>
+              </div>
+              <Button 
+                size="sm" 
+                className="bg-gradient-to-r from-green-500 to-yellow-500 border-0 shadow-lg hover:shadow-green-500/25 transition-all duration-300"
+                onClick={() => {
+                  alert('💹 Opening MEDI Exchange trading interface!');
+                }}
+              >
+                💹 START TRADING
+              </Button>
+            </div>
+            
+            <p className="text-sm text-white/80 mb-6 leading-relaxed">
+              Trade MEDI tokens, AI artworks, and agent services on the decentralized marketplace. Access real-time market data and execute instant transactions.
+            </p>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm flex items-center text-white">
+                <Sparkles className="h-4 w-4 mr-2 text-yellow-400" />
+                Live Market Data
+              </h4>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white">$MEDI/USD</span>
+                    <span className="text-green-400 font-bold">$1,247.89 ↗</span>
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white">AI Agents</span>
+                    <span className="text-blue-400 font-bold">89,432 active</span>
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white">Artworks</span>
+                    <span className="text-purple-400 font-bold">156K listed</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all duration-300"
+                  onClick={() => {
+                    alert('👛 Opening your MEDI wallet!');
+                  }}
+                >
+                  👛 Wallet
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
+                  onClick={() => {
+                    alert('📊 Opening market analytics dashboard!');
+                  }}
+                >
+                  📊 Analytics
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Enhanced Studios list - POSITIONED TO AVOID OVERLAP */}
+      <Card className={`absolute ${showMarketplace ? 'bottom-4 right-[420px]' : 'bottom-4 right-4'} w-80 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl transition-all duration-300`}>
         <CardContent className="p-6">
           <h3 className="font-bold mb-4 text-white text-lg">AI Creator Studios</h3>
           <div className="space-y-3 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
