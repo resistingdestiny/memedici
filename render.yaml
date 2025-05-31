@@ -14,7 +14,9 @@ services:
       - key: NOVITA_API_KEY
         sync: false
       - key: DATABASE_URL
-        value: sqlite:///agents.db
+        fromDatabase:
+          name: memedici-db
+          property: connectionString
     healthCheckPath: /health
     
 databases:
