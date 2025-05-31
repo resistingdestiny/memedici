@@ -4,9 +4,10 @@ import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, Float, Sparkles, Environment, Sky, Stars, Cloud, ContactShadows, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import { CyberpunkAgent } from "./CyberpunkAgent";
-import { MovementController } from "./MovementController";
 import { useCityStore } from "@/lib/stores/use-city";
+import { MovementController } from "./MovementController";
+import { CyberpunkAgent } from "./CyberpunkAgent";
+import { ScaledGLB } from "./GLBScaler";
 
 // Client-side check to prevent SSR issues with Text components
 const isClient = typeof window !== 'undefined';
@@ -373,13 +374,12 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       {/* CYBERPUNK FOG */}
       <fog attach="fog" args={["#000511", 20, 100]} />
       
-      {/* SIMPLE GALLERY FLOOR - NO FLICKERING */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <meshLambertMaterial 
-          color="#001122"
-        />
-      </mesh>
+      {/* OFFICE STUDIO ENVIRONMENT GLB */}
+      <ScaledGLB 
+        glbFile="office_studio (1).glb"
+        position={[0, -2, 0]}
+        receiveShadow
+      />
 
       {/* INSANE FLOATING ARTWORKS - VR STYLE */}
       <group ref={galleryRef}>

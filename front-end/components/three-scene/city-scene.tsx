@@ -31,10 +31,11 @@ import { RoamingArtist } from "./components/RoamingArtist";
 import { StudioGallery } from "./components/StudioGallery";
 import { CityEnvironment, CityGround } from "./components/CityEnvironment";
 import { MovementController } from "./components/MovementController";
-import { CyberpunkPlaza, AgentBuildingHub, TradingMarketplace, LoadingFallback } from "./components/CityStructures";
+import { AgentBuildingHub, TradingMarketplace, LoadingFallback, MysteriousContraption } from "./components/CityStructures";
 import { PastelHouse } from "./components/PastelHouse";
 import { GLBStudio } from "./components/GLBStudio";
 import { ExchangeBuilding, AgentBuilderHub } from "./components/GLBBuildings";
+import { preloadAllGLBFiles } from "./components/GLBScaler";
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
@@ -115,6 +116,10 @@ export function CityScene() {
       console.log('🏛️ Initializing studios...');
       initializeStudios();
     }
+    
+    // Preload all GLB files to prevent flashing
+    console.log('🔄 Preloading GLB files to prevent flashing...');
+    preloadAllGLBFiles();
   }, [studios.length, initializeStudios]);
 
   // Define roaming artists data directly
@@ -453,14 +458,13 @@ export function CityScene() {
                 
                 {/* GLB STUDIOS - SPREAD OUT WITH AUTOMATIC SCALING */}
                 {studios.map((studio, index) => {
-                  // Map studios to available GLB files (excluding ams_s2 and cyberpunk_bar)
+                  // Map studios to available GLB files (excluding ams_s2, cyberpunk_bar, and missing files)
                   const availableBuildings = [
                     'hw_4_cyberpunk_sci-fi_building.glb',
-                    'make_your_own_steampunk_house.glb',
+                    'pastel_house.glb',
                     'mushroom_house.glb',
                     'oriental_building.glb',
-                    'the_neko_stop-off__-_hand-painted_diorama.glb',
-                    'treehouse_concept.glb'
+                    'the_neko_stop-off__-_hand-painted_diorama.glb'
                   ];
                   
                   // Spread studios in a larger area with enough room
@@ -518,7 +522,7 @@ export function CityScene() {
                 ))}
                 
                 {/* ENHANCED CENTRAL PLAZA */}
-                <CyberpunkPlaza />
+                <MysteriousContraption />
                 
                 {/* NEW GLB FACILITIES - AUTOMATIC SCALING */}
                 <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />

@@ -19,6 +19,7 @@ export function GLBStudio({
   rotation?: [number, number, number];
 }) {
   const groupRef = useRef<THREE.Group>(null);
+  const [isGLBLoaded, setIsGLBLoaded] = useState(false);
   const { activeStudio, hoveredStudio, setHoveredStudio, setActiveStudio, enterGalleryMode } = useCityStore();
   
   const isActive = activeStudio === studio.id;
@@ -26,7 +27,7 @@ export function GLBStudio({
   const showInterface = isHovered || isActive;
 
   useFrame((state) => {
-    if (groupRef.current) {
+    if (groupRef.current && isGLBLoaded) {
       // Add subtle floating animation for active/hovered studios
       if (isActive || isHovered) {
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
@@ -58,6 +59,15 @@ export function GLBStudio({
     enterGalleryMode(studio.id);
   };
 
+  const handleGLBLoad = () => {
+    setIsGLBLoaded(true);
+    console.log(`🏛️ GLB Studio loaded: ${studio.name} (${glbFile})`);
+  };
+
+  const handleGLBError = () => {
+    console.error(`❌ Failed to load GLB Studio: ${studio.name} (${glbFile})`);
+  };
+
   return (
     <group 
       ref={groupRef} 
@@ -74,8 +84,8 @@ export function GLBStudio({
         onPointerLeave={handlePointerLeave}
       />
 
-      {/* Studio Information Overlay */}
-      {showInterface && (
+      {/* Studio Information Overlay - Only show when GLB is loaded */}
+      {showInterface && isGLBLoaded && (
         <Html position={[0, 8, 0]} center>
           <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl px-6 py-4 text-cyan-400 font-mono animate-in fade-in duration-200 shadow-2xl shadow-cyan-400/30 min-w-[280px]">
             {/* Studio Header */}

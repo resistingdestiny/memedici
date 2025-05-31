@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, Float, RoundedBox, Sphere, Sparkles, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
+import { ScaledGLB } from "./GLBScaler";
 
 // Remove Text import to avoid troika-worker issues
 // import { Text } from "@react-three/drei";
@@ -141,14 +142,7 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
   isActive: boolean;
   onAgentClick?: (artist: any) => void;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const headRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  const eyeLeftRef = useRef<THREE.Mesh>(null);
-  const eyeRightRef = useRef<THREE.Mesh>(null);
-  const mouthRef = useRef<THREE.Mesh>(null);
-  const faceScreenRef = useRef<THREE.Mesh>(null);
-  const antennaRefs = useRef<THREE.Mesh[]>([]);
+  // Only keep essential refs for animation
   const groupRef = useRef<THREE.Group>(null);
 
   // Get agent data from enhanced database
@@ -191,60 +185,6 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
 
   // ORIGINAL SLOWER, MORE ATMOSPHERIC ANIMATIONS
   useFrame((state) => {
-    if (meshRef.current) {
-      // ORIGINAL: Slow cyberpunk floating (was * 4, now back to original gentle speed)
-      const bob = Math.sin(state.clock.elapsedTime * 2) * 0.3; // Slower, more atmospheric
-      meshRef.current.position.y = position[1] + bob;
-    }
-
-    if (headRef.current) {
-      // ORIGINAL: Gentle head scanning (was * 3, restored to original)
-      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.5) * 0.5; // Slower scanning
-      headRef.current.position.y = position[1] + 1.5 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
-    }
-
-    if (ringRef.current) {
-      // ORIGINAL: Slow energy ring rotation
-      ringRef.current.rotation.x += 0.01; // Slower rotation
-      ringRef.current.rotation.z += 0.005; // Even slower counter-rotation
-    }
-
-    // Enhanced eye animations - ORIGINAL SLOW BLINK
-    if (eyeLeftRef.current && eyeRightRef.current) {
-      const blinkTime = state.clock.elapsedTime * 1.5; // Slower blinking
-      const blink = Math.abs(Math.sin(blinkTime)) > 0.95 ? 0.1 : 1;
-      
-      eyeLeftRef.current.scale.setScalar(blink);
-      eyeRightRef.current.scale.setScalar(blink);
-      
-      // ORIGINAL: Gentle glowing effect
-      const glowIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.3; // Slower glow
-      (eyeLeftRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = glowIntensity;
-      (eyeRightRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = glowIntensity;
-    }
-
-    // Face screen animation - ORIGINAL SLOW PULSE
-    if (faceScreenRef.current) {
-      const screenTime = state.clock.elapsedTime * 1; // Much slower screen effect
-      (faceScreenRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 
-        0.3 + Math.sin(screenTime) * 0.2;
-    }
-
-    // Mouth LED strip animation - ORIGINAL SLOW PULSE
-    if (mouthRef.current) {
-      const mouthTime = state.clock.elapsedTime * 3; // Slower mouth animation
-      (mouthRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 
-        0.4 + Math.sin(mouthTime) * 0.3;
-    }
-
-    // Antenna animations - ORIGINAL SLOW ROTATION
-    antennaRefs.current.forEach((antenna, i) => {
-      if (antenna) {
-        antenna.rotation.y = state.clock.elapsedTime * (0.5 + i * 0.25); // Much slower antenna rotation
-        antenna.position.y = position[1] + 5.5 + Math.sin(state.clock.elapsedTime * 1.5 + i) * 0.1;
-      }
-    });
-
     if (groupRef.current) {
       // Gentle floating animation
       groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.5;
