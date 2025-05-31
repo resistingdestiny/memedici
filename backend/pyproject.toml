@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "memedici"
+version = "0.1.0"
+description = "Memedici - AI-powered creative platform for generating and managing artistic content"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+pydantic = "^2.5.0"
+numpy = "^1.24.3"
+pandas = "^2.0.3"
+python-multipart = "^0.0.6"
+langchain = "^0.1.0"
+langchain-anthropic = "^0.1.0"
+openai = "^1.6.0"
+pillow = "^10.1.0"
+requests = "^2.31.0"
+pydantic-settings = "^2.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+black = "^23.11.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api" 

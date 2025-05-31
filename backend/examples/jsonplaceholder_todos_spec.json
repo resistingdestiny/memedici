@@ -1,0 +1,66 @@
+{
+  "name": "todo_task_manager",
+  "description": "A creative task management tool that fetches todo items and transforms them into artistic project inspiration. Perfect for generating art concepts based on task structures and completion states.",
+  "category": "productivity",
+  "endpoint": "https://jsonplaceholder.typicode.com/todos/1",
+  "method": "GET",
+  "content_type": "application/json",
+  "response_format": "json",
+  "auth": {
+    "type": "none"
+  },
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "todo_id": {
+        "type": "integer",
+        "description": "ID of the todo item to fetch (1-200)",
+        "default": 1,
+        "minimum": 1,
+        "maximum": 200
+      }
+    }
+  },
+  "request_schema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "response_schema": {
+    "type": "object",
+    "properties": {
+      "userId": {
+        "type": "integer",
+        "description": "ID of the user who owns this todo"
+      },
+      "id": {
+        "type": "integer", 
+        "description": "Unique identifier for the todo item"
+      },
+      "title": {
+        "type": "string",
+        "description": "The todo task description"
+      },
+      "completed": {
+        "type": "boolean",
+        "description": "Whether the task has been completed"
+      }
+    },
+    "required": ["userId", "id", "title", "completed"]
+  },
+  "response_example": {
+    "userId": 1,
+    "id": 1,
+    "title": "delectus aut autem",
+    "completed": false
+  },
+  "artistic_use_cases": [
+    "Transform task titles into abstract art concepts",
+    "Use completion status to generate color palettes (completed=warm colors, incomplete=cool colors)",
+    "Create visual representations of productivity workflows",
+    "Generate motivation-themed artworks based on task descriptions"
+  ],
+  "api_documentation": "https://jsonplaceholder.typicode.com/",
+  "rate_limits": "No rate limits - free testing API",
+  "notes": "JSONPlaceholder is a fake REST API for testing and prototyping. Perfect for creative agents to practice API integration and generate art from structured data."
+} 
