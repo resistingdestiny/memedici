@@ -34,6 +34,10 @@ interface CityState {
   pinnedAgentHub: string | null;
   pinnedMarketplace: string | null;
   
+  // Gallery view
+  isInGalleryMode: boolean;
+  currentGalleryStudio: string | null;
+  
   // UI state
   showMinimap: boolean;
   showUI: boolean;
@@ -48,6 +52,8 @@ interface CityState {
   setPinnedAgentHub: (hubId: string | null) => void;
   setPinnedMarketplace: (marketId: string | null) => void;
   closeAllPinnedOverlays: () => void;
+  enterGalleryMode: (studioId: string) => void;
+  exitGalleryMode: () => void;
   toggleMinimap: () => void;
   toggleUI: () => void;
   startTour: () => void;
@@ -70,6 +76,9 @@ export const useCityStore = create<CityState>((set, get) => ({
   pinnedAgentHub: null,
   pinnedMarketplace: null,
   
+  isInGalleryMode: false,
+  currentGalleryStudio: null,
+  
   showMinimap: true,
   showUI: true,
   tourMode: false,
@@ -87,6 +96,8 @@ export const useCityStore = create<CityState>((set, get) => ({
     pinnedAgentHub: null,
     pinnedMarketplace: null
   }),
+  enterGalleryMode: (studioId) => set({ currentGalleryStudio: studioId }),
+  exitGalleryMode: () => set({ currentGalleryStudio: null }),
   toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
   toggleUI: () => set((state) => ({ showUI: !state.showUI })),
   

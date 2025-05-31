@@ -40,7 +40,7 @@ const MOVEMENT_KEYS = [
 function StudioBuilding({ studio }: { studio: any }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
-  const { activeStudio, hoveredStudio, pinnedStudio, setHoveredStudio, setActiveStudio, setPinnedStudio } = useCityStore();
+  const { activeStudio, hoveredStudio, pinnedStudio, setHoveredStudio, setActiveStudio, setPinnedStudio, enterGalleryMode } = useCityStore();
   
   const isActive = activeStudio === studio.id;
   const isHovered = hoveredStudio === studio.id;
@@ -186,6 +186,18 @@ function StudioBuilding({ studio }: { studio: any }) {
             {/* Interactive buttons when pinned */}
             {isPinned && (
               <div className="space-y-2" style={{ pointerEvents: 'auto' }}>
+                <button 
+                  className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-400 text-white font-bold rounded-lg transition-colors cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log('Entering gallery for studio:', studio.name);
+                    enterGalleryMode(studio.id);
+                  }}
+                >
+                  🎨 ENTER GALLERY
+                </button>
                 <button 
                   className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg transition-colors cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
@@ -964,10 +976,17 @@ function AgentBuildingHub({ position, hubId }: { position: [number, number, numb
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
+          console.log('Agent Hub clicked!', hubId, 'isPinned:', isPinned);
           setPinnedAgentHub(isPinned ? null : hubId);
         }}
-        onPointerEnter={() => setIsHovered(true)}
-        onPointerLeave={() => setIsHovered(false)}
+        onPointerEnter={() => {
+          console.log('Agent Hub hovered:', hubId);
+          setIsHovered(true);
+        }}
+        onPointerLeave={() => {
+          console.log('Agent Hub unhovered:', hubId);
+          setIsHovered(false);
+        }}
       >
         <meshStandardMaterial
           color={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#1a1a1a"}
@@ -1091,7 +1110,7 @@ function AgentBuildingHub({ position, hubId }: { position: [number, number, numb
                     e.stopPropagation();
                     e.preventDefault();
                     console.log('Viewing agent gallery');
-                    alert('🎨 Browse existing AI agents and templates!');
+                    alert('🎭 AGENT GALLERY');
                   }}
                 >
                   🎭 AGENT GALLERY
@@ -1147,10 +1166,17 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
+          console.log('Marketplace clicked!', marketId, 'isPinned:', isPinned);
           setPinnedMarketplace(isPinned ? null : marketId);
         }}
-        onPointerEnter={() => setIsHovered(true)}
-        onPointerLeave={() => setIsHovered(false)}
+        onPointerEnter={() => {
+          console.log('Marketplace hovered:', marketId);
+          setIsHovered(true);
+        }}
+        onPointerLeave={() => {
+          console.log('Marketplace unhovered:', marketId);
+          setIsHovered(false);
+        }}
       >
         <cylinderGeometry args={[25, 25, 3, 16]} />
         <meshStandardMaterial
@@ -1303,6 +1329,122 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
   );
 }
 
+// STUDIO 3D GALLERY VIEW 🎨
+function StudioGallery({ studio }: { studio: any }) {
+  const { exitGalleryMode } = useCityStore();
+  const galleryRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (galleryRef.current) {
+      // Gentle rotation
+      galleryRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+    }
+  });
+
+  return (
+    <>
+      {/* GALLERY LIGHTING */}
+      <ambientLight intensity={0.4} color="#ffffff" />
+      <directionalLight position={[10, 10, 5]} intensity={1} color="#ffffff" castShadow />
+      <pointLight position={[0, 8, 0]} intensity={2} color="#ffdd88" />
+      
+      {/* GALLERY FLOOR */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[40, 40]} />
+        <meshStandardMaterial 
+          color="#f8f8f8"
+          roughness={0.1}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* GALLERY WALLS */}
+      {[
+        { pos: [0, 5, -20] as [number, number, number], rot: [0, 0, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
+        { pos: [0, 5, 20] as [number, number, number], rot: [0, 0, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
+        { pos: [-20, 5, 0] as [number, number, number], rot: [0, Math.PI/2, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
+        { pos: [20, 5, 0] as [number, number, number], rot: [0, Math.PI/2, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] }
+      ].map((wall, i) => (
+        <mesh key={i} position={wall.pos} rotation={wall.rot} receiveShadow>
+          <boxGeometry args={wall.size} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      ))}
+
+      {/* ARTWORKS DISPLAYED ON WALLS */}
+      <group ref={galleryRef}>
+        {studio.recentArtworks.map((artwork: any, index: number) => {
+          const angle = (index / studio.recentArtworks.length) * Math.PI * 2;
+          const radius = 15;
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+          
+          return (
+            <group key={artwork.id} position={[x, 3, z]} rotation={[0, -angle + Math.PI, 0]}>
+              {/* GALLERY ARTWORK FRAME */}
+              <Float speed={0.5} rotationIntensity={0.02} floatIntensity={0.1}>
+                <ArtworkDisplay 
+                  artwork={artwork} 
+                  position={[0, 0, 0]} 
+                />
+              </Float>
+              
+              {/* ARTWORK SPOTLIGHT */}
+              <spotLight
+                position={[0, 8, 3]}
+                target-position={[x, 3, z]}
+                angle={0.3}
+                penumbra={0.5}
+                intensity={1}
+                color="#ffffff"
+                castShadow
+              />
+            </group>
+          );
+        })}
+      </group>
+
+      {/* CENTRAL STUDIO LOGO/NAME */}
+      <Float speed={1} rotationIntensity={0.1} floatIntensity={0.3}>
+        <mesh position={[0, 8, 0]}>
+          <cylinderGeometry args={[0.5, 0.5, 0.1]} />
+          <meshStandardMaterial color="#000000" />
+        </mesh>
+        <Html position={[0, 8.5, 0]} center>
+          <div className="bg-black/90 backdrop-blur-xl text-white px-6 py-3 rounded-xl text-center border border-white/20">
+            <div className="text-2xl font-bold text-gold-400">{studio.name}</div>
+            <div className="text-sm opacity-70">Virtual Gallery</div>
+          </div>
+        </Html>
+      </Float>
+
+      {/* EXIT GALLERY BUTTON */}
+      <Html position={[0, 1, 18]} center>
+        <button 
+          className="bg-red-500 hover:bg-red-400 text-white font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer shadow-lg"
+          onClick={(e) => {
+            e.stopPropagation();
+            exitGalleryMode();
+          }}
+        >
+          🚪 EXIT GALLERY
+        </button>
+      </Html>
+
+      {/* GALLERY CAMERA CONTROLS */}
+      <OrbitControls 
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        enableDamping={true}
+        dampingFactor={0.1}
+        maxDistance={25}
+        minDistance={3}
+        target={[0, 3, 0]}
+      />
+    </>
+  );
+}
 
 // SIMPLIFIED GROUND - NO FLASHING 🌍
 function SimpleGround() {
@@ -1344,7 +1486,7 @@ function SimpleGround() {
 
 // Main enhanced scene component
 export function CityScene() {
-  const { studios, initializeStudios, setPinnedStudio, closeAllPinnedOverlays } = useCityStore();
+  const { studios, initializeStudios, setPinnedStudio, closeAllPinnedOverlays, currentGalleryStudio } = useCityStore();
   const [showControls, setShowControls] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   
@@ -1358,6 +1500,9 @@ export function CityScene() {
     setPinnedStudio(null);
     closeAllPinnedOverlays();
   };
+
+  // Find the current studio if in gallery mode
+  const currentStudio = currentGalleryStudio ? studios.find(s => s.id === currentGalleryStudio) : null;
   
   return (
     <div className="w-full h-screen relative">
@@ -1424,82 +1569,90 @@ export function CityScene() {
           onClick={handleSceneClick}
         >
           <Suspense fallback={<LoadingFallback />}>
-            {/* CYBERPUNK LIGHTING SYSTEM 🌈 */}
-            <ambientLight intensity={0.2} color="#0a0a2e" />
-            
-            {/* MAIN NEON LIGHT */}
-            <directionalLight
-              position={[20, 20, 10]}
-              intensity={1.5}
-              color="#00ffff"
-              castShadow
-              shadow-mapSize-width={2048}
-              shadow-mapSize-height={2048}
-              shadow-camera-near={0.5}
-              shadow-camera-far={50}
-              shadow-camera-left={-50}
-              shadow-camera-right={50}
-              shadow-camera-top={50}
-              shadow-camera-bottom={-50}
-            />
-            
-            {/* CYBERPUNK ACCENT LIGHTS */}
-            <pointLight position={[0, 15, 0]} intensity={2} color="#ff00ff" distance={40} />
-            <pointLight position={[15, 8, 15]} intensity={1.5} color="#00ff88" distance={25} />
-            <pointLight position={[-15, 8, -15]} intensity={1.5} color="#ffff00" distance={25} />
-            <pointLight position={[0, 5, 20]} intensity={1} color="#ff0088" distance={30} />
-            <pointLight position={[0, 5, -20]} intensity={1} color="#8800ff" distance={30} />
-            
-            {/* ATMOSPHERIC EFFECTS */}
-            <fog attach="fog" args={["#0a0a2e", 30, 150]} />
-            
-            {/* FUTURISTIC ENVIRONMENT */}
-            <Environment preset="night" />
-            
-            {/* CYBERPUNK SKY */}
-            <Sky 
-              distance={450000}
-              sunPosition={[0, -0.5, 0]}
-              inclination={0.8}
-              azimuth={0.5}
-              turbidity={20}
-              rayleigh={1}
-            />
-            
-            {/* NEON STARS */}
-            <Stars radius={200} depth={50} count={2000} factor={8} saturation={1} fade speed={2} />
-            
-            {/* FLOATING NEON CLOUDS */}
-            <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
-              <Cloud position={[30, 20, -30]} speed={0.1} opacity={0.2} color="#ff00ff" />
-            </Float>
-            <Float speed={0.3} rotationIntensity={0.1} floatIntensity={0.2}>
-              <Cloud position={[-40, 15, 20]} speed={0.08} opacity={0.15} color="#00ffff" />
-            </Float>
-            
-            {/* CYBERPUNK GROUND */}
-            <SimpleGround />
-            
-            {/* FUTURISTIC STUDIOS */}
-            {studios.map((studio) => (
-              <StudioBuilding key={studio.id} studio={studio} />
-            ))}
-            
-            {/* ENHANCED CENTRAL PLAZA */}
-            <CyberpunkPlaza />
-            
-            {/* SINGLE AGENT BUILDING HUB */}
-            <AgentBuildingHub position={[60, 0, 60]} hubId="hub1" />
-            
-            {/* SINGLE TRADING MARKETPLACE */}
-            <TradingMarketplace position={[0, 5, 80]} marketId="market1" />
-            
-            {/* ATMOSPHERIC PARTICLES */}
-            <Sparkles count={500} scale={100} size={3} speed={0.5} color="#00ffff" />
-            <Sparkles count={300} scale={60} size={2} speed={0.8} color="#ff00ff" />
-            <Sparkles count={200} scale={40} size={1} speed={1.2} color="#ffff00" />
-            
-            <MovementController />
+            {currentStudio ? (
+              // GALLERY MODE - Show 3D Studio Gallery
+              <StudioGallery studio={currentStudio} />
+            ) : (
+              // CITY MODE - Show main cyberpunk city
+              <>
+                {/* CYBERPUNK LIGHTING SYSTEM 🌈 */}
+                <ambientLight intensity={0.2} color="#0a0a2e" />
+                
+                {/* MAIN NEON LIGHT */}
+                <directionalLight
+                  position={[20, 20, 10]}
+                  intensity={1.5}
+                  color="#00ffff"
+                  castShadow
+                  shadow-mapSize-width={2048}
+                  shadow-mapSize-height={2048}
+                  shadow-camera-near={0.5}
+                  shadow-camera-far={50}
+                  shadow-camera-left={-50}
+                  shadow-camera-right={50}
+                  shadow-camera-top={50}
+                  shadow-camera-bottom={-50}
+                />
+                
+                {/* CYBERPUNK ACCENT LIGHTS */}
+                <pointLight position={[0, 15, 0]} intensity={2} color="#ff00ff" distance={40} />
+                <pointLight position={[15, 8, 15]} intensity={1.5} color="#00ff88" distance={25} />
+                <pointLight position={[-15, 8, -15]} intensity={1.5} color="#ffff00" distance={25} />
+                <pointLight position={[0, 5, 20]} intensity={1} color="#ff0088" distance={30} />
+                <pointLight position={[0, 5, -20]} intensity={1} color="#8800ff" distance={30} />
+                
+                {/* ATMOSPHERIC EFFECTS */}
+                <fog attach="fog" args={["#0a0a2e", 30, 150]} />
+                
+                {/* FUTURISTIC ENVIRONMENT */}
+                <Environment preset="night" />
+                
+                {/* CYBERPUNK SKY */}
+                <Sky 
+                  distance={450000}
+                  sunPosition={[0, -0.5, 0]}
+                  inclination={0.8}
+                  azimuth={0.5}
+                  turbidity={20}
+                  rayleigh={1}
+                />
+                
+                {/* NEON STARS */}
+                <Stars radius={200} depth={50} count={2000} factor={8} saturation={1} fade speed={2} />
+                
+                {/* FLOATING NEON CLOUDS */}
+                <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
+                  <Cloud position={[30, 20, -30]} speed={0.1} opacity={0.2} color="#ff00ff" />
+                </Float>
+                <Float speed={0.3} rotationIntensity={0.1} floatIntensity={0.2}>
+                  <Cloud position={[-40, 15, 20]} speed={0.08} opacity={0.15} color="#00ffff" />
+                </Float>
+                
+                {/* CYBERPUNK GROUND */}
+                <SimpleGround />
+                
+                {/* FUTURISTIC STUDIOS */}
+                {studios.map((studio) => (
+                  <StudioBuilding key={studio.id} studio={studio} />
+                ))}
+                
+                {/* ENHANCED CENTRAL PLAZA */}
+                <CyberpunkPlaza />
+                
+                {/* SINGLE AGENT BUILDING HUB */}
+                <AgentBuildingHub position={[60, 0, 60]} hubId="hub1" />
+                
+                {/* SINGLE TRADING MARKETPLACE */}
+                <TradingMarketplace position={[0, 5, 80]} marketId="market1" />
+                
+                {/* ATMOSPHERIC PARTICLES */}
+                <Sparkles count={500} scale={100} size={3} speed={0.5} color="#00ffff" />
+                <Sparkles count={300} scale={60} size={2} speed={0.8} color="#ff00ff" />
+                <Sparkles count={200} scale={40} size={1} speed={1.2} color="#ffff00" />
+                
+                <MovementController />
+              </>
+            )}
           </Suspense>
         </Canvas>
       </KeyboardControls>
