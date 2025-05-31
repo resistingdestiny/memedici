@@ -2,9 +2,10 @@
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, useGLTF } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useCityStore } from "@/lib/stores/use-city";
+import { ScaledGLB } from "./GLBScaler";
 
 // Exchange Building using ams_s2.glb
 export function ExchangeBuilding({ position, marketId }: { position: [number, number, number]; marketId: string }) {
@@ -12,10 +13,6 @@ export function ExchangeBuilding({ position, marketId }: { position: [number, nu
   const { pinnedMarketplace, hoveredMarketplace, setPinnedMarketplace, setHoveredMarketplace } = useCityStore();
   const isPinned = pinnedMarketplace === marketId;
   const isHovered = hoveredMarketplace === marketId;
-
-  // Load the GLB model
-  const { scene } = useGLTF('/glb/ams_s2.glb');
-  const clonedScene = scene.clone();
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -55,9 +52,8 @@ export function ExchangeBuilding({ position, marketId }: { position: [number, nu
 
   return (
     <group ref={groupRef} position={position}>
-      <primitive 
-        object={clonedScene}
-        scale={2}
+      <ScaledGLB 
+        glbFile="ams_s2.glb"
         castShadow
         receiveShadow
         onClick={handleClick}
@@ -122,10 +118,6 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
   const isPinned = pinnedAgentHub === hubId;
   const isHovered = hoveredAgentHub === hubId;
 
-  // Load the GLB model
-  const { scene } = useGLTF('/glb/cyberpunk_bar.glb');
-  const clonedScene = scene.clone();
-
   useFrame((state) => {
     if (groupRef.current) {
       // Enhanced floating for interactive state
@@ -164,9 +156,8 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
 
   return (
     <group ref={groupRef} position={position}>
-      <primitive 
-        object={clonedScene}
-        scale={2}
+      <ScaledGLB 
+        glbFile="cyberpunk_bar.glb"
         castShadow
         receiveShadow
         onClick={handleClick}
@@ -222,8 +213,4 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
       )}
     </group>
   );
-}
-
-// Preload the GLB files
-useGLTF.preload('/glb/ams_s2.glb');
-useGLTF.preload('/glb/cyberpunk_bar.glb'); 
+} 

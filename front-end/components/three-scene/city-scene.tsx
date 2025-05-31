@@ -416,7 +416,7 @@ export function CityScene() {
       )}
 
         <Canvas
-          camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
+          camera={{ position: [0, 80, 120], fov: 75 }} // Much higher and further back for wide city view
           shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
           gl={{ 
             antialias: true, 
@@ -451,7 +451,7 @@ export function CityScene() {
                 {/* CITY GROUND */}
                 <CityGround />
                 
-                {/* GLB STUDIOS - SPREAD OUT WITH DIFFERENT BUILDINGS */}
+                {/* GLB STUDIOS - SPREAD OUT WITH AUTOMATIC SCALING */}
                 {studios.map((studio, index) => {
                   // Map studios to available GLB files (excluding ams_s2 and cyberpunk_bar)
                   const availableBuildings = [
@@ -477,7 +477,6 @@ export function CityScene() {
                   
                   const glbFile = availableBuildings[index % availableBuildings.length];
                   const position = studioPositions[index] || [0, 0, 0];
-                  const scale = 2 + (index % 3) * 0.5; // Vary scale between 2-3.5
                   const rotation = [0, (index * Math.PI / 4) % (Math.PI * 2), 0]; // Different rotations
                   
                   return (
@@ -486,7 +485,6 @@ export function CityScene() {
                       studio={studio} 
                       glbFile={glbFile}
                       position={position as [number, number, number]}
-                      scale={scale}
                       rotation={rotation as [number, number, number]}
                     />
                   );
@@ -522,19 +520,19 @@ export function CityScene() {
                 {/* ENHANCED CENTRAL PLAZA */}
                 <CyberpunkPlaza />
                 
-                {/* NEW GLB FACILITIES */}
+                {/* NEW GLB FACILITIES - AUTOMATIC SCALING */}
                 <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />
                 <AgentBuilderHub position={[120, 0, 0]} hubId="builder1" />
                 
-                {/* PASTEL HOUSES - RESIDENTIAL DISTRICT */}
-                <PastelHouse position={[30, 0, 30]} scale={3} rotation={[0, 0, 0]} />
-                <PastelHouse position={[-40, 0, 25]} scale={2.5} rotation={[0, Math.PI / 2, 0]} />
-                <PastelHouse position={[60, 0, -20]} scale={3.2} rotation={[0, Math.PI, 0]} />
-                <PastelHouse position={[-25, 0, -35]} scale={2.8} rotation={[0, -Math.PI / 3, 0]} />
-                <PastelHouse position={[15, 0, 65]} scale={2.6} rotation={[0, Math.PI / 4, 0]} />
-                <PastelHouse position={[-60, 0, -15]} scale={3.1} rotation={[0, Math.PI / 6, 0]} />
-                <PastelHouse position={[45, 0, 50]} scale={2.9} rotation={[0, -Math.PI / 4, 0]} />
-                <PastelHouse position={[-15, 0, 70]} scale={2.7} rotation={[0, Math.PI * 1.5, 0]} />
+                {/* PASTEL HOUSES - RESIDENTIAL DISTRICT - AUTOMATIC SCALING */}
+                <PastelHouse position={[30, 0, 30]} rotation={[0, 0, 0]} />
+                <PastelHouse position={[-40, 0, 25]} rotation={[0, Math.PI / 2, 0]} />
+                <PastelHouse position={[60, 0, -20]} rotation={[0, Math.PI, 0]} />
+                <PastelHouse position={[-25, 0, -35]} rotation={[0, -Math.PI / 3, 0]} />
+                <PastelHouse position={[15, 0, 65]} rotation={[0, Math.PI / 4, 0]} />
+                <PastelHouse position={[-60, 0, -15]} rotation={[0, Math.PI / 6, 0]} />
+                <PastelHouse position={[45, 0, 50]} rotation={[0, -Math.PI / 4, 0]} />
+                <PastelHouse position={[-15, 0, 70]} rotation={[0, Math.PI * 1.5, 0]} />
                 
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />

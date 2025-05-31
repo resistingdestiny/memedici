@@ -2,21 +2,20 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, useGLTF } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useCityStore } from "@/lib/stores/use-city";
+import { ScaledGLB } from "./GLBScaler";
 
 export function GLBStudio({ 
   studio, 
   glbFile, 
   position = [0, 0, 0], 
-  scale = 1, 
   rotation = [0, 0, 0] 
 }: {
   studio: any;
   glbFile: string;
   position?: [number, number, number];
-  scale?: number;
   rotation?: [number, number, number];
 }) {
   const groupRef = useRef<THREE.Group>(null);
@@ -25,10 +24,6 @@ export function GLBStudio({
   const isActive = activeStudio === studio.id;
   const isHovered = hoveredStudio === studio.id;
   const showInterface = isHovered || isActive;
-
-  // Load the GLB model
-  const { scene } = useGLTF(`/glb/${glbFile}`);
-  const clonedScene = scene.clone();
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -67,12 +62,11 @@ export function GLBStudio({
     <group 
       ref={groupRef} 
       position={position} 
-      scale={scale} 
       rotation={rotation}
     >
-      {/* GLB Model with interactions */}
-      <primitive 
-        object={clonedScene}
+      {/* GLB Model with automatic bounding box scaling */}
+      <ScaledGLB 
+        glbFile={glbFile}
         castShadow
         receiveShadow
         onClick={handleClick}
@@ -160,9 +154,4 @@ function getStudioDescription(studioId: string): string {
   };
   
   return descriptions[studioId] || "A unique artistic environment where creativity and technology merge to create extraordinary digital experiences.";
-}
-
-// Preload function for GLB files
-export function preloadGLBStudio(glbFile: string) {
-  useGLTF.preload(`/glb/${glbFile}`);
 } 

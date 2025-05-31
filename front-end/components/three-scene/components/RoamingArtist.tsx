@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial, useGLTF } from "@react-three/drei";
+import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
+import { ScaledGLB } from "./GLBScaler";
 
 export function RoamingArtist({ 
   artistId, 
@@ -47,29 +48,25 @@ export function RoamingArtist({
   const [animationPhase] = useState<number>(Math.random() * Math.PI * 2);
   const [baseY] = useState<number>(initialPosition[1]);
 
-  // Load the cyberpunk robot GLB
-  const { scene } = useGLTF('/glb/cyberpunk_robot.glb');
-  const clonedScene = scene.clone();
-
   useFrame((state) => {
     if (groupRef.current) {
       // Only move if not hovered
       if (!isHovered) {
-        // Update velocity occasionally
-        if (Math.random() < 0.005) {
+        // Update velocity more frequently for more noticeable movement
+        if (Math.random() < 0.01) {
           velocity.set(
-            (Math.random() - 0.5) * 2,
+            (Math.random() - 0.5) * 3,
             0,
-            (Math.random() - 0.5) * 2
+            (Math.random() - 0.5) * 3
           );
-          velocity.normalize().multiplyScalar(0.5);
+          velocity.normalize().multiplyScalar(1.0);
         }
 
         // Movement boundaries for the larger city
         const bounds = 150;
         
-        // Update position
-        position.add(velocity.clone().multiplyScalar(0.01));
+        // Update position with faster movement
+        position.add(velocity.clone().multiplyScalar(0.02));
         
         // Bounce off boundaries
         if (position.x > bounds || position.x < -bounds) {
@@ -133,10 +130,9 @@ export function RoamingArtist({
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* CYBERPUNK ROBOT GLB MODEL */}
-      <primitive 
-        object={clonedScene}
-        scale={1.5}
+      {/* CYBERPUNK ROBOT GLB MODEL with automatic scaling */}
+      <ScaledGLB 
+        glbFile="cyberpunk_robot.glb"
         castShadow
         receiveShadow
         onClick={handleClick}
@@ -334,5 +330,4 @@ export function RoamingArtist({
   );
 }
 
-// Preload the cyberpunk robot GLB
-useGLTF.preload('/glb/cyberpunk_robot.glb'); 
+// Note: Preloading is now handled by the GLBScaler component 
