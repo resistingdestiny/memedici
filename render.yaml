@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: memedici-backend
+    env: python
+    plan: starter
+    rootDir: ./backend
+    buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install --only=main
+    startCommand: poetry run uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: NOVITA_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///agents.db
+    healthCheckPath: /health
+    
+databases:
+  - name: memedici-db
+    databaseName: memedici
+    user: memedici_user 
