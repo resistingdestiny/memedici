@@ -46,6 +46,13 @@ function StudioBuilding({ studio }: { studio: any }) {
   const isHovered = hoveredStudio === studio.id;
   const isPinned = pinnedStudio === studio.id;
   
+  // Debug logging
+  useEffect(() => {
+    if (isPinned) {
+      console.log('🎨 STUDIO PINNED:', studio.name, 'Should show buttons now!');
+    }
+  }, [isPinned, studio.name]);
+  
   useFrame((state) => {
     if (meshRef.current && glowRef.current) {
       // Sick floating animation
@@ -73,9 +80,12 @@ function StudioBuilding({ studio }: { studio: any }) {
         smoothness={4}
         onClick={(e) => {
           e.stopPropagation();
+          console.log('🎯 STUDIO CLICKED!', studio.name, 'isPinned:', isPinned);
           if (isPinned) {
+            console.log('Unpinning studio:', studio.name);
             setPinnedStudio(null); // Unpin if already pinned
           } else {
+            console.log('Pinning studio:', studio.name);
             setPinnedStudio(studio.id); // Pin this studio
           }
           setActiveStudio(studio.id);
@@ -181,60 +191,92 @@ function StudioBuilding({ studio }: { studio: any }) {
             }}
           >
             <div className="font-mono text-xs opacity-70">AI_STUDIO.exe</div>
-            <div className="mb-2">{studio.name}</div>
+            <div className="mb-3">{studio.name}</div>
             
-            {/* Interactive buttons when pinned */}
-            {isPinned && (
-              <div className="space-y-2" style={{ pointerEvents: 'auto' }}>
-                <button 
-                  className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-400 text-white font-bold rounded-lg transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Entering gallery for studio:', studio.name);
+            {/* Always show buttons - but different styling for hover vs pinned */}
+            <div className="space-y-2" style={{ pointerEvents: 'auto' }}>
+              <button 
+                className={`w-full px-4 py-2 font-bold rounded-lg transition-all duration-300 cursor-pointer ${
+                  isPinned 
+                    ? 'bg-purple-500 hover:bg-purple-400 text-white transform hover:scale-105' 
+                    : 'bg-purple-500/70 hover:bg-purple-500 text-white/90 hover:text-white'
+                }`}
+                style={{ pointerEvents: 'auto' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('🎨 GALLERY BUTTON CLICKED for studio:', studio.name);
+                  if (isPinned) {
                     enterGalleryMode(studio.id);
-                  }}
-                >
-                  🎨 ENTER GALLERY
-                </button>
-                <button 
-                  className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Creating agent for studio:', studio.name);
+                  } else {
+                    // If not pinned, pin it first
+                    setPinnedStudio(studio.id);
+                  }
+                }}
+              >
+                🎨 ENTER GALLERY
+              </button>
+              
+              <button 
+                className={`w-full px-4 py-2 font-bold rounded-lg transition-all duration-300 cursor-pointer ${
+                  isPinned 
+                    ? 'bg-green-500 hover:bg-green-400 text-black transform hover:scale-105' 
+                    : 'bg-green-500/70 hover:bg-green-500 text-black/90 hover:text-black'
+                }`}
+                style={{ pointerEvents: 'auto' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('Creating agent for studio:', studio.name);
+                  if (isPinned) {
                     alert(`Creating agent for ${studio.name}!`);
                     // Add your navigation logic here
-                  }}
-                >
-                  🤖 CREATE AGENT
-                </button>
-                <button 
-                  className="w-full px-3 py-1 bg-blue-500 hover:bg-blue-400 text-white text-sm rounded transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('Viewing studio details:', studio.name);
+                  } else {
+                    // If not pinned, pin it first
+                    setPinnedStudio(studio.id);
+                  }
+                }}
+              >
+                🤖 CREATE AGENT
+              </button>
+              
+              <button 
+                className={`w-full px-3 py-1 text-sm rounded transition-all duration-300 cursor-pointer ${
+                  isPinned 
+                    ? 'bg-blue-500 hover:bg-blue-400 text-white transform hover:scale-105' 
+                    : 'bg-blue-500/70 hover:bg-blue-500 text-white/90 hover:text-white'
+                }`}
+                style={{ pointerEvents: 'auto' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('Viewing studio details:', studio.name);
+                  if (isPinned) {
                     alert(`Viewing details for ${studio.name}!`);
-                  }}
-                >
-                  📊 VIEW DETAILS
-                </button>
-                <div className="text-xs text-gray-300 text-center mt-2">
-                  Click building again to close
-                </div>
+                  } else {
+                    // If not pinned, pin it first
+                    setPinnedStudio(studio.id);
+                  }
+                }}
+              >
+                📊 VIEW DETAILS
+              </button>
+              
+              {/* Status indicator */}
+              <div className="text-xs text-center mt-2 transition-all duration-300">
+                {isPinned ? (
+                  <div className="text-yellow-300">
+                    <div>🟡 PINNED - Click buttons to interact</div>
+                    <div className="text-gray-300">Click building again to close</div>
+                  </div>
+                ) : (
+                  <div className="text-gray-300">
+                    <div>💡 Click any button to pin & interact</div>
+                    <div>or click building to pin open</div>
+                  </div>
+                )}
               </div>
-            )}
-            
-            {/* Show click instruction when not pinned */}
-            {!isPinned && (
-              <div className="text-xs text-gray-300 text-center mt-1">
-                Click to pin open
-              </div>
-            )}
+            </div>
           </div>
         </Html>
       )}
