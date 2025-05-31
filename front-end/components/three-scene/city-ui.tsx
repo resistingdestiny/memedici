@@ -227,16 +227,6 @@ export function CityUI() {
                 ))}
               </div>
             </div>
-            
-            {!activeStudio && displayStudio && (
-              <Button
-                className="w-full mt-6 bg-gradient-to-r from-purple-500 to-blue-500 border-0 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-                onClick={() => moveToStudio(displayStudio.id)}
-              >
-                <Camera className="h-4 w-4 mr-2" />
-                Visit Studio
-              </Button>
-            )}
           </CardContent>
         </Card>
       )}
