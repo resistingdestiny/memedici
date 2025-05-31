@@ -450,6 +450,12 @@ class AgentRegistry:
         """List all available agent IDs."""
         return list(self.agents.keys())
     
+    def reload_agents(self):
+        """Reload agents from database to refresh in-memory cache."""
+        self.agents.clear()
+        self._load_agents_from_db()
+        print(f"🔄 Reloaded {len(self.agents)} agents from database")
+    
     def delete_agent(self, agent_id: str) -> bool:
         """Delete an agent configuration from both memory and database."""
         session = self.SessionLocal()
