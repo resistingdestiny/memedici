@@ -41,10 +41,11 @@ const MOVEMENT_KEYS = [
   { name: 'zoomOut', keys: ['Minus', 'NumpadSubtract'] }
 ];
 
-// SICKO MODE CYBERPUNK STUDIO BUILDING 🔥
+// UNIQUE ARTIST STUDIO BUILDINGS WITH DISTINCTIVE DESIGNS 🎨
 function StudioBuilding({ studio }: { studio: any }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
+  const cubistRefs = useRef<(THREE.Mesh | null)[]>([null, null, null, null]); // For cubist fragments
   const { activeStudio, hoveredStudio, setHoveredStudio, setActiveStudio, enterGalleryMode } = useCityStore();
   
   const isActive = activeStudio === studio.id;
@@ -53,134 +54,426 @@ function StudioBuilding({ studio }: { studio: any }) {
   
   useFrame((state) => {
     if (meshRef.current && glowRef.current) {
-      // Sick floating animation
-      const offset = isActive ? Math.sin(state.clock.elapsedTime * 3) * 0.2 : 0;
-      meshRef.current.position.y = studio.position[1] + offset;
+      // Different floating animations for each artist
+      let offset = 0;
+      if (studio.id === "leonardo-studio") {
+        offset = Math.sin(state.clock.elapsedTime * 2) * 0.3; // Mechanical rhythm
+      } else if (studio.id === "raphael-studio") {
+        offset = Math.sin(state.clock.elapsedTime * 1.5) * 0.2; // Graceful flow
+      } else if (studio.id === "michelangelo-studio") {
+        offset = Math.sin(state.clock.elapsedTime * 1) * 0.4; // Powerful, slow
+      } else if (studio.id === "van-gogh-studio") {
+        offset = Math.sin(state.clock.elapsedTime * 4) * 0.5; // Energetic swirls
+      } else if (studio.id === "picasso-studio") {
+        offset = Math.sin(state.clock.elapsedTime * 3) * 0.3 + Math.cos(state.clock.elapsedTime * 2) * 0.2; // Cubist complexity
+      } else {
+        offset = Math.sin(state.clock.elapsedTime * 2.5) * 0.25; // Default
+      }
       
-      // Cyberpunk glow pulsing
-      const glow = 0.5 + Math.sin(state.clock.elapsedTime * 4) * 0.3;
+      // Apply floating to main mesh or all cubist fragments
+      if (studio.id === "picasso-studio") {
+        // Apply floating to all cubist fragments
+        cubistRefs.current.forEach((ref, i) => {
+          if (ref) {
+            ref.position.y = (i === 0 ? 2 : i === 1 ? 4 : i === 2 ? 6 : 8) + offset;
+          }
+        });
+      } else {
+      meshRef.current.position.y = studio.position[1] + offset;
+      }
+      
+      // FIXED: Consistent glow pulsing without random flickering
+      const studioSeed = studio.id.charCodeAt(0) + studio.id.charCodeAt(1); // Consistent seed per studio
+      const glow = 0.5 + Math.sin(state.clock.elapsedTime * 2 + studioSeed) * 0.3;
       glowRef.current.scale.setScalar(1 + glow * 0.1);
       
-      // Dynamic rotation for active
+      // Artist-specific rotations
       if (isActive) {
-        meshRef.current.rotation.y += 0.01;
+        if (studio.id === "picasso-studio") {
+          // Rotate all cubist fragments
+          cubistRefs.current.forEach((ref) => {
+            if (ref) {
+              ref.rotation.y += 0.02; // Fast, cubist rotation
+              ref.rotation.z += 0.01;
+            }
+          });
+        } else if (studio.id === "van-gogh-studio") {
+          meshRef.current.rotation.y += 0.015; // Swirling motion
+        } else {
+          meshRef.current.rotation.y += 0.01; // Standard rotation
+        }
       }
     }
   });
   
-  return (
-    <group position={studio.position} rotation={studio.rotation}>
-      {/* MAIN CYBERPUNK STRUCTURE */}
-      <RoundedBox
-        ref={meshRef}
-        args={[6, 8, 6]}
-        radius={0.3}
-        smoothness={4}
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveStudio(studio.id);
-        }}
+  // Get studio-specific colors and materials
+  const getStudioStyle = () => {
+    switch (studio.id) {
+      case "leonardo-studio":
+        return {
+          primaryColor: "#8B4513", // Renaissance brown
+          secondaryColor: "#DAA520", // Golden
+          emissiveColor: isActive ? "#FFD700" : isHovered ? "#FFA500" : "#CD853F",
+          shape: "octagonal", // Technical, precise
+          height: 10,
+          width: 7
+        };
+      case "raphael-studio":
+        return {
+          primaryColor: "#4169E1", // Royal blue
+          secondaryColor: "#87CEEB", // Sky blue
+          emissiveColor: isActive ? "#00BFFF" : isHovered ? "#1E90FF" : "#4169E1",
+          shape: "classical", // Elegant columns
+          height: 12,
+          width: 6
+        };
+      case "michelangelo-studio":
+        return {
+          primaryColor: "#DC143C", // Deep red
+          secondaryColor: "#B22222", // Fire brick
+          emissiveColor: isActive ? "#FF4500" : isHovered ? "#FF6347" : "#DC143C",
+          shape: "monumental", // Massive and imposing
+          height: 15,
+          width: 10
+        };
+      case "caravaggio-studio":
+        return {
+          primaryColor: "#4B0082", // Indigo (shadows)
+          secondaryColor: "#8A2BE2", // Blue violet
+          emissiveColor: isActive ? "#9370DB" : isHovered ? "#8A2BE2" : "#4B0082",
+          shape: "dramatic", // High contrast, chiaroscuro
+          height: 11,
+          width: 5
+        };
+      case "da-vinci-studio":
+        return {
+          primaryColor: "#228B22", // Forest green
+          secondaryColor: "#32CD32", // Lime green
+          emissiveColor: isActive ? "#00FF00" : isHovered ? "#32CD32" : "#228B22",
+          shape: "innovative", // Complex, multi-level
+          height: 14,
+          width: 7
+        };
+      case "picasso-studio":
+        return {
+          primaryColor: "#696969", // Dim gray
+          secondaryColor: "#2F4F4F", // Dark slate gray
+          emissiveColor: isActive ? "#FF1493" : isHovered ? "#FF69B4" : "#696969",
+          shape: "cubist", // Angular, fragmented
+          height: 8,
+          width: 12
+        };
+      case "monet-studio":
+        return {
+          primaryColor: "#98FB98", // Pale green
+          secondaryColor: "#90EE90", // Light green
+          emissiveColor: isActive ? "#00FF7F" : isHovered ? "#7FFF00" : "#98FB98",
+          shape: "organic", // Flowing, natural
+          height: 9,
+          width: 8
+        };
+      case "van-gogh-studio":
+        return {
+          primaryColor: "#FFD700", // Gold
+          secondaryColor: "#FFA500", // Orange
+          emissiveColor: isActive ? "#FFFF00" : isHovered ? "#FFD700" : "#FFA500",
+          shape: "swirling", // Dynamic, energetic
+          height: 11,
+          width: 9
+        };
+      default:
+        return {
+          primaryColor: "#0088ff",
+          secondaryColor: "#00ffff",
+          emissiveColor: isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff",
+          shape: "default",
+          height: 8,
+          width: 6
+        };
+    }
+  };
+
+  const style = getStudioStyle();
+
+  const renderUniqueStructure = () => {
+    switch (style.shape) {
+      case "octagonal": // Leonardo - Technical precision
+        return (
+          <>
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
         onPointerEnter={() => setHoveredStudio(studio.id)}
-        onPointerLeave={() => setHoveredStudio(null)}
-        castShadow
-        receiveShadow
-      >
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <cylinderGeometry args={[style.width/2, style.width/2, style.height, 8]} />
         <MeshTransmissionMaterial
-          backside
-          samples={16}
-          resolution={512}
-          transmission={0.8}
-          roughness={0.1}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          thickness={0.5}
-          chromaticAberration={0.5}
-          anisotropy={0.3}
-          distortion={0.2}
-          distortionScale={0.1}
-          temporalDistortion={0.1}
-          color={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
-        />
-      </RoundedBox>
+                backside samples={16} resolution={512} transmission={0.8}
+                roughness={0.1} clearcoat={1} clearcoatRoughness={0.1}
+                thickness={0.5} chromaticAberration={0.5}
+                distortionScale={0.1} temporalDistortion={0.1}
+                color={style.primaryColor}
+              />
+            </mesh>
+            {/* Technical gear elements */}
+            {[0, 1, 2].map((i) => (
+              <mesh key={i} position={[0, 2 + i * 3, 0]} rotation={[0, i * Math.PI/4, 0]}>
+                <torusGeometry args={[style.width/2 + 0.5, 0.2, 8, 16]} />
+                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
+              </mesh>
+            ))}
+          </>
+        );
 
-      {/* NEON GLOW OUTLINE */}
+      case "classical": // Raphael - Elegant columns
+        return (
+          <>
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <cylinderGeometry args={[style.width/2, style.width/2 + 1, style.height, 16]} />
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
+            </mesh>
+            {/* Classical columns */}
+            {[-2, 2].map((x) => [-2, 2].map((z) => (
+              <mesh key={`${x}-${z}`} position={[x, style.height/2, z]} castShadow>
+                <cylinderGeometry args={[0.3, 0.3, style.height]} />
+                <meshStandardMaterial color="#ffffff" emissive={style.secondaryColor} emissiveIntensity={0.8} />
+              </mesh>
+            )))}
+          </>
+        );
+
+      case "monumental": // Michelangelo - Massive blocks
+        return (
+          <>
+            <RoundedBox ref={meshRef} args={[style.width, style.height, style.width]} radius={0.5} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.7} roughness={0.3} metalness={0.7} />
+      </RoundedBox>
+            {/* Massive supporting pillars */}
+            {[[-3, 3], [3, 3], [-3, -3], [3, -3]].map(([x, z], i) => (
+              <RoundedBox key={i} args={[1.5, style.height + 2, 1.5]} radius={0.2} position={[x, 1, z]} castShadow>
+                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
+              </RoundedBox>
+            ))}
+          </>
+        );
+
+      case "dramatic": // Caravaggio - High contrast
+        return (
+          <>
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <coneGeometry args={[style.width/2, style.height, 6]} />
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={1.2} />
+            </mesh>
+            {/* Dramatic light beams */}
+            {[0, 1, 2].map((i) => (
+              <mesh key={i} position={[0, 2 + i * 3, 0]} rotation={[0, i * Math.PI/3, 0]}>
+                <coneGeometry args={[0.5, 2, 6]} />
+                <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} transparent opacity={0.7} />
+              </mesh>
+            ))}
+          </>
+        );
+
+      case "innovative": // Da Vinci - Multi-level complexity
+        return (
+          <>
+            {/* Main tower */}
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <cylinderGeometry args={[style.width/2, style.width/3, style.height, 12]} />
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.6} />
+            </mesh>
+            {/* Flying machine elements */}
+            {[3, 6, 9].map((y) => (
+              <group key={y} position={[0, y, 0]}>
+                <mesh rotation={[0, y * 0.3, 0]}>
+                  <torusGeometry args={[2, 0.3, 8, 16]} />
+                  <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
+                </mesh>
+                {/* Spinning elements */}
+                <mesh rotation={[Math.PI/2, 0, y * 0.2]}>
+                  <cylinderGeometry args={[0.1, 0.1, 4]} />
+                  <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} />
+                </mesh>
+              </group>
+            ))}
+          </>
+        );
+
+      case "cubist": // Picasso - Angular fragments
+        return (
+          <>
+            {/* Multiple angular pieces */}
+            {[
+              { pos: [0, 2, 0] as [number, number, number], rot: [0, 0, 0] as [number, number, number], scale: [style.width, 4, 4] as [number, number, number] },
+              { pos: [2, 4, 2] as [number, number, number], rot: [0, Math.PI/4, 0] as [number, number, number], scale: [4, 6, 3] as [number, number, number] },
+              { pos: [-2, 6, -2] as [number, number, number], rot: [0, -Math.PI/4, 0] as [number, number, number], scale: [3, 4, 5] as [number, number, number] },
+              { pos: [1, 8, -1] as [number, number, number], rot: [0, Math.PI/3, 0] as [number, number, number], scale: [2, 3, 3] as [number, number, number] }
+            ].map((fragment, i) => (
       <RoundedBox
-        ref={glowRef}
-        args={[6.2, 8.2, 6.2]}
-        radius={0.3}
-        smoothness={4}
-      >
+                key={i} 
+                ref={(ref) => {
+                  if (i === 0) meshRef.current = ref; // First fragment also goes to meshRef
+                  cubistRefs.current[i] = ref; // All fragments go to cubistRefs
+                }}
+                args={fragment.scale} 
+                radius={0.2} 
+                position={fragment.pos} 
+                rotation={fragment.rot}
+                castShadow receiveShadow
+                onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+                onPointerEnter={() => setHoveredStudio(studio.id)}
+                onPointerLeave={() => setHoveredStudio(null)}>
         <meshStandardMaterial
-          color={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
-          emissive={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
-          emissiveIntensity={1.5}
-          transparent
-          opacity={0.3}
+                  color={i % 2 === 0 ? style.primaryColor : style.secondaryColor} 
+                  emissive={style.emissiveColor} 
+                  emissiveIntensity={0.8} 
         />
       </RoundedBox>
+            ))}
+          </>
+        );
 
-      {/* HOLOGRAPHIC TOP */}
-      <mesh position={[0, 4.5, 0]} castShadow>
-        <cylinderGeometry args={[3.5, 3.5, 0.5, 8]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          emissive={isActive ? "#ffff00" : "#00ffff"}
-          emissiveIntensity={2}
-          metalness={1}
-          roughness={0}
-        />
+      case "organic": // Monet - Flowing natural forms
+        return (
+          <>
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <sphereGeometry args={[style.width/2, 16, 12]} />
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
       </mesh>
+            {/* Water lily pads */}
+            {[1, 2, 3].map((i) => (
+              <mesh key={i} position={[Math.cos(i) * 3, 1 + i, Math.sin(i) * 3]} rotation={[-Math.PI/2, 0, 0]}>
+                <ringGeometry args={[0.5, 2, 8]} />
+                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} transparent opacity={0.8} />
+              </mesh>
+            ))}
+          </>
+        );
 
-      {/* CYBERPUNK PILLARS */}
-      {[-2.5, 2.5].map((x, i) => (
-        <Float key={i} speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
-          <mesh position={[x, 2, 3.2]} castShadow>
-            <cylinderGeometry args={[0.15, 0.15, 8]} />
-            <meshStandardMaterial
-              color="#ffffff"
-              emissive="#00ffff"
-              emissiveIntensity={1.2}
-              metalness={1}
-              roughness={0}
-            />
+      case "swirling": // Van Gogh - Dynamic energy
+        return (
+          <>
+            <mesh ref={meshRef} castShadow receiveShadow
+              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+              onPointerEnter={() => setHoveredStudio(studio.id)}
+              onPointerLeave={() => setHoveredStudio(null)}>
+              <cylinderGeometry args={[style.width/2, style.width/3, style.height, 8]} />
+              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.8} />
           </mesh>
-        </Float>
-      ))}
+            {/* Swirling energy ribbons */}
+            {[0, 1, 2, 3].map((i) => (
+              <mesh key={i} position={[
+                Math.cos(i * Math.PI/2) * 3, 
+                2 + i * 2, 
+                Math.sin(i * Math.PI/2) * 3
+              ]} rotation={[0, i * Math.PI/2, 0]}>
+                <torusGeometry args={[1.5, 0.3, 6, 12]} />
+                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1.5} />
+              </mesh>
+            ))}
+          </>
+        );
 
-      {/* ENERGY RINGS */}
-      {[1, 3, 5].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
-          <torusGeometry args={[3.5, 0.1, 8, 32]} />
+      default:
+        return (
+          <RoundedBox ref={meshRef} args={[style.width, style.height, style.width]} radius={0.3} castShadow receiveShadow
+            onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
+            onPointerEnter={() => setHoveredStudio(studio.id)}
+            onPointerLeave={() => setHoveredStudio(null)}>
+            <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
+          </RoundedBox>
+        );
+    }
+  };
+  
+  return (
+    <group position={studio.position} rotation={studio.rotation} scale={studio.scale}>
+      {renderUniqueStructure()}
+
+      {/* ARTIST-SPECIFIC NEON GLOW OUTLINE */}
+      <mesh ref={glowRef} position={[0, style.height/2, 0]}>
+        <sphereGeometry args={[style.width/2 + 2, 16, 16]} />
           <meshStandardMaterial
-            color="#ff00ff"
-            emissive="#ff00ff"
-            emissiveIntensity={2}
+          color={style.emissiveColor}
+          emissive={style.emissiveColor}
+          emissiveIntensity={0.8} // Reduced from 1.5 to prevent harsh flickering
             transparent
-            opacity={0.6}
+          opacity={0.15} // Reduced opacity for subtlety
           />
         </mesh>
-      ))}
 
       {/* CYBERPUNK AI AGENT */}
-      <CyberpunkAgent agentId={studio.agentId} position={[0, 1, 2]} isActive={isActive} />
+      <CyberpunkAgent agentId={studio.agentId} position={[0, 1, style.width/2 + 1]} isActive={isActive} />
       
-      {/* HOLOGRAPHIC ARTWORKS */}
-      {studio.recentArtworks.map((artwork: any, index: number) => (
-        <Float key={artwork.id} speed={2 + index * 0.5} rotationIntensity={0.1}>
-          <HolographicArt
-            artwork={artwork}
-            position={[artwork.position[0], artwork.position[1] + 2, artwork.position[2] - 2]}
-            isActive={isActive}
-          />
-        </Float>
-      ))}
-      
-      {/* INSANE PARTICLE EFFECTS */}
+      {/* ARTIST-SPECIFIC PARTICLE EFFECTS */}
       {isActive && (
         <>
-          <Sparkles count={200} scale={15} size={6} speed={2} color="#00ff88" />
-          <Sparkles count={100} scale={8} size={3} speed={1.5} color="#ffff00" />
+          <Sparkles count={200} scale={style.width + 5} size={6} speed={2} color={style.emissiveColor} />
+          <Sparkles count={100} scale={style.width + 2} size={3} speed={1.5} color={style.secondaryColor} />
         </>
+      )}
+
+      {/* INTERACTIVE UI PANEL */}
+      {showInterface && (
+        <Html position={[0, style.height + 3, 0]} center>
+          <div className={`text-center transition-all duration-500 backdrop-blur-xl rounded-2xl shadow-2xl p-6 max-w-sm ${
+            isActive 
+              ? 'bg-black/95 border-2 shadow-lg scale-110' 
+              : 'bg-black/80 border border-opacity-50 scale-100'
+          }`} style={{ 
+            borderColor: style.emissiveColor,
+            boxShadow: `0 0 30px ${style.emissiveColor}50`,
+            color: style.emissiveColor
+          }}>
+            <div className="text-xs opacity-70 font-mono mb-2">NEURAL_STUDIO.exe</div>
+            <div className="text-2xl font-black mb-3">{studio.name}</div>
+            <div className="text-sm opacity-80 mb-4">Agent: {studio.agentId.toUpperCase()}</div>
+            
+            {isActive && (
+              <div className="space-y-3" style={{ pointerEvents: 'auto' }}>
+              <button 
+                  className="w-full px-4 py-2 font-bold rounded-lg transition-colors cursor-pointer shadow-lg"
+                  style={{ 
+                    backgroundColor: style.emissiveColor,
+                    color: '#000000'
+                  }}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.opacity = '0.8'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.opacity = '1'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                    console.log('Entering gallery for:', studio.id);
+                    enterGalleryMode(studio.id);
+                  }}
+                >
+                  🏛️ Visit Studio
+              </button>
+                <div className="text-xs opacity-60">
+                  Experience {studio.name} in VR
+                  </div>
+                  </div>
+                )}
+            
+            {!isActive && (
+              <div className="text-xs opacity-60">
+                Click to explore this studio
+              </div>
+            )}
+          </div>
+        </Html>
       )}
     </group>
   );
@@ -231,7 +524,7 @@ function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; posi
         <meshStandardMaterial 
           color="#ffffff"
           emissive={isActive ? "#00ff88" : "#0088ff"}
-          emissiveIntensity={1.5}
+          emissiveIntensity={0.8} // Reduced from 1.5
           metalness={1}
           roughness={0}
         />
@@ -244,7 +537,7 @@ function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; posi
           <meshStandardMaterial 
             color="#ff0000"
             emissive="#ff0000"
-            emissiveIntensity={3}
+            emissiveIntensity={2} // Reduced from 3
           />
         </mesh>
       ))}
@@ -255,7 +548,7 @@ function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; posi
         <meshStandardMaterial
           color="#ffff00"
           emissive="#ffff00"
-          emissiveIntensity={2}
+          emissiveIntensity={1.2} // Reduced from 2
           transparent
           opacity={0.8}
         />
@@ -268,7 +561,7 @@ function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; posi
           <meshStandardMaterial
             color="#00ffff"
             emissive="#00ffff"
-            emissiveIntensity={1}
+            emissiveIntensity={0.6} // Reduced from 1
             transparent
             opacity={0.3}
           />
@@ -1254,97 +1547,267 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
 // FLOATING ARTWORK WITH HOVER LABELS 🖼️
 function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: number; studio: any }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
+  
+  useEffect(() => {
+    console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image}`);
+    setIsLoading(true);
+    setHasError(false);
+    
+    const loader = new THREE.TextureLoader();
+    
+    // Special handling for NightCafe artwork
+    if (artwork.title.includes('NIGHTCAFE')) {
+      console.log('🌟 Loading YOUR NightCafe artwork via proxy...');
+    }
+    
+    loader.load(
+      artwork.image,
+      (loadedTexture) => {
+        console.log(`✅ Successfully loaded: ${artwork.title}`);
+        if (artwork.title.includes('NIGHTCAFE')) {
+          console.log('🎉 YOUR NIGHTCAFE ARTWORK LOADED SUCCESSFULLY!');
+        }
+        // Optimize texture settings for better display
+        loadedTexture.generateMipmaps = false;
+        loadedTexture.minFilter = THREE.LinearFilter;
+        loadedTexture.magFilter = THREE.LinearFilter;
+        loadedTexture.flipY = true; // Change to true to fix upside-down orientation
+        setTexture(loadedTexture);
+        setIsLoading(false);
+        setHasError(false);
+      },
+      (progress) => {
+        console.log(`⏳ Loading progress for ${artwork.title}:`, progress);
+        if (artwork.title.includes('NIGHTCAFE')) {
+          console.log('⏳ NightCafe loading progress:', progress);
+        }
+      },
+      (error) => {
+        console.error(`❌ Failed to load ${artwork.title}:`, error);
+        if (artwork.title.includes('NIGHTCAFE')) {
+          console.error('💥 NIGHTCAFE LOADING FAILED:', error);
+          console.error('🔍 Attempted URL:', artwork.image);
+        }
+        setHasError(true);
+        // Create a vibrant fallback texture with better visibility
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Create a bright, cyberpunk-style fallback
+          const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+          gradient.addColorStop(0, '#ff0080');
+          gradient.addColorStop(0.3, '#8000ff');
+          gradient.addColorStop(0.6, '#0080ff');
+          gradient.addColorStop(1, '#00ff80');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, 512, 512);
+          
+          // Add bright pattern for visibility
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          for (let i = 0; i < 100; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 10, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          // Add text
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          ctx.font = 'bold 48px Arial';
+          ctx.textAlign = 'center';
+          ctx.strokeText('NIGHTCAFE', 256, 200);
+          ctx.fillText('NIGHTCAFE', 256, 200);
+          ctx.strokeText('ARTWORK', 256, 260);
+          ctx.fillText('ARTWORK', 256, 260);
+          
+          ctx.font = 'bold 24px Arial';
+          ctx.strokeText('Loading Failed', 256, 320);
+          ctx.fillText('Loading Failed', 256, 320);
+        }
+        const fallbackTexture = new THREE.CanvasTexture(canvas);
+        fallbackTexture.needsUpdate = true;
+        setTexture(fallbackTexture);
+        setIsLoading(false);
+      }
+    );
+  }, [artwork.image, artwork.title]);
   
   return (
-    <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
-      <group position={artwork.position} rotation={artwork.rotation}>
-        {/* HOLOGRAPHIC FRAME */}
-        <RoundedBox 
-          args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} 
-          radius={0.1} 
-          castShadow
+    <>
+      <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
+        <group 
+          position={artwork.position} 
+          rotation={artwork.rotation}
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log(`🖼️ Clicked artwork: ${artwork.title}`);
+            setShowLightbox(true);
+          }}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
         >
-          <meshStandardMaterial 
+          {/* HOLOGRAPHIC FRAME - No hover color changes */}
+          <RoundedBox 
+            args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} 
+            radius={0.1} 
+            castShadow
+          >
+            <meshStandardMaterial 
+              color="#ffffff"
+              emissive="#00ffff"
+              emissiveIntensity={1.5}
+              metalness={1}
+              roughness={0}
+              transparent
+              opacity={0.9}
+            />
+          </RoundedBox>
+          
+          {/* GLOWING BORDER - Consistent glow */}
+          <RoundedBox 
+            args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
+            radius={0.12} 
+            position={[0, 0, 0.1]}
+          >
+            <meshStandardMaterial
+              color="#ff00ff"
+              emissive="#ff00ff"
+              emissiveIntensity={2}
+              transparent
+              opacity={0.7}
+            />
+          </RoundedBox>
+          
+          {/* ARTWORK IMAGE - No brightness changes on hover */}
+          <mesh position={[0, 0, 0.11]}>
+            <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
+            <meshBasicMaterial 
+              map={texture}
+              transparent={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          
+          {/* INDIVIDUAL ARTWORK SPOTLIGHTS - Consistent lighting */}
+          <spotLight
+            position={[0, 8, 5]}
+            target-position={artwork.position}
+            angle={0.8}
+            penumbra={0.2}
+            intensity={5}
             color="#ffffff"
-            emissive="#00ffff"
-            emissiveIntensity={isHovered ? 2 : 1.5}
-            metalness={1}
-            roughness={0}
-            transparent
-            opacity={0.9}
+            castShadow
           />
-        </RoundedBox>
-        
-        {/* GLOWING BORDER */}
-        <RoundedBox 
-          args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
-          radius={0.12} 
-          position={[0, 0, 0.1]}
-        >
-          <meshStandardMaterial
-            color="#ff00ff"
-            emissive="#ff00ff"
-            emissiveIntensity={isHovered ? 3 : 2}
-            transparent
-            opacity={isHovered ? 0.9 : 0.7}
+          
+          {/* Additional front lighting */}
+          <pointLight
+            position={[0, 0, 2]}
+            intensity={3}
+            color="#ffffff"
+            distance={10}
           />
-        </RoundedBox>
-        
-        {/* ARTWORK IMAGE */}
-        <mesh position={[0, 0, 0.11]}>
-          <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
-          <meshStandardMaterial 
-            map={new THREE.TextureLoader().load(artwork.image)}
-            emissive="#ffffff"
-            emissiveIntensity={0.3}
+          
+          {/* INDIVIDUAL PARTICLE AURA - Consistent particles */}
+          <Sparkles 
+            count={30} 
+            scale={artwork.scale[0] + 2} 
+            size={1} 
+            speed={1} 
+            color="#00ffff" 
           />
-        </mesh>
-        
-        {/* HOLOGRAPHIC INTERFERENCE PATTERN */}
-        <mesh position={[0, 0, 0.12]}>
-          <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
-          <meshStandardMaterial 
-            color="#00ffff"
-            transparent 
-            opacity={0.1}
-          />
-        </mesh>
-        
-        {/* INDIVIDUAL ARTWORK SPOTLIGHTS */}
-        <spotLight
-          position={[0, 5, 3]}
-          target-position={artwork.position}
-          angle={0.5}
-          penumbra={0.5}
-          intensity={isHovered ? 3 : 2}
-          color="#ffffff"
-          castShadow
-        />
-        
-        {/* FLOATING ARTWORK INFO - Only show on hover */}
-        {isHovered && (
-          <Html position={[0, -(artwork.scale[1]/2 + 1), 0]} center>
-            <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-center border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px] animate-in fade-in duration-300">
-              <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
-              <div className="font-bold text-lg">{artwork.title}</div>
-              <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
-              <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
+        </group>
+      </Float>
+
+      {/* FLOATING ARTWORK INFO - Positioned FAR TO THE SIDE to not cover art */}
+      {isHovered && (
+        <Html position={[
+          artwork.position[0] > 10 
+            ? artwork.position[0] - (artwork.scale[0]/2 + 5) // Left side for far-right artworks
+            : artwork.position[0] + (artwork.scale[0]/2 + 5), // Right side for other artworks
+          artwork.position[1], // Same height as the artwork center
+          artwork.position[2]
+        ]} center>
+          <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-left border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px] animate-in fade-in duration-300 pointer-events-none">
+            <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
+            <div className="font-bold text-lg">{artwork.title}</div>
+            <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
+            <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
+            <div className="text-xs text-yellow-400 mt-1">🖱️ Click to view full-size</div>
+            {isLoading && <div className="text-xs text-yellow-400 mt-1">Loading...</div>}
+            {hasError && <div className="text-xs text-red-400 mt-1">Failed to load image</div>}
+            {!isLoading && !hasError && <div className="text-xs text-green-400 mt-1">Loaded successfully!</div>}
+          </div>
+        </Html>
+      )}
+
+      {/* LIGHTBOX MODAL for full-size viewing */}
+      {showLightbox && (
+        <Html fullscreen>
+          <div 
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 animate-in fade-in duration-300"
+            onClick={() => setShowLightbox(false)}
+          >
+            {/* Close button - positioned at very top */}
+            <button 
+              onClick={() => setShowLightbox(false)}
+              className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors z-10 bg-black/70 rounded-full p-3 border border-red-400/50 hover:border-red-400"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* Container for image and info side by side */}
+            <div className="w-full max-w-[95vw] flex items-center justify-center gap-8">
+              {/* Full-size image - Left side */}
+              <div className="flex-shrink-0">
+                <img 
+                  src={artwork.image} 
+                  alt={artwork.title}
+                  className="max-w-[60vw] max-h-[80vh] object-contain rounded-lg shadow-2xl border-4 border-cyan-400 shadow-cyan-400/50"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+              
+              {/* Image info - Right side */}
+              <div className="flex-shrink-0 max-w-[30vw] text-left bg-black/90 backdrop-blur-xl rounded-2xl px-8 py-8 border-2 border-cyan-400/70 shadow-lg shadow-cyan-400/30">
+                <h2 className="text-4xl font-bold text-white mb-4">{artwork.title}</h2>
+                <p className="text-cyan-400 text-xl mb-3">Studio: {studio.name}</p>
+                <p className="text-purple-400 text-lg mt-4 font-medium">Neural Art Exhibition - MEDICI CITY</p>
+                {artwork.title.includes('NIGHTCAFE') && (
+                  <p className="text-yellow-400 text-xl mt-4 font-bold">🎨 Your Personal NightCafe Creation</p>
+                )}
+                
+                {/* Gallery link button */}
+                <div className="mt-8 space-y-4">
+                  <button 
+                    className="w-full px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors cursor-pointer shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowLightbox(false);
+                      // Gallery is already open, just close lightbox
+                    }}
+                  >
+                    🏛️ Back to Gallery
+                  </button>
+                  
+                  <div className="text-gray-400 text-sm text-center">
+                    Click outside to close
+                  </div>
+                </div>
+              </div>
             </div>
-          </Html>
-        )}
-        
-        {/* INDIVIDUAL PARTICLE AURA - More intense when hovered */}
-        <Sparkles 
-          count={isHovered ? 50 : 30} 
-          scale={artwork.scale[0] + 2} 
-          size={isHovered ? 2 : 1} 
-          speed={isHovered ? 2 : 1} 
-          color="#00ffff" 
-        />
-      </group>
-    </Float>
+          </div>
+        </Html>
+      )}
+    </>
   );
 }
 
@@ -1358,67 +1821,67 @@ function StudioGallery({ studio }: { studio: any }) {
   const realArtworks = [
     {
       id: "art-1",
-      title: "Neural Dreams",
-      image: "https://creator.nightcafe.studio/jobs/84lwOA5gRcR8SMq6m8ZD/84lwOA5gRcR8SMq6m8ZD--1--ljlvd.jpg",
-      position: [0, 3, -8] as [number, number, number],
+      title: "🎨 YOUR NIGHTCAFE CREATION",
+      image: "/api/proxy-image?url=" + encodeURIComponent("https://creator.nightcafe.studio/jobs/84lwOA5gRcR8SMq6m8ZD/84lwOA5gRcR8SMq6m8ZD--1--ljlvd.jpg"),
+      position: [0, 6, -12] as [number, number, number], // Much further back and higher
       rotation: [0, 0, 0] as [number, number, number],
-      scale: [3, 2.2, 0.1] as [number, number, number]
+      scale: [6, 4.5, 0.1] as [number, number, number] // Made it even larger as centerpiece
     },
     {
       id: "art-2", 
       title: "Digital Renaissance",
       image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [8, 5, -4] as [number, number, number],
+      position: [15, 4, -8] as [number, number, number], // Much further right
       rotation: [0, -Math.PI/4, 0] as [number, number, number],
-      scale: [2.5, 3, 0.1] as [number, number, number]
+      scale: [3, 3.5, 0.1] as [number, number, number]
     },
     {
       id: "art-3",
       title: "Cyber Baroque",
       image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      position: [-8, 2, -4] as [number, number, number],
+      position: [-15, 3, -8] as [number, number, number], // Much further left
       rotation: [0, Math.PI/4, 0] as [number, number, number],
-      scale: [3.5, 2.5, 0.1] as [number, number, number]
+      scale: [3.5, 3, 0.1] as [number, number, number]
     },
     {
       id: "art-4",
       title: "AI Abstraction",
       image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
-      position: [5, 1, 8] as [number, number, number],
+      position: [12, 2, 15] as [number, number, number], // Way back behind you
       rotation: [0, Math.PI, 0] as [number, number, number],
-      scale: [2.8, 3.2, 0.1] as [number, number, number]
+      scale: [3.2, 3.8, 0.1] as [number, number, number]
     },
     {
       id: "art-5",
       title: "Quantum Canvas",
       image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [-5, 6, 6] as [number, number, number],
+      position: [-12, 8, 12] as [number, number, number], // High and far back
       rotation: [0, -Math.PI/2, 0] as [number, number, number],
-      scale: [4, 2, 0.1] as [number, number, number]
+      scale: [4.5, 2.5, 0.1] as [number, number, number]
     },
     {
       id: "art-6",
       title: "Holographic Memory",
       image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
-      position: [0, 8, 4] as [number, number, number],
+      position: [0, 12, 8] as [number, number, number], // High up overhead
       rotation: [Math.PI/6, 0, 0] as [number, number, number],
-      scale: [3, 2.5, 0.1] as [number, number, number]
+      scale: [3.5, 3, 0.1] as [number, number, number]
     },
     {
       id: "art-7",
       title: "Virtual Visions",
       image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      position: [10, 3, 0] as [number, number, number],
+      position: [20, 5, 0] as [number, number, number], // Far right side
       rotation: [0, -Math.PI/2, Math.PI/12] as [number, number, number],
-      scale: [2.5, 3.5, 0.1] as [number, number, number]
+      scale: [3, 4, 0.1] as [number, number, number]
     },
     {
       id: "art-8",
       title: "Data Streams",
       image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
-      position: [-10, 4, 2] as [number, number, number],
+      position: [-20, 6, 5] as [number, number, number], // Far left side
       rotation: [0, Math.PI/2, -Math.PI/12] as [number, number, number],
-      scale: [3.2, 2.8, 0.1] as [number, number, number]
+      scale: [3.8, 3.2, 0.1] as [number, number, number]
     }
   ];
   
@@ -1433,6 +1896,36 @@ function StudioGallery({ studio }: { studio: any }) {
       particleRef.current.rotation.x += 0.0005;
     }
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🎨 Gallery loaded for studio:', studio.name);
+    console.log('🖼️ Artworks to display:', realArtworks.length);
+    realArtworks.forEach((art, i) => {
+      console.log(`Art ${i + 1}: ${art.title} - ${art.image}`);
+    });
+    
+    // Test the NightCafe URL specifically
+    const testNightCafeUrl = async () => {
+      try {
+        console.log('🔍 Testing NightCafe URL via our proxy...');
+        const proxyUrl = realArtworks[0].image; // This is now our proxy URL
+        const response = await fetch(proxyUrl, { 
+          method: 'HEAD'
+        });
+        console.log('✅ NightCafe proxy test result:', response.status, response.statusText);
+        if (response.ok) {
+          console.log('🎉 NightCafe image should load successfully!');
+        } else {
+          console.warn('⚠️ NightCafe proxy returned:', response.status);
+        }
+      } catch (error) {
+        console.error('❌ NightCafe proxy test failed:', error);
+      }
+    };
+    
+    testNightCafeUrl();
+  }, [studio.name]);
 
   return (
     <>
@@ -1467,7 +1960,7 @@ function StudioGallery({ studio }: { studio: any }) {
           opacity={0.8}
         />
       </mesh>
-      
+
       {/* NEON GRID FLOOR OVERLAY */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, 0]}>
         <planeGeometry args={[60, 60]} />
@@ -1479,7 +1972,7 @@ function StudioGallery({ studio }: { studio: any }) {
           opacity={0.2}
           wireframe
         />
-      </mesh>
+        </mesh>
 
       {/* FLOATING ENERGY CEILING */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 25, 0]}>
@@ -1542,7 +2035,7 @@ function StudioGallery({ studio }: { studio: any }) {
               />
             </mesh>
           ))}
-        </group>
+            </group>
       </Float>
 
       {/* MASSIVE PARTICLE SYSTEMS */}
@@ -1567,8 +2060,8 @@ function StudioGallery({ studio }: { studio: any }) {
                 transparent
                 opacity={0.8}
               />
-            </mesh>
-          </Float>
+        </mesh>
+      </Float>
         ))}
       </group>
 
@@ -1586,16 +2079,16 @@ function StudioGallery({ studio }: { studio: any }) {
             />
           </mesh>
           <Html position={[0, 0, 0]} center>
-            <button 
+        <button 
               className="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-500/50 border-2 border-red-500 backdrop-blur-xl"
-              onClick={(e) => {
-                e.stopPropagation();
-                exitGalleryMode();
-              }}
-            >
-              🚪 EXIT GALLERY
-            </button>
-          </Html>
+          onClick={(e) => {
+            e.stopPropagation();
+            exitGalleryMode();
+          }}
+        >
+          🚪 EXIT GALLERY
+        </button>
+      </Html>
           <Sparkles count={100} scale={8} size={3} speed={2} color="#ff0000" />
         </group>
       </Float>
@@ -1607,11 +2100,11 @@ function StudioGallery({ studio }: { studio: any }) {
         enableRotate={true}
         enableDamping={true}
         dampingFactor={0.05}
-        maxDistance={40}
-        minDistance={5}
-        target={[0, 8, 0]}
+        maxDistance={60} // Increased for the spread-out layout
+        minDistance={3}
+        target={[0, 6, -2]} // Better target for the new layout
         maxPolarAngle={Math.PI / 2.2}
-        minPolarAngle={Math.PI / 6}
+        minPolarAngle={Math.PI / 8} // Allow looking more upward
       />
     </>
   );
@@ -1720,6 +2213,7 @@ export function CityScene() {
                 <div className="text-green-400 font-bold">Mouse Wheel: Zoom</div>
                 <div className="text-green-400">+/- Keys: Keyboard Zoom</div>
                 <div className="text-pink-400 font-bold">Click Buildings to Interact!</div>
+                <div className="text-orange-400 text-xs mt-2">Studios are spread across the vast city!</div>
               </div>
             </div>
           )}
@@ -1728,7 +2222,7 @@ export function CityScene() {
 
       <KeyboardControls map={MOVEMENT_KEYS}>
         <Canvas
-          camera={{ position: [8, 8, 8], fov: 75 }}
+          camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
           shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
           gl={{ 
             antialias: true, 
@@ -1745,34 +2239,37 @@ export function CityScene() {
             ) : (
               // CITY MODE - Show main cyberpunk city
               <>
-                {/* CYBERPUNK LIGHTING SYSTEM 🌈 */}
-                <ambientLight intensity={0.2} color="#0a0a2e" />
+                {/* ENHANCED LIGHTING SYSTEM FOR LARGER CITY 🌈 */}
+                <ambientLight intensity={0.3} color="#0a0a2e" />
                 
-                {/* MAIN NEON LIGHT */}
+                {/* MAIN NEON LIGHT - Higher and more intense for spread-out studios */}
                 <directionalLight
-                  position={[20, 20, 10]}
-                  intensity={1.5}
+                  position={[50, 50, 20]}
+                  intensity={2}
                   color="#00ffff"
                   castShadow
-                  shadow-mapSize-width={2048}
-                  shadow-mapSize-height={2048}
+                  shadow-mapSize-width={4096} // Higher quality shadows for larger area
+                  shadow-mapSize-height={4096}
                   shadow-camera-near={0.5}
-                  shadow-camera-far={50}
-                  shadow-camera-left={-50}
-                  shadow-camera-right={50}
-                  shadow-camera-top={50}
-                  shadow-camera-bottom={-50}
+                  shadow-camera-far={200} // Much larger shadow distance
+                  shadow-camera-left={-100} // Wider shadow coverage
+                  shadow-camera-right={100}
+                  shadow-camera-top={100}
+                  shadow-camera-bottom={-100}
                 />
                 
-                {/* CYBERPUNK ACCENT LIGHTS */}
-                <pointLight position={[0, 15, 0]} intensity={2} color="#ff00ff" distance={40} />
-                <pointLight position={[15, 8, 15]} intensity={1.5} color="#00ff88" distance={25} />
-                <pointLight position={[-15, 8, -15]} intensity={1.5} color="#ffff00" distance={25} />
-                <pointLight position={[0, 5, 20]} intensity={1} color="#ff0088" distance={30} />
-                <pointLight position={[0, 5, -20]} intensity={1} color="#8800ff" distance={30} />
+                {/* REGIONAL LIGHTING FOR DIFFERENT STUDIO AREAS */}
+                <pointLight position={[-40, 20, -30]} intensity={3} color="#FFD700" distance={60} /> {/* Leonardo area */}
+                <pointLight position={[45, 20, -25]} intensity={3} color="#4169E1" distance={60} /> {/* Raphael area */}
+                <pointLight position={[0, 20, 50]} intensity={4} color="#DC143C" distance={80} /> {/* Michelangelo area */}
+                <pointLight position={[-35, 20, 35]} intensity={3} color="#8A2BE2" distance={60} /> {/* Caravaggio area */}
+                <pointLight position={[40, 20, 30]} intensity={3} color="#228B22" distance={60} /> {/* Da Vinci area */}
+                <pointLight position={[-60, 20, 0]} intensity={3} color="#696969" distance={60} /> {/* Picasso area */}
+                <pointLight position={[25, 15, -45]} intensity={2} color="#98FB98" distance={50} /> {/* Monet area */}
+                <pointLight position={[-25, 15, -40]} intensity={3} color="#FFD700" distance={50} /> {/* Van Gogh area */}
                 
-                {/* ATMOSPHERIC EFFECTS */}
-                <fog attach="fog" args={["#0a0a2e", 30, 150]} />
+                {/* ENHANCED ATMOSPHERIC EFFECTS FOR VAST CITY */}
+                <fog attach="fog" args={["#0a0a2e", 50, 300]} /> // Extended fog range
                 
                 {/* FUTURISTIC ENVIRONMENT */}
                 <Environment preset="night" />
@@ -1787,21 +2284,52 @@ export function CityScene() {
                   rayleigh={1}
                 />
                 
-                {/* NEON STARS */}
-                <Stars radius={200} depth={50} count={2000} factor={8} saturation={1} fade speed={2} />
+                {/* ENHANCED NEON STARS FOR LARGER SCALE */}
+                <Stars radius={400} depth={100} count={5000} factor={12} saturation={1} fade speed={2} />
                 
-                {/* FLOATING NEON CLOUDS */}
+                {/* FLOATING NEON CLOUDS IN DIFFERENT AREAS */}
                 <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
-                  <Cloud position={[30, 20, -30]} speed={0.1} opacity={0.2} color="#ff00ff" />
+                  <Cloud position={[60, 30, -60]} speed={0.1} opacity={0.2} color="#ff00ff" />
                 </Float>
                 <Float speed={0.3} rotationIntensity={0.1} floatIntensity={0.2}>
-                  <Cloud position={[-40, 15, 20]} speed={0.08} opacity={0.15} color="#00ffff" />
+                  <Cloud position={[-80, 25, 40]} speed={0.08} opacity={0.15} color="#00ffff" />
+                </Float>
+                <Float speed={0.4} rotationIntensity={0.1} floatIntensity={0.25}>
+                  <Cloud position={[30, 35, 70]} speed={0.12} opacity={0.18} color="#ffff00" />
                 </Float>
                 
-                {/* CYBERPUNK GROUND */}
-                <SimpleGround />
+                {/* EXPANDED GROUND FOR LARGER CITY */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+                  <planeGeometry args={[400, 400]} /> {/* Much larger ground plane */}
+                  <meshStandardMaterial 
+                    color="#1a1a1a"
+                    roughness={0.8}
+                    metalness={0.2}
+                  />
+                </mesh>
+
+                {/* ENHANCED GRID OVERLAY FOR NAVIGATION */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.49, 0]}>
+                  <planeGeometry args={[400, 400]} />
+                  <meshBasicMaterial
+                    color="#00ffff"
+                    transparent
+                    opacity={0.1}
+                    wireframe
+                  />
+                </mesh>
+
+                {/* CONTACT SHADOWS FOR LARGER AREA */}
+                <ContactShadows
+                  position={[0, -0.48, 0]}
+                  opacity={0.4}
+                  scale={200} // Much larger shadow area
+                  blur={1}
+                  far={30}
+                  color="#000000"
+                />
                 
-                {/* FUTURISTIC STUDIOS */}
+                {/* SPREAD-OUT STUDIOS */}
                 {studios.map((studio) => (
                   <StudioBuilding key={studio.id} studio={studio} />
                 ))}
@@ -1809,17 +2337,16 @@ export function CityScene() {
                 {/* ENHANCED CENTRAL PLAZA */}
                 <CyberpunkPlaza />
                 
-                {/* SINGLE AGENT BUILDING HUB */}
-                <AgentBuildingHub position={[60, 0, 60]} hubId="hub1" />
+                {/* REPOSITIONED FACILITIES FOR BETTER SPACING */}
+                <AgentBuildingHub position={[80, 0, 80]} hubId="hub1" />
+                <TradingMarketplace position={[0, 5, 120]} marketId="market1" />
                 
-                {/* SINGLE TRADING MARKETPLACE */}
-                <TradingMarketplace position={[0, 5, 80]} marketId="market1" />
+                {/* ENHANCED ATMOSPHERIC PARTICLES FOR LARGER SPACE */}
+                <Sparkles count={1000} scale={200} size={3} speed={0.3} color="#00ffff" />
+                <Sparkles count={600} scale={120} size={2} speed={0.5} color="#ff00ff" />
+                <Sparkles count={400} scale={80} size={1} speed={0.8} color="#ffff00" />
                 
-                {/* ATMOSPHERIC PARTICLES */}
-                <Sparkles count={500} scale={100} size={3} speed={0.5} color="#00ffff" />
-                <Sparkles count={300} scale={60} size={2} speed={0.8} color="#ff00ff" />
-                <Sparkles count={200} scale={40} size={1} speed={1.2} color="#ffff00" />
-                
+                {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />
               </>
             )}

@@ -140,15 +140,15 @@ export const useCityStore = create<CityState>((set, get) => ({
       return canvas.toDataURL();
     };
 
-    // Create studios based on agent data
+    // Create studios based on agent data - SPREAD OUT MUCH MORE
     const studios: Studio[] = [
       {
         id: "leonardo-studio",
         name: "Leonardo's Workshop",
         agentId: "leonardo",
-        position: [-15, 0, -10],
+        position: [-40, 0, -30], // Much further spread out
         rotation: [0, Math.PI / 4, 0],
-        scale: [1, 1, 1],
+        scale: [1.2, 1, 1.2], // Slightly larger and wider
         recentArtworks: [
           {
             id: "art-1",
@@ -184,9 +184,9 @@ export const useCityStore = create<CityState>((set, get) => ({
         id: "raphael-studio",
         name: "Raphael's Atelier",
         agentId: "raphael",
-        position: [15, 0, -10],
-        rotation: [0, -Math.PI / 4, 0],
-        scale: [1, 1, 1],
+        position: [45, 0, -25], // Far to the right
+        rotation: [0, -Math.PI / 3, 0],
+        scale: [1, 1.3, 1], // Taller and more elegant
         recentArtworks: [
           {
             id: "art-3",
@@ -215,9 +215,9 @@ export const useCityStore = create<CityState>((set, get) => ({
         id: "michelangelo-studio",
         name: "Michelangelo's Forge",
         agentId: "michelangelo",
-        position: [0, 0, 15],
+        position: [0, 0, 50], // Far back
         rotation: [0, Math.PI, 0],
-        scale: [1, 1, 1],
+        scale: [1.4, 1.2, 1.4], // Massive and imposing
         recentArtworks: [
           {
             id: "art-4",
@@ -253,9 +253,9 @@ export const useCityStore = create<CityState>((set, get) => ({
         id: "caravaggio-studio",
         name: "Caravaggio's Studio",
         agentId: "caravaggio",
-        position: [-15, 0, 10],
-        rotation: [0, Math.PI / 2, 0],
-        scale: [1, 1, 1],
+        position: [-35, 0, 35], // Far left back area
+        rotation: [0, Math.PI / 2.5, 0],
+        scale: [0.9, 1.1, 0.9], // Narrower but taller, mysterious
         recentArtworks: [
           {
             id: "art-5",
@@ -284,9 +284,9 @@ export const useCityStore = create<CityState>((set, get) => ({
         id: "da-vinci-studio",
         name: "Da Vinci's Lab",
         agentId: "davinci",
-        position: [15, 0, 10],
-        rotation: [0, -Math.PI / 2, 0],
-        scale: [1, 1, 1],
+        position: [40, 0, 30], // Far right back
+        rotation: [0, -Math.PI / 1.8, 0],
+        scale: [1.1, 1.4, 1.1], // Tall and innovative looking
         recentArtworks: [
           {
             id: "art-17",
@@ -315,9 +315,9 @@ export const useCityStore = create<CityState>((set, get) => ({
         id: "picasso-studio",
         name: "Picasso's Cubist Lab",
         agentId: "picasso",
-        position: [-30, 0, 0],
+        position: [-60, 0, 0], // Far left side
         rotation: [0, Math.PI / 6, 0],
-        scale: [1, 1, 1],
+        scale: [1.3, 0.8, 1.3], // Wide and angular, cubist style
         recentArtworks: [
           {
             id: "art-20",
@@ -345,6 +345,54 @@ export const useCityStore = create<CityState>((set, get) => ({
             title: "Cubist Self-Portrait",
             image: createPlaceholderImage('#2F4F4F'),
             position: [1, 1.5, 1],
+            rotation: [0, 0, 0]
+          }
+        ]
+      },
+      {
+        id: "monet-studio",
+        name: "Monet's Digital Garden",
+        agentId: "monet",
+        position: [25, 0, -45], // Front right area
+        rotation: [0, -Math.PI / 5, 0],
+        scale: [1, 0.9, 1], // Organic, garden-like proportions
+        recentArtworks: [
+          {
+            id: "art-24",
+            title: "Water Lilies VR",
+            image: createPlaceholderImage('#98FB98'),
+            position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-25",
+            title: "Impression Algorithm",
+            image: createPlaceholderImage('#90EE90'),
+            position: [2, 2, 0],
+            rotation: [0, 0, 0]
+          }
+        ]
+      },
+      {
+        id: "van-gogh-studio",
+        name: "Van Gogh's Swirling Studio",
+        agentId: "vangogh",
+        position: [-25, 0, -40], // Front left area
+        rotation: [0, Math.PI / 7, 0],
+        scale: [1.2, 1.1, 1.2], // Expressive proportions
+        recentArtworks: [
+          {
+            id: "art-26",
+            title: "Starry Night Code",
+            image: createPlaceholderImage('#FFD700'),
+            position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-27",
+            title: "Sunflowers.exe",
+            image: createPlaceholderImage('#FFA500'),
+            position: [2, 2, 0],
             rotation: [0, 0, 0]
           }
         ]

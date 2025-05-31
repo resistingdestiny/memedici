@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
   images: {
-    domains: ['images.pexels.com', 'api.dicebear.com', 'picsum.photos'],
+    domains: [
+      'images.pexels.com', 
+      'api.dicebear.com', 
+      'picsum.photos',
+      'images.unsplash.com',
+      'creator.nightcafe.studio'
+    ],
     unoptimized: true,
   },
   swcMinify: true,
