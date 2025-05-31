@@ -32,6 +32,7 @@ import { StudioGallery } from "./components/StudioGallery";
 import { CityEnvironment, CityGround } from "./components/CityEnvironment";
 import { MovementController } from "./components/MovementController";
 import { CyberpunkPlaza, AgentBuildingHub, TradingMarketplace, LoadingFallback } from "./components/CityStructures";
+import { PastelHouse } from "./components/PastelHouse";
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
@@ -486,6 +487,16 @@ export function CityScene() {
                 {/* REPOSITIONED FACILITIES FOR BETTER SPACING */}
                 <AgentBuildingHub position={[80, 0, 80]} hubId="hub1" />
                 <TradingMarketplace position={[0, 5, 120]} marketId="market1" />
+                
+                {/* PASTEL HOUSES - RESIDENTIAL DISTRICT */}
+                <PastelHouse position={[30, 0, 30]} scale={3} rotation={[0, 0, 0]} />
+                <PastelHouse position={[-40, 0, 25]} scale={2.5} rotation={[0, Math.PI / 2, 0]} />
+                <PastelHouse position={[60, 0, -20]} scale={3.2} rotation={[0, Math.PI, 0]} />
+                <PastelHouse position={[-25, 0, -35]} scale={2.8} rotation={[0, -Math.PI / 3, 0]} />
+                <PastelHouse position={[15, 0, 65]} scale={2.6} rotation={[0, Math.PI / 4, 0]} />
+                <PastelHouse position={[-60, 0, -15]} scale={3.1} rotation={[0, Math.PI / 6, 0]} />
+                <PastelHouse position={[45, 0, 50]} scale={2.9} rotation={[0, -Math.PI / 4, 0]} />
+                <PastelHouse position={[-15, 0, 70]} scale={2.7} rotation={[0, Math.PI * 1.5, 0]} />
                 
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />

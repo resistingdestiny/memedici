@@ -136,17 +136,6 @@ export function CityEnvironment() {
         opacity={0.3}
         position={[0, 90, 0]}
       />
-      
-      {/* Contact shadows for ground objects */}
-      <ContactShadows
-        position={[0, 0, 0]}
-        opacity={0.4}
-        scale={200}
-        blur={2}
-        far={50}
-        resolution={1024}
-        color="#000011"
-      />
     </>
   );
 }
@@ -154,62 +143,62 @@ export function CityEnvironment() {
 export function CityGround() {
   return (
     <group>
-      {/* MAIN GROUND PLANE - No flickering, single solid base */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[600, 600]} />
+      {/* MAIN GROUND PLANE - Solid foundation, no transparency issues */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]} receiveShadow>
+        <planeGeometry args={[800, 800]} />
         <meshStandardMaterial
           color="#0a0a1a"
-          roughness={0.9}
+          roughness={1.0}
           metalness={0.0}
-          emissive="#000011"
-          emissiveIntensity={0.05}
+          emissive="#000008"
+          emissiveIntensity={0.03}
         />
       </mesh>
       
-      {/* SINGLE GRID OVERLAY - Properly spaced to avoid z-fighting */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.45, 0]}>
-        <planeGeometry args={[600, 600, 120, 120]} />
+      {/* NEON GRID - Far above ground to prevent z-fighting */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]}>
+        <planeGeometry args={[600, 600, 60, 60]} />
         <meshBasicMaterial
-          color="#003366"
+          color="#004488"
           transparent
-          opacity={0.2}
+          opacity={0.15}
           wireframe
           depthWrite={false}
         />
       </mesh>
       
-      {/* CENTRAL PLATFORM AREA - Well spaced above ground */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
-        <circleGeometry args={[120, 64]} />
+      {/* CENTRAL GLOW AREA - Well separated */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.6, 0]}>
+        <circleGeometry args={[100, 64]} />
         <meshStandardMaterial
-          color="#001122"
+          color="#002244"
           transparent
-          opacity={0.4}
-          emissive="#002244"
-          emissiveIntensity={0.2}
-          roughness={0.8}
-          metalness={0.2}
+          opacity={0.3}
+          emissive="#004488"
+          emissiveIntensity={0.4}
+          roughness={0.9}
+          metalness={0.0}
           depthWrite={false}
         />
       </mesh>
       
-      {/* GLOWING PATH MARKERS - Higher above ground */}
-      {Array.from({ length: 16 }, (_, i) => {
-        const angle = (i / 16) * Math.PI * 2;
-        const radius = 80 + (i % 3) * 40; // Vary radius in groups
+      {/* PATHWAY MARKERS - Highest layer */}
+      {Array.from({ length: 12 }, (_, i) => {
+        const angle = (i / 12) * Math.PI * 2;
+        const radius = 70 + (i % 2) * 30;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
         
         return (
-          <mesh key={i} position={[x, -0.3, z]}>
-            <circleGeometry args={[3, 8]} />
+          <mesh key={i} position={[x, -0.4, z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[2, 8]} />
             <meshStandardMaterial
-              color="#00ffff"
+              color="#00aaff"
               transparent
-              opacity={0.6}
-              emissive="#00ffff"
-              emissiveIntensity={0.8}
-              roughness={0.1}
+              opacity={0.7}
+              emissive="#00aaff"
+              emissiveIntensity={1.0}
+              roughness={0.0}
               metalness={0.0}
               depthWrite={false}
             />
@@ -217,22 +206,22 @@ export function CityGround() {
         );
       })}
       
-      {/* NEON CIRCUIT PATTERNS - Subtle ground decoration */}
-      {Array.from({ length: 8 }, (_, i) => {
-        const angle = (i / 8) * Math.PI * 2;
-        const x = Math.cos(angle) * 150;
-        const z = Math.sin(angle) * 150;
+      {/* CIRCUIT PATTERNS - Clean lines */}
+      {Array.from({ length: 6 }, (_, i) => {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = Math.cos(angle) * 120;
+        const z = Math.sin(angle) * 120;
         
         return (
-          <mesh key={`circuit-${i}`} position={[x, -0.35, z]} rotation={[-Math.PI / 2, 0, angle]}>
-            <planeGeometry args={[40, 2]} />
+          <mesh key={`circuit-${i}`} position={[x, -0.5, z]} rotation={[-Math.PI / 2, 0, angle]}>
+            <planeGeometry args={[30, 1]} />
             <meshStandardMaterial
-              color="#0066cc"
+              color="#0088cc"
               transparent
-              opacity={0.3}
-              emissive="#0066cc"
-              emissiveIntensity={0.5}
-              roughness={0.1}
+              opacity={0.4}
+              emissive="#0088cc"
+              emissiveIntensity={0.6}
+              roughness={0.0}
               metalness={0.0}
               depthWrite={false}
             />
