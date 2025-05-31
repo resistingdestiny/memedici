@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import os
@@ -25,6 +26,15 @@ from agent_config import agent_registry, AgentConfig
 from agent_tools import custom_tool_manager
 
 app = FastAPI(title="Memedici", version="2.0.0")
+
+# Add CORS middleware for production
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Serve static files (for our HTML test interface)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -72,6 +82,17 @@ async def root():
         "platform": "Memedici",
         "version": "2.0.0",
         "description": "An AI-powered platform for creating artistic agents with evolving personas and creative content generation",
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment monitoring."""
+    return {
+        "status": "healthy",
+        "platform": "Memedici",
+        "version": "2.0.0",
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 
@@ -495,11 +516,15 @@ async def create_custom_tool_v2(request: Dict[str, Any]):
         }
 
 if __name__ == "__main__":
+    import os
+    
+    # Get port from environment variable (Render provides this)
+    port = int(os.environ.get("PORT", 8000))
     
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=port,
+        reload=False,  # Disable reload in production
         log_level="info"
     ) 
