@@ -35,6 +35,7 @@ import { CyberpunkPlaza, AgentBuildingHub, TradingMarketplace, LoadingFallback }
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
+let buildingInteractionActive = false; // New flag to prevent scene clicks during building interactions
 
 // Simple fallback component that doesn't use Three.js
 const SimpleFallback = () => (
@@ -326,13 +327,26 @@ export function CityScene() {
   
   // Close pinned overlays when clicking outside - but not immediately after building clicks
   const handleSceneClick = (e: any) => {
+    // Don't close if building interaction is active
+    if ((globalThis as any).buildingInteractionActive) {
+      console.log('  ❌ NOT closing overlays - building interaction is active');
+      return;
+    }
+
     const timeSinceLastBuildingClick = Date.now() - lastBuildingClickTime;
     console.log('🌍 Scene clicked - checking if should close overlays');
     console.log('  Time since last building click:', timeSinceLastBuildingClick, 'ms');
     
-    // Don't close panels if a building was clicked recently (within 100ms)
-    if (timeSinceLastBuildingClick < 100) {
+    // Don't close panels if a building was clicked recently (within 500ms) 
+    if (timeSinceLastBuildingClick < 500) {
       console.log('  ❌ NOT closing overlays - building was clicked recently');
+      return;
+    }
+    
+    // Also check if we have any pinned panels - only close if something is actually pinned
+    const { pinnedAgentHub, pinnedMarketplace } = useCityStore.getState();
+    if (!pinnedAgentHub && !pinnedMarketplace) {
+      console.log('  ❌ NOT closing overlays - no panels are pinned');
       return;
     }
     

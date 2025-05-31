@@ -15,6 +15,18 @@ const isClient = typeof window !== 'undefined';
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
 
+// Import the interaction flag from city-scene
+declare global {
+  var buildingInteractionActive: boolean;
+}
+
+// Initialize if not exists
+if (typeof window !== 'undefined') {
+  if (typeof (globalThis as any).buildingInteractionActive === 'undefined') {
+    (globalThis as any).buildingInteractionActive = false;
+  }
+}
+
 export function CyberpunkPlaza() {
   const plazaRef = useRef<THREE.Group>(null);
 
@@ -113,6 +125,9 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
+          // Set interaction flag
+          (globalThis as any).buildingInteractionActive = true;
+          
           // Mark the time of this building click
           lastBuildingClickTime = Date.now();
           console.log('🔥🔥🔥 AGENT HUB CLICKED! 🔥🔥🔥');
@@ -121,6 +136,11 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
           console.log('  Will set pinnedAgentHub to:', isPinned ? null : hubId);
           setPinnedAgentHub(isPinned ? null : hubId);
           console.log('  ✅ setPinnedAgentHub called successfully');
+          
+          // Clear interaction flag after a delay
+          setTimeout(() => {
+            (globalThis as any).buildingInteractionActive = false;
+          }, 1000);
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();
@@ -228,6 +248,9 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
         receiveShadow
         onClick={(e) => {
           e.stopPropagation();
+          // Set interaction flag
+          (globalThis as any).buildingInteractionActive = true;
+          
           // Mark the time of this building click
           lastBuildingClickTime = Date.now();
           console.log('🔥🔥🔥 MARKETPLACE CLICKED! 🔥🔥🔥');
@@ -236,6 +259,11 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
           console.log('  Will set pinnedMarketplace to:', isPinned ? null : marketId);
           setPinnedMarketplace(isPinned ? null : marketId);
           console.log('  ✅ setPinnedMarketplace called successfully');
+          
+          // Clear interaction flag after a delay
+          setTimeout(() => {
+            (globalThis as any).buildingInteractionActive = false;
+          }, 1000);
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();

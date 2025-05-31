@@ -24,6 +24,7 @@ export function RoamingArtist({
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
   const [position] = useState<THREE.Vector3>(new THREE.Vector3(...initialPosition));
   const [velocity] = useState<THREE.Vector3>(new THREE.Vector3(
     (Math.random() - 0.5) * 2,
@@ -86,6 +87,21 @@ export function RoamingArtist({
         targetRotation,
         0.1
       );
+    }
+
+    // Pulse the light intensity
+    if (lightRef.current) {
+      const t = state.clock.elapsedTime;
+      lightRef.current.intensity = 0.5 + Math.sin(t * 3) * 0.5; // Pulsing between 0 and 1
+    }
+
+    // Pulse the base ring scale
+    if (groupRef.current) {
+      const haloMesh = groupRef.current.getObjectByName("halo") as THREE.Mesh;
+      if (haloMesh) {
+        const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+        haloMesh.scale.set(scale, scale, scale);
+      }
     }
 
     // Floating animation
@@ -163,29 +179,40 @@ export function RoamingArtist({
         />
       </mesh>
 
-      {/* Floating Art Symbol */}
-      <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
-        <mesh position={[0, 4, 0]}>
-          <ringGeometry args={[0.3, 0.5, 8]} />
-          <meshStandardMaterial 
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.5}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
-      </Float>
-
-      {/* Trail Effect */}
-      <Sparkles
-        count={20}
-        scale={[2, 3, 2]}
-        size={1}
-        speed={0.5}
-        color={color}
-        position={[0, 1, -1]}
+      {/* Pulsing Light above head */}
+      <pointLight 
+        ref={lightRef}
+        position={[0, 3, 0]} 
+        color={color} 
+        intensity={0.8}
+        distance={5}
+        decay={2}
       />
+
+      {/* Pulsing Halo Ring at Base */}
+      <mesh 
+        name="halo"
+        position={[0, 0.1, 0]} 
+        rotation={[-Math.PI / 2, 0, 0]}
+        castShadow={false}
+      >
+        <ringGeometry args={[0.8, 1.2, 32]} />
+        <meshStandardMaterial 
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.2}
+          transparent
+          opacity={0.5}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Always-visible nameplate */}
+      <Html position={[0, 5.5, 0]} center>
+        <div className="bg-black/70 backdrop-blur-sm border border-cyan-400 rounded-md px-2 py-1 text-cyan-300 font-mono text-center shadow-md">
+          <div className="text-xs font-semibold">{name}</div>
+        </div>
+      </Html>
 
       {/* Information Panel when hovered */}
       {isHovered && (
