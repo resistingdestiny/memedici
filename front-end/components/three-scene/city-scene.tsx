@@ -44,6 +44,7 @@ function StudioBuilding({ studio }: { studio: any }) {
   
   const isActive = activeStudio === studio.id;
   const isHovered = hoveredStudio === studio.id;
+  const showInterface = isHovered || isActive;
   
   useFrame((state) => {
     if (meshRef.current && glowRef.current) {
@@ -155,68 +156,55 @@ function StudioBuilding({ studio }: { studio: any }) {
         </mesh>
       ))}
 
-      {/* CLEAN STUDIO INFO CARD - Always visible when hovered */}
-      {(isHovered || isActive) && (
-        <Html position={[0, 8, 0]} center>
+      {/* SINGLE CLEAN INTERFACE BOX - Only show when needed */}
+      {showInterface && (
+        <Html position={[0, 10, 0]} center distanceFactor={15}>
           <div 
-            className={`transition-all duration-500 backdrop-blur-xl ${
+            className={`transition-all duration-300 backdrop-blur-xl ${
               isActive 
                 ? 'text-green-400 bg-black/95 border-2 border-green-400 shadow-green-400/50' 
                 : 'text-cyan-400 bg-black/90 border-2 border-cyan-400 shadow-cyan-400/50'
-            } rounded-2xl shadow-2xl transform hover:scale-105 animate-in fade-in duration-300`}
+            } rounded-2xl shadow-2xl`}
             style={{ 
               pointerEvents: 'auto',
               zIndex: 1000,
-              position: 'relative',
-              minWidth: '280px'
+              minWidth: '300px',
+              maxWidth: '350px'
             }}
           >
             {/* Header */}
             <div className="px-4 py-3 border-b border-current/20">
               <div className="font-mono text-xs opacity-70">AI_STUDIO.exe</div>
               <div className="text-xl font-bold">{studio.name}</div>
-              <div className="text-sm opacity-80">Renaissance Masters</div>
+              <div className="text-sm opacity-80">{studio.agentId.charAt(0).toUpperCase() + studio.agentId.slice(1)}</div>
             </div>
             
-            {/* Studio Description */}
-            <div className="px-4 py-2 text-sm">
-              <p className="opacity-90">
-                Focused on sculptural form, anatomical precision, and powerful, dynamic compositions.
-              </p>
+            {/* Description */}
+            <div className="px-4 py-2 text-sm opacity-90">
+              Focused on sculptural form, anatomical precision, and powerful, dynamic compositions.
             </div>
             
             {/* Recent Creations Section */}
             <div className="px-4 py-3 border-t border-current/20">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-sm font-bold">🎨 Recent Creations</div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-bold">🎨 Recent Creations</span>
               </div>
               
-              {/* Latest artwork preview */}
-              {studio.recentArtworks.length > 0 && (
-                <div 
-                  className="bg-red-600 hover:bg-red-500 rounded-lg p-3 transition-colors cursor-pointer mb-3"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log('🎨 GALLERY BUTTON CLICKED for studio:', studio.name);
-                    enterGalleryMode(studio.id);
-                  }}
-                  style={{ pointerEvents: 'auto' }}
-                >
+              {/* Latest artwork */}
+              {studio.recentArtworks[0] && (
+                <div className="bg-red-600 hover:bg-red-500 rounded-lg p-3 transition-colors cursor-pointer mb-3">
                   <div className="text-white font-bold text-sm">
                     {studio.recentArtworks[0].title}
                   </div>
                 </div>
               )}
               
-              {/* Gallery access button */}
+              {/* Gallery Button */}
               <button 
-                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all duration-300 cursor-pointer transform hover:scale-105"
-                style={{ pointerEvents: 'auto' }}
+                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  console.log('🎨 ENTERING GALLERY for studio:', studio.name);
                   enterGalleryMode(studio.id);
                 }}
               >
