@@ -40,18 +40,10 @@ const MOVEMENT_KEYS = [
 function StudioBuilding({ studio }: { studio: any }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
-  const { activeStudio, hoveredStudio, pinnedStudio, setHoveredStudio, setActiveStudio, setPinnedStudio, enterGalleryMode } = useCityStore();
+  const { activeStudio, hoveredStudio, setHoveredStudio, setActiveStudio, enterGalleryMode } = useCityStore();
   
   const isActive = activeStudio === studio.id;
   const isHovered = hoveredStudio === studio.id;
-  const isPinned = pinnedStudio === studio.id;
-  
-  // Debug logging
-  useEffect(() => {
-    if (isPinned) {
-      console.log('🎨 STUDIO PINNED:', studio.name, 'Should show buttons now!');
-    }
-  }, [isPinned, studio.name]);
   
   useFrame((state) => {
     if (meshRef.current && glowRef.current) {
@@ -80,14 +72,6 @@ function StudioBuilding({ studio }: { studio: any }) {
         smoothness={4}
         onClick={(e) => {
           e.stopPropagation();
-          console.log('🎯 STUDIO CLICKED!', studio.name, 'isPinned:', isPinned);
-          if (isPinned) {
-            console.log('Unpinning studio:', studio.name);
-            setPinnedStudio(null); // Unpin if already pinned
-          } else {
-            console.log('Pinning studio:', studio.name);
-            setPinnedStudio(studio.id); // Pin this studio
-          }
           setActiveStudio(studio.id);
         }}
         onPointerEnter={() => setHoveredStudio(studio.id)}
@@ -109,7 +93,7 @@ function StudioBuilding({ studio }: { studio: any }) {
           distortion={0.2}
           distortionScale={0.1}
           temporalDistortion={0.1}
-          color={isPinned ? "#ffff00" : isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
+          color={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
         />
       </RoundedBox>
 
@@ -121,8 +105,8 @@ function StudioBuilding({ studio }: { studio: any }) {
         smoothness={4}
       >
         <meshStandardMaterial
-          color={isPinned ? "#ffff00" : isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
-          emissive={isPinned ? "#ffff00" : isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
+          color={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
+          emissive={isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff"}
           emissiveIntensity={1.5}
           transparent
           opacity={0.3}
@@ -134,7 +118,7 @@ function StudioBuilding({ studio }: { studio: any }) {
         <cylinderGeometry args={[3.5, 3.5, 0.5, 8]} />
         <meshStandardMaterial
           color="#ffffff"
-          emissive={isPinned ? "#ffff00" : isActive ? "#ffff00" : "#00ffff"}
+          emissive={isActive ? "#ffff00" : "#00ffff"}
           emissiveIntensity={2}
           metalness={1}
           roughness={0}
@@ -171,110 +155,76 @@ function StudioBuilding({ studio }: { studio: any }) {
         </mesh>
       ))}
 
-      {/* INTERACTIVE HOLOGRAPHIC LABEL - Show when hovered, active, or pinned */}
-      {(isHovered || isActive || isPinned) && (
+      {/* CLEAN STUDIO INFO CARD - Always visible when hovered */}
+      {(isHovered || isActive) && (
         <Html position={[0, 8, 0]} center>
           <div 
-            className={`text-2xl font-black px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 backdrop-blur-xl ${
-              isPinned
-                ? 'text-yellow-400 bg-black/90 border-2 border-yellow-400 shadow-yellow-400/50'
-                : isActive 
-                ? 'text-green-400 bg-black/90 border-2 border-green-400 shadow-green-400/50' 
-                : isHovered
-                ? 'text-pink-400 bg-black/90 border-2 border-pink-400 shadow-pink-400/50'
+            className={`transition-all duration-500 backdrop-blur-xl ${
+              isActive 
+                ? 'text-green-400 bg-black/95 border-2 border-green-400 shadow-green-400/50' 
                 : 'text-cyan-400 bg-black/90 border-2 border-cyan-400 shadow-cyan-400/50'
-            } transform hover:scale-105 animate-in fade-in duration-300`}
+            } rounded-2xl shadow-2xl transform hover:scale-105 animate-in fade-in duration-300`}
             style={{ 
-              pointerEvents: 'auto', // Always enable pointer events
+              pointerEvents: 'auto',
               zIndex: 1000,
-              position: 'relative'
+              position: 'relative',
+              minWidth: '280px'
             }}
           >
-            <div className="font-mono text-xs opacity-70">AI_STUDIO.exe</div>
-            <div className="mb-3">{studio.name}</div>
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-current/20">
+              <div className="font-mono text-xs opacity-70">AI_STUDIO.exe</div>
+              <div className="text-xl font-bold">{studio.name}</div>
+              <div className="text-sm opacity-80">Renaissance Masters</div>
+            </div>
             
-            {/* Always show buttons - but different styling for hover vs pinned */}
-            <div className="space-y-2" style={{ pointerEvents: 'auto' }}>
-              <button 
-                className={`w-full px-4 py-2 font-bold rounded-lg transition-all duration-300 cursor-pointer ${
-                  isPinned 
-                    ? 'bg-purple-500 hover:bg-purple-400 text-white transform hover:scale-105' 
-                    : 'bg-purple-500/70 hover:bg-purple-500 text-white/90 hover:text-white'
-                }`}
-                style={{ pointerEvents: 'auto' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('🎨 GALLERY BUTTON CLICKED for studio:', studio.name);
-                  if (isPinned) {
+            {/* Studio Description */}
+            <div className="px-4 py-2 text-sm">
+              <p className="opacity-90">
+                Focused on sculptural form, anatomical precision, and powerful, dynamic compositions.
+              </p>
+            </div>
+            
+            {/* Recent Creations Section */}
+            <div className="px-4 py-3 border-t border-current/20">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-sm font-bold">🎨 Recent Creations</div>
+              </div>
+              
+              {/* Latest artwork preview */}
+              {studio.recentArtworks.length > 0 && (
+                <div 
+                  className="bg-red-600 hover:bg-red-500 rounded-lg p-3 transition-colors cursor-pointer mb-3"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log('🎨 GALLERY BUTTON CLICKED for studio:', studio.name);
                     enterGalleryMode(studio.id);
-                  } else {
-                    // If not pinned, pin it first
-                    setPinnedStudio(studio.id);
-                  }
-                }}
-              >
-                🎨 ENTER GALLERY
-              </button>
+                  }}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <div className="text-white font-bold text-sm">
+                    {studio.recentArtworks[0].title}
+                  </div>
+                </div>
+              )}
               
+              {/* Gallery access button */}
               <button 
-                className={`w-full px-4 py-2 font-bold rounded-lg transition-all duration-300 cursor-pointer ${
-                  isPinned 
-                    ? 'bg-green-500 hover:bg-green-400 text-black transform hover:scale-105' 
-                    : 'bg-green-500/70 hover:bg-green-500 text-black/90 hover:text-black'
-                }`}
+                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all duration-300 cursor-pointer transform hover:scale-105"
                 style={{ pointerEvents: 'auto' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  console.log('Creating agent for studio:', studio.name);
-                  if (isPinned) {
-                    alert(`Creating agent for ${studio.name}!`);
-                    // Add your navigation logic here
-                  } else {
-                    // If not pinned, pin it first
-                    setPinnedStudio(studio.id);
-                  }
+                  console.log('🎨 ENTERING GALLERY for studio:', studio.name);
+                  enterGalleryMode(studio.id);
                 }}
               >
-                🤖 CREATE AGENT
+                🏛️ VIEW FULL GALLERY
               </button>
               
-              <button 
-                className={`w-full px-3 py-1 text-sm rounded transition-all duration-300 cursor-pointer ${
-                  isPinned 
-                    ? 'bg-blue-500 hover:bg-blue-400 text-white transform hover:scale-105' 
-                    : 'bg-blue-500/70 hover:bg-blue-500 text-white/90 hover:text-white'
-                }`}
-                style={{ pointerEvents: 'auto' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('Viewing studio details:', studio.name);
-                  if (isPinned) {
-                    alert(`Viewing details for ${studio.name}!`);
-                  } else {
-                    // If not pinned, pin it first
-                    setPinnedStudio(studio.id);
-                  }
-                }}
-              >
-                📊 VIEW DETAILS
-              </button>
-              
-              {/* Status indicator */}
-              <div className="text-xs text-center mt-2 transition-all duration-300">
-                {isPinned ? (
-                  <div className="text-yellow-300">
-                    <div>🟡 PINNED - Click buttons to interact</div>
-                    <div className="text-gray-300">Click building again to close</div>
-                  </div>
-                ) : (
-                  <div className="text-gray-300">
-                    <div>💡 Click any button to pin & interact</div>
-                    <div>or click building to pin open</div>
-                  </div>
-                )}
+              <div className="text-xs text-current/60 text-center mt-2">
+                {studio.recentArtworks.length} artworks available
               </div>
             </div>
           </div>
@@ -296,10 +246,10 @@ function StudioBuilding({ studio }: { studio: any }) {
       ))}
       
       {/* INSANE PARTICLE EFFECTS */}
-      {(isActive || isPinned) && (
+      {isActive && (
         <>
-          <Sparkles count={200} scale={15} size={6} speed={2} color={isPinned ? "#ffff00" : "#00ff88"} />
-          <Sparkles count={100} scale={8} size={3} speed={1.5} color={isPinned ? "#ffaa00" : "#ffff00"} />
+          <Sparkles count={200} scale={15} size={6} speed={2} color="#00ff88" />
+          <Sparkles count={100} scale={8} size={3} speed={1.5} color="#ffff00" />
         </>
       )}
     </group>
@@ -1528,7 +1478,7 @@ function SimpleGround() {
 
 // Main enhanced scene component
 export function CityScene() {
-  const { studios, initializeStudios, setPinnedStudio, closeAllPinnedOverlays, currentGalleryStudio } = useCityStore();
+  const { studios, initializeStudios, closeAllPinnedOverlays, currentGalleryStudio } = useCityStore();
   const [showControls, setShowControls] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   
@@ -1539,7 +1489,6 @@ export function CityScene() {
   // Close pinned overlays when clicking outside
   const handleSceneClick = (e: any) => {
     // Only close if we didn't click on a building (which has stopPropagation)
-    setPinnedStudio(null);
     closeAllPinnedOverlays();
   };
 

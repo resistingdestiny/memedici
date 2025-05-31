@@ -28,7 +28,6 @@ interface CityState {
   studios: Studio[];
   activeStudio: string | null;
   hoveredStudio: string | null;
-  pinnedStudio: string | null;
   
   // Agent hubs and marketplaces
   pinnedAgentHub: string | null;
@@ -48,7 +47,6 @@ interface CityState {
   setCameraTarget: (target: [number, number, number]) => void;
   setActiveStudio: (studioId: string | null) => void;
   setHoveredStudio: (studioId: string | null) => void;
-  setPinnedStudio: (studioId: string | null) => void;
   setPinnedAgentHub: (hubId: string | null) => void;
   setPinnedMarketplace: (marketId: string | null) => void;
   closeAllPinnedOverlays: () => void;
@@ -71,7 +69,6 @@ export const useCityStore = create<CityState>((set, get) => ({
   studios: [],
   activeStudio: null,
   hoveredStudio: null,
-  pinnedStudio: null,
   
   pinnedAgentHub: null,
   pinnedMarketplace: null,
@@ -88,11 +85,9 @@ export const useCityStore = create<CityState>((set, get) => ({
   setCameraTarget: (target) => set({ cameraTarget: target }),
   setActiveStudio: (studioId) => set({ activeStudio: studioId }),
   setHoveredStudio: (studioId) => set({ hoveredStudio: studioId }),
-  setPinnedStudio: (studioId) => set({ pinnedStudio: studioId }),
   setPinnedAgentHub: (hubId) => set({ pinnedAgentHub: hubId }),
   setPinnedMarketplace: (marketId) => set({ pinnedMarketplace: marketId }),
   closeAllPinnedOverlays: () => set({
-    pinnedStudio: null,
     pinnedAgentHub: null,
     pinnedMarketplace: null
   }),
@@ -168,6 +163,20 @@ export const useCityStore = create<CityState>((set, get) => ({
             image: createPlaceholderImage('#DAA520'),
             position: [2, 2, 0],
             rotation: [0, 0, 0]
+          },
+          {
+            id: "art-8",
+            title: "Vitruvian AI",
+            image: createPlaceholderImage('#CD853F'),
+            position: [0, 3, -1],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-9",
+            title: "The Flying Machine 2.0",
+            image: createPlaceholderImage('#DEB887'),
+            position: [-1, 1.5, 1],
+            rotation: [0, 0, 0]
           }
         ]
       },
@@ -184,6 +193,20 @@ export const useCityStore = create<CityState>((set, get) => ({
             title: "Modern School of Athens",
             image: createPlaceholderImage('#4169E1'),
             position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-10",
+            title: "Digital Sistine Madonna",
+            image: createPlaceholderImage('#6495ED'),
+            position: [2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-11",
+            title: "Renaissance Metaverse",
+            image: createPlaceholderImage('#87CEEB'),
+            position: [0, 3, -1],
             rotation: [0, 0, 0]
           }
         ]
@@ -202,6 +225,27 @@ export const useCityStore = create<CityState>((set, get) => ({
             image: createPlaceholderImage('#DC143C'),
             position: [0, 2, -2],
             rotation: [0, 0, 0]
+          },
+          {
+            id: "art-12",
+            title: "Digital David",
+            image: createPlaceholderImage('#FF6347'),
+            position: [-2, 2.5, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-13",
+            title: "The Sistine Cloud",
+            image: createPlaceholderImage('#FF4500'),
+            position: [2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-14",
+            title: "Pieta 3.0",
+            image: createPlaceholderImage('#B22222'),
+            position: [1, 1.5, 1],
+            rotation: [0, 0, 0]
           }
         ]
       },
@@ -218,6 +262,89 @@ export const useCityStore = create<CityState>((set, get) => ({
             title: "Modern Bacchus",
             image: createPlaceholderImage('#8A2BE2'),
             position: [0, 2, 2],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-15",
+            title: "Digital Chiaroscuro",
+            image: createPlaceholderImage('#4B0082'),
+            position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-16",
+            title: "The Calling of St. AI",
+            image: createPlaceholderImage('#6A0DAD'),
+            position: [2, 2.5, 0],
+            rotation: [0, 0, 0]
+          }
+        ]
+      },
+      {
+        id: "da-vinci-studio",
+        name: "Da Vinci's Lab",
+        agentId: "davinci",
+        position: [15, 0, 10],
+        rotation: [0, -Math.PI / 2, 0],
+        scale: [1, 1, 1],
+        recentArtworks: [
+          {
+            id: "art-17",
+            title: "Neural Network Portrait",
+            image: createPlaceholderImage('#228B22'),
+            position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-18",
+            title: "Quantum Salvator Mundi",
+            image: createPlaceholderImage('#32CD32'),
+            position: [2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-19",
+            title: "The Annunciation 2.0",
+            image: createPlaceholderImage('#9ACD32'),
+            position: [0, 3, -1],
+            rotation: [0, 0, 0]
+          }
+        ]
+      },
+      {
+        id: "picasso-studio",
+        name: "Picasso's Cubist Lab",
+        agentId: "picasso",
+        position: [-30, 0, 0],
+        rotation: [0, Math.PI / 6, 0],
+        scale: [1, 1, 1],
+        recentArtworks: [
+          {
+            id: "art-20",
+            title: "Guernica Reloaded",
+            image: createPlaceholderImage('#696969'),
+            position: [-2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-21",
+            title: "Les Demoiselles d'AI",
+            image: createPlaceholderImage('#A9A9A9'),
+            position: [2, 2, 0],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-22",
+            title: "Blue Period Bot",
+            image: createPlaceholderImage('#191970'),
+            position: [0, 3, -1],
+            rotation: [0, 0, 0]
+          },
+          {
+            id: "art-23",
+            title: "Cubist Self-Portrait",
+            image: createPlaceholderImage('#2F4F4F'),
+            position: [1, 1.5, 1],
             rotation: [0, 0, 0]
           }
         ]
