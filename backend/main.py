@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import os
 import logging
@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import json
 from datetime import datetime
 import uvicorn
+from sqlalchemy import func
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger('FastAPIServer')
 
 from agent_system_langgraph import agent_manager
-from agent_config import agent_registry, AgentConfig
+from agent_config import agent_registry, AgentConfig, GeneratedArtworkDB, SessionLocal
 from agent_tools import custom_tool_manager
 
 app = FastAPI(title="Memedici", version="2.0.0")
@@ -49,10 +50,12 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     success: bool
     response: Optional[str] = None
+    assets: Dict[str, Any] = Field(default_factory=dict, description="Dictionary of created assets keyed by asset ID")
     error: Optional[str] = None
     agent_id: str
     thread_id: str
     tools_used: Optional[List[str]] = None
+    artworks_created: int = 0
     persona_evolved: bool = False
 
 
@@ -109,39 +112,63 @@ async def chat_with_agent(request: ChatRequest):
             thread_id=request.thread_id
         )
         
+        # result should now be an AgentResponse object
+        if isinstance(result, dict) and hasattr(result, 'message'):
+            # Handle AgentResponse object
+            response_message = result.message
+            assets = result.assets
+            tools_used = []  # We'll need to extract this from somewhere else if needed
+            artworks_created = len(assets)
+        elif hasattr(result, 'message'):
+            # Handle AgentResponse object
+            response_message = result.message
+            assets = result.assets
+            tools_used = []  # We'll need to extract this from somewhere else if needed
+            artworks_created = len(assets)
+        else:
+            # Fallback for unexpected format
+            response_message = str(result)
+            assets = {}
+            tools_used = []
+            artworks_created = 0
+        
         # Check if persona should evolve based on interaction
         persona_evolved = False
-        if result["success"] and result.get("tools_used"):
+        if tools_used:
             # Evolve persona based on tool usage
             agent_config = agent_registry.get_agent_config(request.agent_id)
             
             # Check for standard art tools
-            if "create_artwork" in result["tools_used"]:
+            if "create_artwork" in tools_used:
                 agent_config.evolve_persona("artwork_creation", "successful")
                 agent_registry.create_agent(request.agent_id, agent_config)
                 persona_evolved = True
-            elif any(tool in result["tools_used"] for tool in ["analyze_art", "remix_concept"]):
+            elif any(tool in tools_used for tool in ["analyze_art", "remix_concept"]):
                 agent_config.evolve_persona("creative_analysis", "insightful")
                 agent_registry.create_agent(request.agent_id, agent_config)
                 persona_evolved = True
             
             # Check for custom tools (any tool not in standard tools)
             standard_tools = ["create_artwork", "analyze_art", "remix_concept", "blockchain_integration"]
-            custom_tools_used = [tool for tool in result["tools_used"] if tool not in standard_tools]
+            custom_tools_used = [tool for tool in tools_used if tool not in standard_tools]
             if custom_tools_used:
                 agent_config.evolve_persona("custom_tool_usage", "creative_expansion")
                 agent_registry.create_agent(request.agent_id, agent_config)
                 persona_evolved = True
                 logger.info(f"🎭 Persona evolved due to custom tool usage: {custom_tools_used}")
         
-        if result["success"]:
-            logger.info(f"✅ Chat successful for agent {request.agent_id}")
-        else:
-            logger.error(f"❌ Chat failed for agent {request.agent_id}: {result.get('error')}")
-        
-        # Add persona evolution info to response
-        result["persona_evolved"] = persona_evolved
-        return ChatResponse(**result)
+        logger.info(f"✅ Chat successful for agent {request.agent_id}")
+            
+        return ChatResponse(
+            success=True,
+            response=response_message,
+            assets=assets,
+            agent_id=request.agent_id,
+            thread_id=request.thread_id,
+            tools_used=tools_used,
+            artworks_created=artworks_created,
+            persona_evolved=persona_evolved
+        )
     except Exception as e:
         logger.error(f"❌ Exception in chat endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -227,9 +254,11 @@ async def list_available_tools():
     return {
         "standard_tools": [
             {
-                "name": tool.name,
-                "description": tool.description,
-                "category": "art_creation" if "create" in tool.name or "artwork" in tool.name else "analysis"
+                "name": tool["name"],
+                "description": tool["description"],
+                "category": tool.get("category", "art_creation" if ("generate" in tool["name"] or "create" in tool["name"] or "artwork" in tool["name"]) else "analysis"),
+                "parameters": tool.get("parameters", {}),
+                "type": tool.get("type", "standard")
             }
             for tool in standard_tools
         ],
@@ -420,6 +449,238 @@ async def test_interface():
     return FileResponse("static/test.html")
 
 
+@app.get("/artworks/{artwork_id}")
+async def get_artwork(artwork_id: str):
+    """Get artwork information from database."""
+    try:
+        session = SessionLocal()
+        try:
+            artwork = session.query(GeneratedArtworkDB).filter(GeneratedArtworkDB.id == artwork_id).first()
+            if not artwork:
+                raise HTTPException(status_code=404, detail="Artwork not found")
+            
+            return {
+                "success": True,
+                "artwork": {
+                    "id": artwork.id,
+                    "agent_id": artwork.agent_id,
+                    "artwork_type": artwork.artwork_type,
+                    "prompt": artwork.prompt,
+                    "negative_prompt": artwork.negative_prompt,
+                    "model_name": artwork.model_name,
+                    "model_type": artwork.model_type,
+                    "parameters": artwork.parameters,
+                    "file_url": artwork.file_url,
+                    "file_size": artwork.file_size,
+                    "metadata": artwork.artwork_metadata,
+                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None
+                }
+            }
+        finally:
+            session.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/agents/{agent_id}/artworks")
+async def list_agent_artworks(agent_id: str, limit: int = 20, offset: int = 0, include_details: bool = False):
+    """List artworks created by a specific agent with enhanced details."""
+    try:
+        session = SessionLocal()
+        try:
+            # Get agent info
+            agent_info = agent_registry.get_agent_info(agent_id)
+            
+            artworks = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.agent_id == agent_id)\
+                .order_by(GeneratedArtworkDB.created_at.desc())\
+                .offset(offset)\
+                .limit(limit)\
+                .all()
+            
+            total_count = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.agent_id == agent_id)\
+                .count()
+            
+            artwork_list = []
+            for artwork in artworks:
+                artwork_data = {
+                    "id": artwork.id,
+                    "artwork_type": artwork.artwork_type,
+                    "prompt": artwork.prompt[:100] + "..." if len(artwork.prompt) > 100 else artwork.prompt,
+                    "model_name": artwork.model_name,
+                    "model_type": artwork.model_type,
+                    "file_url": artwork.file_url,
+                    "file_size": artwork.file_size,
+                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None
+                }
+                
+                # Include full details if requested
+                if include_details:
+                    artwork_data.update({
+                        "full_prompt": artwork.prompt,
+                        "negative_prompt": artwork.negative_prompt,
+                        "parameters": artwork.parameters,
+                        "metadata": artwork.artwork_metadata,
+                        "file_path": artwork.file_path
+                    })
+                
+                artwork_list.append(artwork_data)
+            
+            # Get artwork statistics
+            stats = {
+                "total_artworks": total_count,
+                "by_model_type": {},
+                "recent_activity": {
+                    "last_7_days": 0,
+                    "last_30_days": 0
+                }
+            }
+            
+            # Calculate model type distribution
+            model_stats = session.query(
+                GeneratedArtworkDB.model_type,
+                func.count(GeneratedArtworkDB.id).label('count')
+            ).filter(GeneratedArtworkDB.agent_id == agent_id)\
+            .group_by(GeneratedArtworkDB.model_type)\
+            .all()
+            
+            for model_type, count in model_stats:
+                stats["by_model_type"][model_type] = count
+            
+            # Calculate recent activity
+            from datetime import datetime, timedelta
+            now = datetime.utcnow()
+            week_ago = now - timedelta(days=7)
+            month_ago = now - timedelta(days=30)
+            
+            stats["recent_activity"]["last_7_days"] = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.agent_id == agent_id, GeneratedArtworkDB.created_at >= week_ago)\
+                .count()
+            
+            stats["recent_activity"]["last_30_days"] = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.agent_id == agent_id, GeneratedArtworkDB.created_at >= month_ago)\
+                .count()
+            
+            return {
+                "success": True,
+                "agent": {
+                    "id": agent_id,
+                    "display_name": agent_info.get("identity", {}).get("display_name", "Unknown Agent"),
+                    "studio_name": agent_info.get("studio", {}).get("name", "Unknown Studio"),
+                    "art_style": agent_info.get("studio", {}).get("art_style", "Unknown Style")
+                },
+                "artworks": artwork_list,
+                "statistics": stats,
+                "pagination": {
+                    "limit": limit,
+                    "offset": offset,
+                    "has_more": total_count > offset + limit,
+                    "total_pages": (total_count + limit - 1) // limit
+                }
+            }
+        finally:
+            session.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving artworks: {str(e)}")
+
+
+@app.get("/agents/{agent_id}/artworks/recent")
+async def get_agent_recent_artworks(agent_id: str, days: int = 7):
+    """Get recent artworks created by a specific agent."""
+    try:
+        session = SessionLocal()
+        try:
+            from datetime import datetime, timedelta
+            cutoff_date = datetime.utcnow() - timedelta(days=days)
+            
+            recent_artworks = session.query(GeneratedArtworkDB)\
+                .filter(
+                    GeneratedArtworkDB.agent_id == agent_id,
+                    GeneratedArtworkDB.created_at >= cutoff_date
+                )\
+                .order_by(GeneratedArtworkDB.created_at.desc())\
+                .all()
+            
+            artwork_list = []
+            for artwork in recent_artworks:
+                artwork_list.append({
+                    "id": artwork.id,
+                    "prompt": artwork.prompt[:50] + "..." if len(artwork.prompt) > 50 else artwork.prompt,
+                    "model_type": artwork.model_type,
+                    "file_url": artwork.file_url,
+                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None
+                })
+            
+            return {
+                "success": True,
+                "agent_id": agent_id,
+                "period_days": days,
+                "recent_artworks": artwork_list,
+                "count": len(artwork_list)
+            }
+        finally:
+            session.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving recent artworks: {str(e)}")
+
+
+@app.get("/artworks/statistics")
+async def get_global_artwork_statistics():
+    """Get global artwork statistics across all agents."""
+    try:
+        session = SessionLocal()
+        try:
+            from datetime import datetime, timedelta
+            
+            total_artworks = session.query(GeneratedArtworkDB).count()
+            
+            # Get statistics by agent
+            agent_stats = session.query(
+                GeneratedArtworkDB.agent_id,
+                func.count(GeneratedArtworkDB.id).label('count')
+            ).group_by(GeneratedArtworkDB.agent_id)\
+            .order_by(func.count(GeneratedArtworkDB.id).desc())\
+            .all()
+            
+            # Get statistics by model type
+            model_stats = session.query(
+                GeneratedArtworkDB.model_type,
+                func.count(GeneratedArtworkDB.id).label('count')
+            ).group_by(GeneratedArtworkDB.model_type)\
+            .order_by(func.count(GeneratedArtworkDB.id).desc())\
+            .all()
+            
+            # Recent activity
+            now = datetime.utcnow()
+            week_ago = now - timedelta(days=7)
+            month_ago = now - timedelta(days=30)
+            
+            recent_stats = {
+                "last_7_days": session.query(GeneratedArtworkDB)\
+                    .filter(GeneratedArtworkDB.created_at >= week_ago).count(),
+                "last_30_days": session.query(GeneratedArtworkDB)\
+                    .filter(GeneratedArtworkDB.created_at >= month_ago).count()
+            }
+            
+            return {
+                "success": True,
+                "total_artworks": total_artworks,
+                "by_agent": [{"agent_id": agent_id, "count": count} for agent_id, count in agent_stats],
+                "by_model_type": [{"model_type": model_type, "count": count} for model_type, count in model_stats],
+                "recent_activity": recent_stats,
+                "generated_at": datetime.utcnow().isoformat()
+            }
+        finally:
+            session.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving statistics: {str(e)}")
+
+
 @app.post("/tools/custom")
 async def create_custom_tool_v2(request: Dict[str, Any]):
     """Create a custom tool from manual entry or uploaded specification."""
@@ -525,6 +786,6 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=port,
-        reload=False,  # Disable reload in production
+        reload=True, 
         log_level="info"
     ) 

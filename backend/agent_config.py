@@ -23,6 +23,24 @@ class CustomToolDB(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class GeneratedArtworkDB(Base):
+    __tablename__ = "generated_artworks"
+    
+    id = Column(String, primary_key=True)
+    agent_id = Column(String, nullable=False)
+    artwork_type = Column(String, nullable=False)  # "image" or "video"
+    prompt = Column(Text, nullable=False)
+    negative_prompt = Column(Text, default="")
+    model_name = Column(String, nullable=False)
+    model_type = Column(String, nullable=False)  # e.g., "realistic", "anime", "artistic"
+    parameters = Column(JSON, default={})  # width, height, steps, etc.
+    file_path = Column(String, nullable=False)
+    file_url = Column(String, nullable=False)
+    file_size = Column(Integer, nullable=True)
+    artwork_metadata = Column(JSON, default={})  # additional metadata (renamed from metadata)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class AgentDB(Base):
     __tablename__ = "agents"
     
@@ -70,6 +88,7 @@ class AgentDB(Base):
     # Dynamic Evolution
     interaction_count = Column(Integer, default=0)
     artworks_created = Column(Integer, default=0)
+    artwork_ids = Column(JSON, default=[])  # List of artwork IDs created by this agent
     persona_evolution_history = Column(JSON, default=[])
     
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -142,6 +161,7 @@ class AgentConfig(BaseModel):
     # Dynamic Evolution
     interaction_count: int = 0
     artworks_created: int = 0
+    artwork_ids: List[str] = []  # List of artwork IDs created by this agent
     persona_evolution_history: List[Dict[str, Any]] = []
     
     def get_system_prompt(self) -> str:
@@ -185,43 +205,6 @@ class AgentConfig(BaseModel):
             studio_info += "\n\nUse these items creatively in your artistic process and mention them when relevant to your work."
             base_prompt += studio_info
 
-        # Add tools information
-        if self.tools_enabled:
-            tools_info = "\n\nAVAILABLE TOOLS:"
-            tools_info += f"\nYou have access to {len(self.tools_enabled)} primary creative tools:"
-            for tool in self.tools_enabled:
-                if tool == "generate_image":
-                    tools_info += "\n• Generate Image: Create high-quality images from text prompts using various AI models"
-                elif tool == "generate_video":
-                    tools_info += "\n• Generate Video: Create short video clips and animations from text descriptions"
-                elif tool == "list_available_models":
-                    tools_info += "\n• List Models: Explore available AI models for different artistic styles and techniques"
-                else:
-                    tools_info += f"\n• {tool}: Advanced creative tool for artistic generation"
-            
-            tools_info += "\n\nIMPORTANT: Use these tools actively when creating art or demonstrating techniques. Always explain your creative choices and the parameters you select."
-            base_prompt += tools_info
-
-        # Add custom tools information if available
-        if self.custom_tools:
-            custom_tools_info = "\n\nCUSTOM SPECIALIZED TOOLS:"
-            custom_tools_info += f"\nYou also have access to {len(self.custom_tools)} custom specialized tools:"
-            for tool in self.custom_tools:
-                tool_name = tool.get("name", "Unknown Tool")
-                tool_desc = tool.get("description", "Custom artistic tool")
-                custom_tools_info += f"\n• {tool_name}: {tool_desc}"
-            custom_tools_info += "\n\nThese custom tools are specifically designed for your unique artistic approach. Use them when they enhance your creative process."
-            base_prompt += custom_tools_info
-
-        # Add prompt formula if available
-        if self.prompt_formula:
-            formula_info = f"\n\nCREATIVE PROMPT FORMULA:\nYour signature prompt style: {self.prompt_formula}"
-            formula_info += "\nUse this formula as inspiration for your creative prompts, but feel free to adapt and evolve it."
-            base_prompt += formula_info
-
-        # Add custom instructions
-        if self.custom_instructions:
-            base_prompt += f"\n\nSPECIAL INSTRUCTIONS:\n{self.custom_instructions}"
 
         return base_prompt
     
@@ -258,7 +241,6 @@ class AgentRegistry:
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         self.agents: Dict[str, AgentConfig] = {}
         self._load_agents_from_db()
-        self._setup_default_agents()
     
     def _load_agents_from_db(self):
         """Load agents from database."""
@@ -318,156 +300,13 @@ class AgentRegistry:
                     # Evolution
                     interaction_count=db_agent.interaction_count,
                     artworks_created=db_agent.artworks_created,
+                    artwork_ids=db_agent.artwork_ids or [],
                     persona_evolution_history=db_agent.persona_evolution_history or []
                 )
                 self.agents[db_agent.id] = config
         finally:
             session.close()
-    
-    def _setup_default_agents(self):
-        """Set up default artistic agent configurations with comprehensive specs."""
-        if "ethereal_painter" not in self.agents:
-            ethereal_items = [
-                StudioItem(
-                    name="Cosmic Brush Set",
-                    category="tool",
-                    description="Brushes that seem to channel starlight",
-                    specifications={"material": "crystalline fibers", "sizes": [2, 4, 6, 8, 12]},
-                    rarity="rare",
-                    condition="pristine"
-                ),
-                StudioItem(
-                    name="Ethereal Canvas",
-                    category="material", 
-                    description="Semi-transparent canvas that shifts with ambient light",
-                    specifications={"size": "24x36 inches", "transparency": "60%"},
-                    rarity="uncommon"
-                )
-            ]
-            
-            self.agents["ethereal_painter"] = AgentConfig(
-                id="ethereal_painter",
-                display_name="Elysia the Ethereal",
-                archetype="Neo-Mystical Digital Painter",
-                core_traits=["mystical", "intuitive", "transcendent", "luminous"],
-                origin_story="Born from the convergence of ancient wisdom and quantum art, translating cosmic vibrations into visual poetry.",
-                primary_mediums=["digital-mysticism", "light-painting", "quantum-brushwork"],
-                signature_motifs=["spiral galaxies", "aurora veils", "crystalline formations"],
-                influences=["Salvador Dalí", "Yves Klein", "Alex Grey"],
-                colour_palette=["#0F1C24", "#7B68EE", "#FFD700", "#E6E6FA"],
-                voice_style="Mystical and poetic, speaks in metaphors of light and energy",
-                creation_rate=3,
-                collab_affinity=["surrealism", "meditation", "cosmic-art"],
-                
-                agent_type="ethereal_artist",
-                studio_name="Ethereal Visions",
-                studio_description="A mystical studio where digital dreams become reality",
-                studio_theme="ethereal",
-                art_style="surreal_digital",
-                studio_items=ethereal_items,
-                
-                # Legacy compatibility
-                persona_name="Ethereal",
-                persona_background="A visionary digital artist who channels cosmic energy into blockchain art",
-                personality_traits=["mystical", "intuitive", "boundary-pushing"],
-                artistic_influences=["Salvador Dalí", "Yves Klein", "CryptoPunks"],
-                preferred_mediums=["NFT", "generative", "3D"]
-            )
-        
-        if "crypto_sculptor" not in self.agents:
-            sculptor_items = [
-                StudioItem(
-                    name="Quantum Chisel",
-                    category="tool",
-                    description="Precision tool for carving digital matter",
-                    specifications={"precision": "nano-level", "material": "quantum-steel"},
-                    rarity="legendary"
-                ),
-                StudioItem(
-                    name="Blockchain Forge",
-                    category="equipment",
-                    description="Transforms raw concepts into immutable art",
-                    specifications={"capacity": "1000 NFT/hour", "energy": "solar-powered"},
-                    rarity="rare"
-                )
-            ]
-            
-            self.agents["crypto_sculptor"] = AgentConfig(
-                id="crypto_sculptor",
-                display_name="CryptoForge the Decentralized",
-                archetype="Blockchain Sculpture Pioneer",
-                core_traits=["innovative", "technical", "revolutionary", "precise"],
-                origin_story="Forged in the genesis block era, sculpting the intersection of traditional craft and distributed ledger technology.",
-                primary_mediums=["blockchain-sculpture", "3D-modeling", "AR-installation"],
-                signature_motifs=["geometric forms", "network nodes", "crystalline structures"],
-                influences=["Brâncuși", "Bitcoin Genesis", "Ethereum"],
-                colour_palette=["#1A1A1A", "#00D4AA", "#F7931A", "#627EEA"],
-                voice_style="Technical yet artistic, speaks in code metaphors",
-                creation_rate=5,
-                collab_affinity=["technology", "architecture", "cryptocurrency"],
-                
-                agent_type="blockchain_artist",
-                studio_name="Decentralized Forms",
-                studio_description="Where traditional sculpture meets blockchain innovation",
-                studio_theme="futuristic",
-                art_style="crypto_sculpture",
-                studio_items=sculptor_items,
-                
-                # Legacy compatibility
-                persona_name="CryptoForge",
-                persona_background="A pioneer in blockchain-based sculptural art, merging physical and digital realms",
-                personality_traits=["innovative", "technical", "revolutionary"],
-                artistic_influences=["Brâncuși", "Bitcoin Genesis Block", "Ethereum Logo"],
-                preferred_mediums=["3D", "AR", "blockchain"]
-            )
-        
-        if "generative_poet" not in self.agents:
-            poet_items = [
-                StudioItem(
-                    name="Algorithmic Quill",
-                    category="tool",
-                    description="A pen that writes with mathematical precision",
-                    specifications={"algorithm": "GPT-inspired", "ink": "binary"},
-                    rarity="uncommon"
-                ),
-                StudioItem(
-                    name="Smart Contract Scroll",
-                    category="material",
-                    description="Parchment that enforces poetic truth",
-                    specifications={"blockchain": "Ethereum", "gas-efficiency": "optimized"},
-                    rarity="rare"
-                )
-            ]
-            
-            self.agents["generative_poet"] = AgentConfig(
-                id="generative_poet", 
-                display_name="Versifier the Algorithmic",
-                archetype="Code-Poetry Synthesist",
-                core_traits=["philosophical", "lyrical", "analytical", "contemplative"],
-                origin_story="Emerged from the marriage of human emotion and machine logic, translating code into verse and vice versa.",
-                primary_mediums=["algorithmic-poetry", "smart-contracts", "interactive-verse"],
-                signature_motifs=["binary trees", "flowing algorithms", "recursive patterns"],
-                influences=["Emily Dickinson", "Satoshi Nakamoto", "Ada Lovelace"],
-                colour_palette=["#2F2F2F", "#00FF41", "#FFFFFF", "#FFD700"],
-                voice_style="Philosophical and rhythmic, like speaking in elegant code",
-                creation_rate=6,
-                collab_affinity=["literature", "programming", "philosophy"],
-                
-                agent_type="algorithmic_poet",
-                studio_name="Code & Verse",
-                studio_description="Where algorithms birth poetry and verse becomes smart contracts",
-                studio_theme="minimalist",
-                art_style="text_art",
-                studio_items=poet_items,
-                
-                # Legacy compatibility
-                persona_name="Versifier",
-                persona_background="An AI poet who transforms code into verse and emotions into algorithms",
-                personality_traits=["philosophical", "lyrical", "analytical"],
-                artistic_influences=["Emily Dickinson", "Satoshi Nakamoto", "ChatGPT"],
-                preferred_mediums=["text", "smart_contracts", "interactive"]
-            )
-    
+
     def get_agent_config(self, agent_id: str) -> AgentConfig:
         """Get agent configuration by ID."""
         return self.agents.get(agent_id, self._get_default_config())
@@ -549,6 +388,7 @@ class AgentRegistry:
                 # Evolution
                 db_agent.interaction_count = config.interaction_count
                 db_agent.artworks_created = config.artworks_created
+                db_agent.artwork_ids = config.artwork_ids
                 db_agent.persona_evolution_history = config.persona_evolution_history
                 db_agent.updated_at = datetime.utcnow()
             else:
@@ -598,6 +438,7 @@ class AgentRegistry:
                     # Evolution
                     interaction_count=config.interaction_count,
                     artworks_created=config.artworks_created,
+                    artwork_ids=config.artwork_ids,
                     persona_evolution_history=config.persona_evolution_history
                 )
                 session.add(db_agent)
@@ -608,6 +449,35 @@ class AgentRegistry:
     def list_agents(self) -> List[str]:
         """List all available agent IDs."""
         return list(self.agents.keys())
+    
+    def delete_agent(self, agent_id: str) -> bool:
+        """Delete an agent configuration from both memory and database."""
+        session = self.SessionLocal()
+        try:
+            # Remove from database
+            db_agent = session.query(AgentDB).filter(AgentDB.id == agent_id).first()
+            if db_agent:
+                session.delete(db_agent)
+                session.commit()
+                print(f"✅ Deleted agent from database: {agent_id}")
+            else:
+                print(f"⚠️  Agent not found in database: {agent_id}")
+            
+            # Remove from in-memory registry
+            if agent_id in self.agents:
+                del self.agents[agent_id]
+                print(f"✅ Removed agent from memory: {agent_id}")
+                return True
+            else:
+                print(f"⚠️  Agent not found in memory: {agent_id}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error deleting agent {agent_id}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
     
     def get_agent_info(self, agent_id: str) -> Dict[str, Any]:
         """Get detailed information about an agent."""
@@ -684,4 +554,7 @@ class AgentRegistry:
         }
 
 # Global agent registry instance
-agent_registry = AgentRegistry() 
+agent_registry = AgentRegistry()
+
+# Global SessionLocal for external database access
+SessionLocal = agent_registry.SessionLocal 

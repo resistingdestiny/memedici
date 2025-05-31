@@ -294,17 +294,26 @@ class CustomToolManager:
         return dynamic_custom_tool
     
     def get_all_custom_tools_for_agent(self, custom_tool_names: List[str] = None):
-        """Get all custom tools as LangChain Tool objects for agent use."""
+        """Get all custom tools as LangChain Tool objects for an agent."""
         tools = []
         
         for tool_id, tool_info in self.custom_tools.items():
-            if tool_info.get("status") == "active":
-                # If specific tool names provided, filter by name
-                if custom_tool_names and tool_info["name"] not in custom_tool_names:
-                    continue
-                
+            # If specific tool names are provided, only include those
+            if custom_tool_names and tool_info.get("name") not in custom_tool_names:
+                continue
+            
+            try:
                 tool = self.get_tool_as_langchain_tool(tool_id)
-                if tool:
-                    tools.append(tool)
+                tools.append(tool)
+            except Exception as e:
+                logger.error(f"❌ Error creating LangChain tool for {tool_info.get('name', tool_id)}: {e}")
         
-        return tools 
+        return tools
+    
+    def list_tools(self) -> Dict[str, Any]:
+        """List all available custom tools."""
+        return {
+            "success": True,
+            "tools": self.custom_tools,
+            "total_count": len(self.custom_tools)
+        } 
