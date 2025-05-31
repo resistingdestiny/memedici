@@ -181,7 +181,7 @@ function StudioBuilding({ studio }: { studio: any }) {
             
             {/* Description */}
             <div className="px-4 py-2 text-sm opacity-90">
-              Focused on sculptural form, anatomical precision, and powerful, dynamic compositions.
+              Renaissance master specializing in realistic portraits with subtle lighting and expressive details.
             </div>
             
             {/* Recent Creations Section */}
@@ -190,25 +190,27 @@ function StudioBuilding({ studio }: { studio: any }) {
                 <span className="text-sm font-bold">🎨 Recent Creations</span>
               </div>
               
-              {/* Latest artwork */}
-              {studio.recentArtworks[0] && (
-                <div className="bg-red-600 hover:bg-red-500 rounded-lg p-3 transition-colors cursor-pointer mb-3">
-                  <div className="text-white font-bold text-sm">
-                    {studio.recentArtworks[0].title}
+              {/* Artwork Grid */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {studio.recentArtworks.slice(0, 4).map((artwork: any, index: number) => (
+                  <div key={artwork.id} className="bg-gradient-to-br from-orange-600 to-amber-700 hover:from-orange-500 hover:to-amber-600 rounded-lg p-2 transition-colors cursor-pointer">
+                    <div className="text-white font-bold text-xs">
+                      {artwork.title}
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
               
-              {/* Gallery Button */}
+              {/* Integrated Gallery Button */}
               <button 
-                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   enterGalleryMode(studio.id);
                 }}
               >
-                🏛️ VIEW FULL GALLERY
+                🏛️ Visit Studio
               </button>
               
               <div className="text-xs text-current/60 text-center mt-2">
