@@ -46,9 +46,9 @@ const SimpleFallback = () => (
       <div className="text-sm opacity-70">Initializing 3D Environment</div>
       <div className="mt-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto"></div>
-      </div>
-    </div>
-  </Html>
+        </div>
+          </div>
+        </Html>
 );
 
 // Error Boundary Component for Three.js
@@ -72,8 +72,8 @@ class ThreeErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError:
 
   render() {
     if (this.state.hasError) {
-      return (
-        <Html center>
+  return (
+    <Html center>
           <div className="bg-red-900/90 backdrop-blur-xl border border-red-400 rounded-xl p-8 text-red-400 font-mono text-center shadow-lg shadow-red-400/25">
             <div className="text-2xl font-bold mb-4">⚠️ 3D ERROR</div>
             <div className="text-lg mb-2">Something went wrong with the 3D scene</div>
@@ -84,10 +84,10 @@ class ThreeErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError:
             >
               Refresh Page
             </button>
-          </div>
-        </Html>
-      );
-    }
+      </div>
+    </Html>
+  );
+}
 
     return this.props.children;
   }
@@ -302,7 +302,7 @@ export function CityScene() {
     const generateResponse = () => {
       if (selectedArtist.type === "AI Assistant") {
         return `As an AI curator, I can tell you about the artworks here, the history of this ${selectedArtist.isActive ? "active studio" : "gallery space"}, or help you navigate the virtual experience. What interests you most?`;
-      } else {
+        } else {
         const responses = [
           `That's a great question! As a ${selectedArtist.specialty}, I find inspiration in the intersection of traditional techniques and digital innovation.`,
           `You know, working ${selectedArtist.homeStudio ? `at ${selectedArtist.homeStudio}` : "as an independent artist"} has really shaped my perspective on art in the digital age.`,
@@ -412,17 +412,17 @@ export function CityScene() {
         </div>
       )}
 
-      <Canvas
-        camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
-        shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
-        gl={{ 
-          antialias: true, 
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.5,
-          outputColorSpace: THREE.SRGBColorSpace
-        }}
-        onClick={handleSceneClick}
-      >
+        <Canvas
+          camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
+          shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
+          gl={{ 
+            antialias: true, 
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 1.5,
+            outputColorSpace: THREE.SRGBColorSpace
+          }}
+          onClick={handleSceneClick}
+        >
         <Suspense fallback={<SimpleFallback />}>
           <ThreeErrorBoundary>
             {currentStudio ? (
@@ -492,8 +492,8 @@ export function CityScene() {
               </>
             )}
           </ThreeErrorBoundary>
-        </Suspense>
-      </Canvas>
+          </Suspense>
+        </Canvas>
       
       {/* CITY UI OVERLAY - Map, Studio Info, Controls */}
       <CityUI />

@@ -230,7 +230,7 @@ export function CityUI() {
         </Card>
       )}
       
-      {/* Enhanced Studio info panel */}
+      {/* Studio info panel */}
       {displayStudio && (
         <Card className="absolute bottom-4 left-4 w-96 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl">
           <CardContent className="p-6">
@@ -298,7 +298,6 @@ export function CityUI() {
                 ))}
               </div>
               
-              {/* Gallery Button */}
               <Button
                 className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
                 onClick={() => {

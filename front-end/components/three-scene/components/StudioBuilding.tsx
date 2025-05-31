@@ -384,8 +384,8 @@ export function StudioBuilding({ studio }: { studio: any }) {
         />
       </mesh>
       
-      {/* CYBERPUNK AI AGENT */}
-      <CyberpunkAgent agentId={studio.agentId} position={[0, 1, style.width/2 + 1]} isActive={isActive} />
+      {/* CYBERPUNK AI AGENT - REMOVED since agents should only be in galleries or roaming */}
+      {/* <CyberpunkAgent agentId={studio.agentId} position={[0, 1, style.width/2 + 1]} isActive={isActive} /> */}
       
       {/* ARTIST-SPECIFIC PARTICLE EFFECTS */}
       {isActive && (
@@ -395,15 +395,14 @@ export function StudioBuilding({ studio }: { studio: any }) {
         </>
       )}
 
-      {/* ENHANCED STUDIO INFO OVERLAY - ORIGINAL BETTER DESIGN */}
-      {showInterface && (
+      {/* ENHANCED STUDIO INFO OVERLAY - REMOVED TO REDUCE CLUTTER */}
+      {/* {showInterface && (
         <Html position={[0, style.height + 3, 0]} center>
           <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400 rounded-xl px-6 py-4 text-center shadow-lg shadow-cyan-400/50 animate-in fade-in duration-300 pointer-events-none">
             <div className="text-2xl font-bold text-white mb-2">{studio.name}</div>
             <div className="text-cyan-400 text-lg mb-2">{studio.artist}</div>
             <div className="text-purple-400 text-sm mb-3">{studio.specialty}</div>
             
-            {/* Enhanced interaction buttons */}
             <div className="flex gap-2 justify-center">
               <button 
                 className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer pointer-events-auto"
@@ -430,7 +429,7 @@ export function StudioBuilding({ studio }: { studio: any }) {
             </div>
           </div>
         </Html>
-      )}
+      )} */}
     </group>
   );
 } 

@@ -74,15 +74,6 @@ export function CyberpunkPlaza() {
         </mesh>
       </Float>
 
-      {/* Plaza Title */}
-      {isClient && (
-        <Html position={[0, 8, 0]}>
-          <div className="bg-black/80 backdrop-blur border border-cyan-400 rounded px-2 py-1 text-cyan-400 text-sm text-center font-mono pointer-events-none">
-            MEDICI CITY PLAZA
-          </div>
-        </Html>
-      )}
-
       {/* Ambient Sparkles */}
       <Sparkles
         count={200}

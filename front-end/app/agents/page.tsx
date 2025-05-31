@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAgents } from "@/lib/stores/use-agents";
-import { AgentCard } from "@/components/dashboard/agent-card";
+import { useState } from "react";
+import { useListAgents } from "@/hooks/useListAgents";
+import { AgentCardConfig } from "@/components/dashboard/agent-card-config";
 import { AgentTable } from "@/components/agents/agent-table";
 import { CreateAgentWizard } from "@/components/agents/create-agent-wizard";
 import { Button } from "@/components/ui/button";
@@ -15,46 +15,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Users, Grid, Table as TableIcon, Plus } from "lucide-react";
+import { Search, Users, Grid, Table as TableIcon, Plus, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AgentsPage() {
-  const {
-    agents,
-    isLoading,
-    fetchAgents,
-    searchTerm,
-    setSearchTerm,
-    selectedTags,
-    setSelectedTags,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    viewMode,
-    setViewMode
-  } = useAgents();
+  const { data: agents, isLoading, isError, error, refetch } = useListAgents();
   
   const [showCreateWizard, setShowCreateWizard] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<"price" | "output" | "date">("output");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
   
-  // Extract all unique specialties from agents
-  const allSpecialties = Array.from(
-    new Set(agents.flatMap((agent) => agent.specialty))
+  // Extract all unique traits from agents
+  const allTraits = Array.from(
+    new Set(agents.flatMap((agent) => agent.core_traits))
   );
   
-  // Filter agents based on search term and selected specialties
+  // Filter agents based on search term and selected traits
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
       searchTerm === "" ||
-      agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.description.toLowerCase().includes(searchTerm.toLowerCase());
+      agent.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.origin_story.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.archetype.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSpecialties =
+    const matchesTraits =
       selectedTags.length === 0 ||
-      selectedTags.some((specialty) =>
-        agent.specialty.includes(specialty)
+      selectedTags.some((trait) =>
+        agent.core_traits.includes(trait)
       );
     
-    return matchesSearch && matchesSpecialties;
+    return matchesSearch && matchesTraits;
   });
 
   // Sort filtered agents
@@ -63,17 +56,17 @@ export default function AgentsPage() {
     
     switch (sortBy) {
       case "price":
-        aValue = a.stats.totalStaked || 0;
-        bValue = b.stats.totalStaked || 0;
+        aValue = a.stats?.totalStaked || 0;
+        bValue = b.stats?.totalStaked || 0;
         break;
       case "output":
-        aValue = a.stats.artworksCreated;
-        bValue = b.stats.artworksCreated;
+        aValue = a.stats?.artworksCreated || 0;
+        bValue = b.stats?.artworksCreated || 0;
         break;
       case "date":
-        // Since there's no createdAt in the Agent interface, use name as fallback
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
+        // Since there's no createdAt in the AgentConfig interface, use display_name as fallback
+        aValue = a.display_name.toLowerCase();
+        bValue = b.display_name.toLowerCase();
         return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       default:
         return 0;
@@ -81,10 +74,6 @@ export default function AgentsPage() {
     
     return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
   });
-
-  useEffect(() => {
-    fetchAgents();
-  }, [fetchAgents]);
 
   return (
     <div className="min-h-screen pt-16">
@@ -106,6 +95,19 @@ export default function AgentsPage() {
               Create Agent
             </Button>
           </div>
+
+          {/* Error Alert */}
+          {isError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Failed to load agents from server. Showing cached data. 
+                <Button variant="link" className="p-0 h-auto ml-2" onClick={refetch}>
+                  Try again
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           
           {/* Search and Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -160,24 +162,24 @@ export default function AgentsPage() {
             </div>
           </div>
           
-          {/* Specialty Tags */}
-          {allSpecialties.length > 0 && (
+          {/* Trait Tags */}
+          {allTraits.length > 0 && (
             <div className="mt-4">
               <div className="flex flex-wrap gap-2">
-                {allSpecialties.map((specialty) => (
+                {allTraits.slice(0, 10).map((trait) => (
                   <Badge
-                    key={specialty}
-                    variant={selectedTags.includes(specialty) ? "default" : "outline"}
+                    key={trait}
+                    variant={selectedTags.includes(trait) ? "default" : "outline"}
                     className="cursor-pointer"
                     onClick={() => {
-                      if (selectedTags.includes(specialty)) {
-                        setSelectedTags(selectedTags.filter(tag => tag !== specialty));
+                      if (selectedTags.includes(trait)) {
+                        setSelectedTags(selectedTags.filter(tag => tag !== trait));
                       } else {
-                        setSelectedTags([...selectedTags, specialty]);
+                        setSelectedTags([...selectedTags, trait]);
                       }
                     }}
                   >
-                    {specialty}
+                    {trait}
                   </Badge>
                 ))}
                 {selectedTags.length > 0 && (
@@ -237,11 +239,13 @@ export default function AgentsPage() {
             )}
           </div>
         ) : viewMode === "table" ? (
-          <AgentTable agents={sortedAgents} />
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Table view coming soon...</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedAgents.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} />
+              <AgentCardConfig key={agent.id} agent={agent} />
             ))}
           </div>
         )}

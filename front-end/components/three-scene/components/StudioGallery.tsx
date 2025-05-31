@@ -2,9 +2,11 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, OrbitControls, Float, Sparkles, Environment, Sky, Stars, Cloud, ContactShadows, MeshTransmissionMaterial } from "@react-three/drei";
+import { Html, Float, Sparkles, Environment, Sky, Stars, Cloud, ContactShadows, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { CyberpunkAgent } from "./CyberpunkAgent";
+import { MovementController } from "./MovementController";
+import { useCityStore } from "@/lib/stores/use-city";
 
 // Client-side check to prevent SSR issues with Text components
 const isClient = typeof window !== 'undefined';
@@ -412,15 +414,6 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
             />
           </mesh>
           
-          {/* STUDIO NAME HOLOGRAM */}
-          <Html position={[0, 3, 0]} center>
-            <div className="bg-black/95 backdrop-blur-xl text-cyan-400 px-8 py-4 rounded-2xl text-center border-2 border-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse">
-              <div className="text-3xl font-bold text-white">{studio.name}</div>
-              <div className="text-lg opacity-80">Virtual Gallery</div>
-              <div className="text-sm text-purple-400 mt-2">Neural Art Exhibition</div>
-            </div>
-          </Html>
-          
           {/* ENERGY RINGS */}
           {[3, 4, 5].map((radius, i) => (
             <mesh key={i} rotation={[Math.PI / 4, 0, 0]}>
@@ -448,26 +441,26 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
         />
       ))}
 
-      {/* PARTICLE SYSTEMS */}
-      <Sparkles count={500} scale={50} size={2} speed={0.5} color="#00ffff" />
-      <Sparkles count={300} scale={30} size={1.5} speed={0.8} color="#ff00ff" />
+      {/* PARTICLE SYSTEMS - REDUCED TO AVOID CLUTTER */}
+      <Sparkles count={200} scale={50} size={1.5} speed={0.5} color="#00ffff" />
+      <Sparkles count={100} scale={30} size={1} speed={0.8} color="#ff00ff" />
       
-      {/* FLOATING DATA STREAMS */}
+      {/* FLOATING DATA STREAMS - REDUCED COUNT */}
       <group ref={particleRef}>
-        {Array.from({length: 20}).map((_, i) => (
+        {Array.from({length: 8}).map((_, i) => (
           <Float key={i} speed={1 + i * 0.1} rotationIntensity={0.2} floatIntensity={0.8}>
             <mesh position={[
               (Math.random() - 0.5) * 40,
               Math.random() * 20 + 5,
               (Math.random() - 0.5) * 40
             ]}>
-              <sphereGeometry args={[0.2]} />
+              <sphereGeometry args={[0.1]} />
               <meshStandardMaterial
                 color="#00ffff"
                 emissive="#00ffff"
-                emissiveIntensity={1.5}
+                emissiveIntensity={1}
                 transparent
-                opacity={0.8}
+                opacity={0.6}
               />
             </mesh>
           </Float>
@@ -475,18 +468,20 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       </group>
 
       {/* ENHANCED GALLERY CAMERA CONTROLS */}
-      <OrbitControls 
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        enableDamping={true}
-        dampingFactor={0.05}
-        maxDistance={60}
-        minDistance={3}
-        target={[0, 6, -2]}
-        maxPolarAngle={Math.PI / 2.2}
-        minPolarAngle={Math.PI / 8}
-      />
+      <MovementController />
+
+      {/* EXIT GALLERY BUTTON */}
+      <Html position={[-25, 15, -25]} center>
+        <button 
+          onClick={() => {
+            const { exitGalleryMode } = useCityStore.getState();
+            exitGalleryMode();
+          }}
+          className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-xl border-2 border-red-400 shadow-lg shadow-red-400/50 transition-all hover:scale-105 animate-pulse"
+        >
+          🚪 EXIT GALLERY
+        </button>
+      </Html>
     </>
   );
 } 
