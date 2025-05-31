@@ -226,6 +226,18 @@ export function CityUI() {
                   </div>
                 ))}
               </div>
+              
+              {/* Gallery Button */}
+              <Button
+                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
+                onClick={() => {
+                  // TODO: Add gallery functionality here
+                  console.log('Opening gallery for studio:', displayStudio.id);
+                  alert('🏛️ Opening gallery for ' + displayStudio.name);
+                }}
+              >
+                🏛️ Visit Studio
+              </Button>
             </div>
           </CardContent>
         </Card>
