@@ -1251,6 +1251,103 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
   );
 }
 
+// FLOATING ARTWORK WITH HOVER LABELS 🖼️
+function FloatingArtwork({ artwork, index, studio }: { artwork: any; index: number; studio: any }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
+      <group position={artwork.position} rotation={artwork.rotation}>
+        {/* HOLOGRAPHIC FRAME */}
+        <RoundedBox 
+          args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} 
+          radius={0.1} 
+          castShadow
+          onPointerEnter={() => setIsHovered(true)}
+          onPointerLeave={() => setIsHovered(false)}
+        >
+          <meshStandardMaterial 
+            color="#ffffff"
+            emissive="#00ffff"
+            emissiveIntensity={isHovered ? 2 : 1.5}
+            metalness={1}
+            roughness={0}
+            transparent
+            opacity={0.9}
+          />
+        </RoundedBox>
+        
+        {/* GLOWING BORDER */}
+        <RoundedBox 
+          args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
+          radius={0.12} 
+          position={[0, 0, 0.1]}
+        >
+          <meshStandardMaterial
+            color="#ff00ff"
+            emissive="#ff00ff"
+            emissiveIntensity={isHovered ? 3 : 2}
+            transparent
+            opacity={isHovered ? 0.9 : 0.7}
+          />
+        </RoundedBox>
+        
+        {/* ARTWORK IMAGE */}
+        <mesh position={[0, 0, 0.11]}>
+          <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
+          <meshStandardMaterial 
+            map={new THREE.TextureLoader().load(artwork.image)}
+            emissive="#ffffff"
+            emissiveIntensity={0.3}
+          />
+        </mesh>
+        
+        {/* HOLOGRAPHIC INTERFERENCE PATTERN */}
+        <mesh position={[0, 0, 0.12]}>
+          <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
+          <meshStandardMaterial 
+            color="#00ffff"
+            transparent 
+            opacity={0.1}
+          />
+        </mesh>
+        
+        {/* INDIVIDUAL ARTWORK SPOTLIGHTS */}
+        <spotLight
+          position={[0, 5, 3]}
+          target-position={artwork.position}
+          angle={0.5}
+          penumbra={0.5}
+          intensity={isHovered ? 3 : 2}
+          color="#ffffff"
+          castShadow
+        />
+        
+        {/* FLOATING ARTWORK INFO - Only show on hover */}
+        {isHovered && (
+          <Html position={[0, -(artwork.scale[1]/2 + 1), 0]} center>
+            <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-center border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px] animate-in fade-in duration-300">
+              <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
+              <div className="font-bold text-lg">{artwork.title}</div>
+              <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
+              <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
+            </div>
+          </Html>
+        )}
+        
+        {/* INDIVIDUAL PARTICLE AURA - More intense when hovered */}
+        <Sparkles 
+          count={isHovered ? 50 : 30} 
+          scale={artwork.scale[0] + 2} 
+          size={isHovered ? 2 : 1} 
+          speed={isHovered ? 2 : 1} 
+          color="#00ffff" 
+        />
+      </group>
+    </Float>
+  );
+}
+
 // STUDIO 3D GALLERY VIEW - SICKO MODE VR EXPERIENCE 🎨🔥
 function StudioGallery({ studio }: { studio: any }) {
   const { exitGalleryMode } = useCityStore();
@@ -1262,7 +1359,7 @@ function StudioGallery({ studio }: { studio: any }) {
     {
       id: "art-1",
       title: "Neural Dreams",
-      image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
+      image: "https://creator.nightcafe.studio/jobs/84lwOA5gRcR8SMq6m8ZD/84lwOA5gRcR8SMq6m8ZD--1--ljlvd.jpg",
       position: [0, 3, -8] as [number, number, number],
       rotation: [0, 0, 0] as [number, number, number],
       scale: [3, 2.2, 0.1] as [number, number, number]
@@ -1399,81 +1496,7 @@ function StudioGallery({ studio }: { studio: any }) {
       {/* INSANE FLOATING ARTWORKS - VR STYLE */}
       <group ref={galleryRef}>
         {realArtworks.map((artwork, index) => (
-          <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
-            <group position={artwork.position} rotation={artwork.rotation}>
-              {/* HOLOGRAPHIC FRAME */}
-              <RoundedBox args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} radius={0.1} castShadow>
-                <meshStandardMaterial 
-                  color="#ffffff"
-                  emissive="#00ffff"
-                  emissiveIntensity={1.5}
-                  metalness={1}
-                  roughness={0}
-                  transparent
-                  opacity={0.9}
-                />
-              </RoundedBox>
-              
-              {/* GLOWING BORDER */}
-              <RoundedBox 
-                args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
-                radius={0.12} 
-                position={[0, 0, 0.1]}
-              >
-                <meshStandardMaterial
-                  color="#ff00ff"
-                  emissive="#ff00ff"
-                  emissiveIntensity={2}
-                  transparent
-                  opacity={0.7}
-                />
-              </RoundedBox>
-              
-              {/* ARTWORK IMAGE */}
-              <mesh position={[0, 0, 0.11]}>
-                <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
-                <meshStandardMaterial 
-                  map={new THREE.TextureLoader().load(artwork.image)}
-                  emissive="#ffffff"
-                  emissiveIntensity={0.3}
-                />
-              </mesh>
-              
-              {/* HOLOGRAPHIC INTERFERENCE PATTERN */}
-              <mesh position={[0, 0, 0.12]}>
-                <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
-                <meshStandardMaterial 
-                  color="#00ffff"
-                  transparent 
-                  opacity={0.1}
-                />
-              </mesh>
-              
-              {/* INDIVIDUAL ARTWORK SPOTLIGHTS */}
-              <spotLight
-                position={[0, 5, 3]}
-                target-position={artwork.position}
-                angle={0.5}
-                penumbra={0.5}
-                intensity={2}
-                color="#ffffff"
-                castShadow
-              />
-              
-              {/* FLOATING ARTWORK INFO */}
-              <Html position={[0, -(artwork.scale[1]/2 + 1), 0]} center>
-                <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-center border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px]">
-                  <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
-                  <div className="font-bold text-lg">{artwork.title}</div>
-                  <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
-                  <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
-                </div>
-              </Html>
-              
-              {/* INDIVIDUAL PARTICLE AURA */}
-              <Sparkles count={30} scale={artwork.scale[0] + 2} size={1} speed={1} color="#00ffff" />
-            </group>
-          </Float>
+          <FloatingArtwork key={artwork.id} artwork={artwork} index={index} studio={studio} />
         ))}
       </group>
 
