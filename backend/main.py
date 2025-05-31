@@ -25,6 +25,7 @@ logger = logging.getLogger('FastAPIServer')
 from agent_system_langgraph import agent_manager
 from agent_config import agent_registry, AgentConfig, GeneratedArtworkDB, SessionLocal
 from agent_tools import custom_tool_manager
+from startup_agents import ensure_crypto_artists_loaded
 
 app = FastAPI(title="Memedici", version="2.0.0")
 
@@ -40,6 +41,12 @@ app.add_middleware(
 # Serve static files (for our HTML test interface)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+@app.on_event("startup")
+async def startup_event():
+    """Startup event to ensure crypto artist agents are loaded."""
+    logger.info("🚀 Starting Memedici server...")
+    ensure_crypto_artists_loaded()
+    logger.info("✅ Server startup complete")
 
 class ChatRequest(BaseModel):
     message: str
