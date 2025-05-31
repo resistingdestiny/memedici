@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const nextConfig = {
   // Enable static export for Netlify
   output: 'export',
@@ -17,12 +23,18 @@ const nextConfig = {
   },
   swcMinify: true,
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: false
   },
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: false
   },
-  webpack: (config, { isServer }) => {
+  experimental: {
+    // Improve build caching
+    turbotrace: {
+      logLevel: 'error'
+    }
+  },
+  webpack: (config, { isServer, dev }) => {
     config.ignoreWarnings = [
       { module: /node_modules\/node-fetch/ },
       { file: /node_modules\/node-fetch/ },
@@ -51,6 +63,12 @@ const nextConfig = {
       net: false,
       tls: false,
       'pino-pretty': false,
+    };
+
+    // Ensure proper module resolution for @/ alias
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, './')
     };
 
     return config;

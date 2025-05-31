@@ -29,6 +29,7 @@ import { Slider } from "@/components/ui/slider";
 import { stake } from "@/lib/stubs";
 import { type Agent } from "@/lib/stubs";
 import { useWallet } from "@/lib/stores/use-wallet";
+import { useWalletConnection } from "@/lib/stores/use-wallet";
 
 const stakeSchema = z.object({
   amount: z
@@ -47,7 +48,8 @@ interface StakeModalProps {
 export function StakeModal({ agent, onSuccess }: StakeModalProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isConnected, connect, balance } = useWallet();
+  const { isConnected, balance } = useWallet();
+  const { connect, connectors } = useWalletConnection();
   
   const form = useForm<StakeFormValues>({
     resolver: zodResolver(stakeSchema),
@@ -57,7 +59,9 @@ export function StakeModal({ agent, onSuccess }: StakeModalProps) {
   });
   
   const handleConnect = () => {
-    connect();
+    if (connectors[0]) {
+      connect({ connector: connectors[0] });
+    }
   };
 
   const onSubmit = async (data: StakeFormValues) => {

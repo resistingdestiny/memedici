@@ -25,7 +25,7 @@ import {
 import { useCityStore } from "@/lib/stores/use-city";
 import * as THREE from "three";
 import { CityUI } from "./city-ui";
-import { StudioBuilding } from "./components/StudioBuilding";
+// import { StudioBuilding } from "./components/StudioBuilding"; // Replaced with GLBStudio
 import { CyberpunkAgent } from "./components/CyberpunkAgent";
 import { RoamingArtist } from "./components/RoamingArtist";
 import { StudioGallery } from "./components/StudioGallery";
@@ -33,6 +33,8 @@ import { CityEnvironment, CityGround } from "./components/CityEnvironment";
 import { MovementController } from "./components/MovementController";
 import { CyberpunkPlaza, AgentBuildingHub, TradingMarketplace, LoadingFallback } from "./components/CityStructures";
 import { PastelHouse } from "./components/PastelHouse";
+import { GLBStudio } from "./components/GLBStudio";
+import { ExchangeBuilding, AgentBuilderHub } from "./components/GLBBuildings";
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
@@ -449,10 +451,46 @@ export function CityScene() {
                 {/* CITY GROUND */}
                 <CityGround />
                 
-                {/* SPREAD-OUT STUDIOS */}
-                {studios.map((studio) => (
-                  <StudioBuilding key={studio.id} studio={studio} />
-                ))}
+                {/* GLB STUDIOS - SPREAD OUT WITH DIFFERENT BUILDINGS */}
+                {studios.map((studio, index) => {
+                  // Map studios to available GLB files (excluding ams_s2 and cyberpunk_bar)
+                  const availableBuildings = [
+                    'hw_4_cyberpunk_sci-fi_building.glb',
+                    'make_your_own_steampunk_house.glb',
+                    'mushroom_house.glb',
+                    'oriental_building.glb',
+                    'the_neko_stop-off__-_hand-painted_diorama.glb',
+                    'treehouse_concept.glb'
+                  ];
+                  
+                  // Spread studios in a larger area with enough room
+                  const studioPositions = [
+                    [-80, 0, -60],   // Far northwest
+                    [90, 0, -50],    // Far northeast  
+                    [0, 0, 100],     // Far south
+                    [-70, 0, 80],    // Southwest
+                    [80, 0, 70],     // Southeast
+                    [-100, 0, 0],    // Far west
+                    [60, 0, -90],    // North
+                    [-40, 0, -80]    // Northwest
+                  ];
+                  
+                  const glbFile = availableBuildings[index % availableBuildings.length];
+                  const position = studioPositions[index] || [0, 0, 0];
+                  const scale = 2 + (index % 3) * 0.5; // Vary scale between 2-3.5
+                  const rotation = [0, (index * Math.PI / 4) % (Math.PI * 2), 0]; // Different rotations
+                  
+                  return (
+                    <GLBStudio 
+                      key={studio.id} 
+                      studio={studio} 
+                      glbFile={glbFile}
+                      position={position as [number, number, number]}
+                      scale={scale}
+                      rotation={rotation as [number, number, number]}
+                    />
+                  );
+                })}
                 
                 {/* ROAMING ARTISTS - GLIDING AROUND THE MAIN CITY 🎨👥 */}
                 {roamingArtists.map((artist) => (
@@ -484,9 +522,9 @@ export function CityScene() {
                 {/* ENHANCED CENTRAL PLAZA */}
                 <CyberpunkPlaza />
                 
-                {/* REPOSITIONED FACILITIES FOR BETTER SPACING */}
-                <AgentBuildingHub position={[80, 0, 80]} hubId="hub1" />
-                <TradingMarketplace position={[0, 5, 120]} marketId="market1" />
+                {/* NEW GLB FACILITIES */}
+                <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />
+                <AgentBuilderHub position={[120, 0, 0]} hubId="builder1" />
                 
                 {/* PASTEL HOUSES - RESIDENTIAL DISTRICT */}
                 <PastelHouse position={[30, 0, 30]} scale={3} rotation={[0, 0, 0]} />

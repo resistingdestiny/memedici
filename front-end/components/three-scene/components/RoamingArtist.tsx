@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial } from "@react-three/drei";
+import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 export function RoamingArtist({ 
@@ -24,14 +24,16 @@ export function RoamingArtist({
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const headRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  const eyeLeftRef = useRef<THREE.Mesh>(null);
-  const eyeRightRef = useRef<THREE.Mesh>(null);
-  const mouthRef = useRef<THREE.Mesh>(null);
-  const faceScreenRef = useRef<THREE.Mesh>(null);
-  const antennaRefs = useRef<THREE.Mesh[]>([]);
-  const lightRef = useRef<THREE.PointLight>(null);
+  // Comment out all the individual refs for the complex appearance
+  // const headRef = useRef<THREE.Mesh>(null);
+  // const ringRef = useRef<THREE.Mesh>(null);
+  // const eyeLeftRef = useRef<THREE.Mesh>(null);
+  // const eyeRightRef = useRef<THREE.Mesh>(null);
+  // const mouthRef = useRef<THREE.Mesh>(null);
+  // const faceScreenRef = useRef<THREE.Mesh>(null);
+  // const antennaRefs = useRef<THREE.Mesh[]>([]);
+  // const lightRef = useRef<THREE.PointLight>(null);
+  
   const [position] = useState<THREE.Vector3>(new THREE.Vector3(...initialPosition));
   const [velocity] = useState<THREE.Vector3>(new THREE.Vector3(
     (Math.random() - 0.5) * 2,
@@ -45,137 +47,67 @@ export function RoamingArtist({
   const [animationPhase] = useState<number>(Math.random() * Math.PI * 2);
   const [baseY] = useState<number>(initialPosition[1]);
 
-  // Enhanced roaming behavior with physics
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
+  // Load the cyberpunk robot GLB
+  const { scene } = useGLTF('/glb/cyberpunk_robot.glb');
+  const clonedScene = scene.clone();
 
-    // Skip movement when hovered to make clicking easier
-    if (!isHovered) {
-      // Smooth movement with physics-like behavior
-      const speed = homeStudio ? 0.08 : 0.12; // Much slower speeds for contemplative movement
-      const maxSpeed = speed;
-      const acceleration = 0.005; // Reduced acceleration for gentler movement
-      
-      // Add some randomness to movement every few seconds
-      if (Math.random() < 0.002) { // Less frequent direction changes
-        velocity.add(new THREE.Vector3(
-          (Math.random() - 0.5) * acceleration,
-          0,
-          (Math.random() - 0.5) * acceleration
-        ));
+  useFrame((state) => {
+    if (groupRef.current) {
+      // Only move if not hovered
+      if (!isHovered) {
+        // Update velocity occasionally
+        if (Math.random() < 0.005) {
+          velocity.set(
+            (Math.random() - 0.5) * 2,
+            0,
+            (Math.random() - 0.5) * 2
+          );
+          velocity.normalize().multiplyScalar(0.5);
+        }
+
+        // Movement boundaries for the larger city
+        const bounds = 150;
+        
+        // Update position
+        position.add(velocity.clone().multiplyScalar(0.01));
+        
+        // Bounce off boundaries
+        if (position.x > bounds || position.x < -bounds) {
+          velocity.x *= -1;
+          position.x = Math.max(-bounds, Math.min(bounds, position.x));
+        }
+        if (position.z > bounds || position.z < -bounds) {
+          velocity.z *= -1;
+          position.z = Math.max(-bounds, Math.min(bounds, position.z));
+        }
+
+        // Update direction for facing movement
+        if (velocity.length() > 0.01) {
+          setLastDirection(velocity.clone().normalize());
+        }
+
+        // Apply position to group
+        groupRef.current.position.copy(position);
+        
+        // Face movement direction
+        if (lastDirection.length() > 0) {
+          const targetRotation = Math.atan2(lastDirection.x, lastDirection.z);
+          groupRef.current.rotation.y = THREE.MathUtils.lerp(
+            groupRef.current.rotation.y,
+            targetRotation,
+            0.05
+          );
+        }
       }
 
-      // City boundary collision (enhanced for larger city)
-      const cityRadius = homeStudio ? 15 : 90; // Studio artists stay near their studios
-      const homePos = homeStudio ? getStudioPosition(homeStudio) : new THREE.Vector3(0, 0, 0);
-      const distanceFromHome = position.distanceTo(homePos);
+      // Idle floating animation
+      const time = state.clock.elapsedTime + animationPhase;
+      groupRef.current.position.y = baseY + Math.sin(time * 1.5) * 0.2;
       
-      if (distanceFromHome > cityRadius) {
-        // Bounce back towards home/center
-        const directionToHome = homePos.clone().sub(position).normalize();
-        velocity.add(directionToHome.multiplyScalar(acceleration * 2));
-      }
-
-      // Limit velocity
-      if (velocity.length() > maxSpeed) {
-        velocity.normalize().multiplyScalar(maxSpeed);
-      }
-
-      // Apply velocity to position
-      position.add(velocity.clone().multiplyScalar(delta * 60));
-      
-      // Update group position
-      groupRef.current.position.copy(position);
-      
-      // Track movement direction for rotation
-      if (velocity.length() > 0.01) {
-        setLastDirection(velocity.clone().normalize());
-      }
-      
-      // Rotate agent to face movement direction
-      if (lastDirection && groupRef.current) {
-        const targetRotation = Math.atan2(lastDirection.x, lastDirection.z);
-        groupRef.current.rotation.y = THREE.MathUtils.lerp(
-          groupRef.current.rotation.y,
-          targetRotation,
-          0.1
-        );
-      }
-    }
-
-    // Cyberpunk agent animations with enhanced effects
-    if (meshRef.current) {
-      // Enhanced floating with subtle vertical bobbing
-      const slowBob = Math.sin(state.clock.elapsedTime * 1.5 + animationPhase) * 0.15;
-      const fastBob = Math.sin(state.clock.elapsedTime * 3 + animationPhase) * 0.05;
-      meshRef.current.position.y = 1 + slowBob + fastBob;
-      
-      // Subtle rotation breathing effect
-      const breatheScale = 1 + Math.sin(state.clock.elapsedTime * 2 + animationPhase) * 0.02;
-      meshRef.current.scale.setScalar(breatheScale);
-    }
-
-    if (headRef.current) {
-      // Enhanced head scanning with more natural movement
-      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.2 + animationPhase) * 0.4;
-      headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.8 + animationPhase) * 0.1;
-    }
-
-    // Enhanced Energy ring rotation with multiple axes
-    if (ringRef.current) {
-      ringRef.current.rotation.y = state.clock.elapsedTime * 2 + animationPhase;
-      ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 1.5 + animationPhase) * 0.2;
-      ringRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.8 + animationPhase) * 0.1;
-      
-      // Subtle ring scale pulsing
-      const ringPulse = 1 + Math.sin(state.clock.elapsedTime * 4 + animationPhase) * 0.05;
-      ringRef.current.scale.setScalar(ringPulse);
-    }
-
-    // Eye blinking effect
-    if (eyeLeftRef.current && eyeRightRef.current) {
-      const blinkTime = state.clock.elapsedTime * 4;
-      const blink = Math.sin(blinkTime) > 0.95 ? 0.1 : 1;
-      (eyeLeftRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = blink * 2;
-      (eyeRightRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = blink * 2;
-    }
-
-    // Mouth LED strip animation
-    if (mouthRef.current) {
-      const mouthTime = state.clock.elapsedTime * 3;
-      (mouthRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 
-        0.4 + Math.sin(mouthTime) * 0.3;
-    }
-
-    // Antenna animations
-    antennaRefs.current.forEach((antenna, i) => {
-      if (antenna) {
-        antenna.rotation.y = state.clock.elapsedTime * (0.5 + i * 0.25);
-        antenna.position.y = 3.5 + Math.sin(state.clock.elapsedTime * 1.5 + i) * 0.1;
-      }
-    });
-
-    // Pulse the light intensity
-    if (lightRef.current) {
-      const t = state.clock.elapsedTime;
-      lightRef.current.intensity = 0.5 + Math.sin(t * 3) * 0.5; // Pulsing between 0 and 1
+      // Subtle rotation
+      groupRef.current.rotation.y += Math.sin(time * 0.5) * 0.001;
     }
   });
-
-  // Get studio position for studio artists
-  const getStudioPosition = (studioName: string): THREE.Vector3 => {
-    const studioPositions: { [key: string]: THREE.Vector3 } = {
-      "Leonardo Studio": new THREE.Vector3(-40, 0, -30),
-      "Raphael Studio": new THREE.Vector3(45, 0, -25),
-      "Michelangelo Studio": new THREE.Vector3(0, 0, 50),
-      "Caravaggio Studio": new THREE.Vector3(-35, 0, 35),
-      "Da Vinci Studio": new THREE.Vector3(40, 0, 30),
-      "Picasso Studio": new THREE.Vector3(-60, 0, 0),
-      "Monet Studio": new THREE.Vector3(25, 0, -45),
-      "Van Gogh Studio": new THREE.Vector3(-25, 0, -40)
-    };
-    return studioPositions[studioName] || new THREE.Vector3(0, 0, 0);
-  };
 
   const handleClick = (e: any) => {
     e.stopPropagation();
@@ -201,7 +133,19 @@ export function RoamingArtist({
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* Enhanced AI Agent Body with better PBR materials */}
+      {/* CYBERPUNK ROBOT GLB MODEL */}
+      <primitive 
+        object={clonedScene}
+        scale={1.5}
+        castShadow
+        receiveShadow
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      />
+
+      {/* COMMENT OUT ALL THE COMPLEX CUSTOM APPEARANCE */}
+      {/* 
       <RoundedBox ref={meshRef} args={[0.8, 2, 0.8]} radius={0.1} position={[0, 1, 0]} castShadow receiveShadow
         onClick={handleClick}
         onPointerOver={handlePointerOver}
@@ -218,7 +162,6 @@ export function RoamingArtist({
         />
       </RoundedBox>
 
-      {/* Enhanced Spherical Head with better materials */}
       <Sphere ref={headRef} args={[0.4, 32, 32]} position={[0, 1.5, 0]} castShadow>
         <meshStandardMaterial 
           color="#ffffff"
@@ -230,7 +173,6 @@ export function RoamingArtist({
         />
       </Sphere>
 
-      {/* Digital Face Screen with enhanced emission */}
       <mesh ref={faceScreenRef} position={[0, 1.5, 0.35]}>
         <planeGeometry args={[0.6, 0.4]} />
         <meshStandardMaterial 
@@ -244,7 +186,6 @@ export function RoamingArtist({
         />
       </mesh>
 
-      {/* Enhanced Glowing Eyes */}
       <mesh ref={eyeLeftRef} position={[-0.15, 1.6, 0.35]}>
         <sphereGeometry args={[0.05]} />
         <meshStandardMaterial 
@@ -266,7 +207,6 @@ export function RoamingArtist({
         />
       </mesh>
 
-      {/* Enhanced LED Mouth Strip */}
       <mesh ref={mouthRef} position={[0, 1.3, 0.35]}>
         <boxGeometry args={[0.3, 0.03, 0.01]} />
         <meshStandardMaterial 
@@ -278,7 +218,6 @@ export function RoamingArtist({
         />
       </mesh>
 
-      {/* Enhanced Energy Ring Around Agent */}
       <mesh ref={ringRef} position={[0, 1.5, 0]}>
         <torusGeometry args={[1, 0.05, 8, 32]} />
         <meshStandardMaterial
@@ -292,7 +231,6 @@ export function RoamingArtist({
         />
       </mesh>
 
-      {/* Enhanced Holographic Scanning Lines */}
       {[0.5, 1, 1.5, 2].map((y, i) => (
         <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
           <ringGeometry args={[0.2, 1.2, 16]} />
@@ -308,7 +246,6 @@ export function RoamingArtist({
         </mesh>
       ))}
 
-      {/* Enhanced Spinning Antenna Array */}
       {[0, 1, 2].map((i) => (
         <mesh 
           key={i}
@@ -330,7 +267,6 @@ export function RoamingArtist({
         </mesh>
       ))}
 
-      {/* Enhanced floating effect ring */}
       <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.2}>
         <mesh position={[0, 2.5, 0]}>
           <torusGeometry args={[1.5, 0.1, 8, 16]} />
@@ -346,7 +282,6 @@ export function RoamingArtist({
         </mesh>
       </Float>
 
-      {/* Enhanced Pulsing Light above head */}
       <pointLight 
         ref={lightRef}
         position={[0, 3, 0]} 
@@ -356,7 +291,6 @@ export function RoamingArtist({
         decay={2}
       />
 
-      {/* Enhanced Particle Aura - Primary layer */}
       <Sparkles 
         count={50} 
         scale={3} 
@@ -366,65 +300,39 @@ export function RoamingArtist({
         opacity={0.8}
       />
       
-      {/* Secondary particle layer */}
       <Sparkles 
         count={30} 
         scale={2} 
-        size={1} 
+        size={1.5} 
         speed={1.5} 
-        color="#ffffff"
-        opacity={0.4}
-      />
-      
-      {/* Data stream particles */}
-      <Sparkles 
-        count={20} 
-        scale={1.5} 
-        size={0.5} 
-        speed={2} 
         color="#ffff00"
         opacity={0.6}
       />
+      */}
 
-      {/* Enhanced Status Indicator */}
-      <mesh position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[1.3, 1.3, 0.1]} />
-        <meshStandardMaterial 
-          color="#003366"
-          emissive={color}
-          emissiveIntensity={0.3}
-          roughness={0.4}
-          metalness={0.6}
-        />
-      </mesh>
-
-      {/* Information Panel when hovered - INCLUDES NAME NOW */}
+      {/* Keep the hover information panel */}
       {isHovered && (
-        <Html position={[0, 5, 0]}>
-          <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-lg px-3 py-2 text-cyan-400 font-mono text-center shadow-lg shadow-cyan-400/25 animate-in fade-in duration-200 pointer-events-none">
-            <div className="text-sm font-bold text-white">{name}</div>
-            <div className="text-xs opacity-80">{specialty}</div>
+        <Html position={[0, 4, 0]} center>
+          <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-xl px-4 py-3 text-cyan-400 font-mono animate-in fade-in duration-200 shadow-lg shadow-cyan-400/25 min-w-[200px]">
+            <div className="text-lg font-bold text-center">{name}</div>
+            <div className="text-sm text-center mb-2">{specialty}</div>
             {homeStudio && (
-              <div className="text-xs text-green-400">📍 {homeStudio}</div>
+              <div className="text-xs text-green-400 text-center mb-2">📍 {homeStudio}</div>
             )}
-            <div className="text-xs text-yellow-400 mt-1">🖱️ Click to Chat</div>
+            <div className="text-xs text-purple-400 text-center mb-3">
+              {homeStudio ? 'Studio Artist' : 'Independent Artist'}
+            </div>
+            <div className="text-center">
+              <div className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs py-1 px-3 rounded transition-colors cursor-pointer">
+                🗨️ Click to Chat
+              </div>
+            </div>
           </div>
         </Html>
       )}
-
-      {/* Studio Artist Indicator */}
-      {homeStudio && (
-        <mesh position={[0, 0.2, 0]}>
-          <cylinderGeometry args={[0.7, 0.7, 0.1]} />
-          <meshStandardMaterial 
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      )}
     </group>
   );
-} 
+}
+
+// Preload the cyberpunk robot GLB
+useGLTF.preload('/glb/cyberpunk_robot.glb'); 

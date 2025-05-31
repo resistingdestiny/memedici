@@ -124,6 +124,7 @@ export const useAgents = create<AgentsState>((set, get) => ({
         name: data.name || "New Agent",
         description: data.description || "",
         specialty: data.specialty || [],
+        collective: data.collective || "Independent",
         avatar: data.avatar || "https://api.dicebear.com/7.x/avatars/svg?seed=1",
         featured: false,
         gallery: null,
