@@ -34,7 +34,8 @@ export function CityUI() {
     stopTour,
     moveToStudio,
     setCameraPosition,
-    setCameraTarget
+    setCameraTarget,
+    enterGalleryMode
   } = useCityStore();
   
   const { agents, fetchAgents } = useAgents();
@@ -231,9 +232,7 @@ export function CityUI() {
               <Button
                 className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
                 onClick={() => {
-                  // TODO: Add gallery functionality here
-                  console.log('Opening gallery for studio:', displayStudio.id);
-                  alert('🏛️ Opening gallery for ' + displayStudio.name);
+                  enterGalleryMode(displayStudio.id);
                 }}
               >
                 🏛️ Visit Studio
