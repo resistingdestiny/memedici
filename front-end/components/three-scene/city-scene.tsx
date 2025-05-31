@@ -18,10 +18,15 @@ import {
   MeshTransmissionMaterial,
   MeshReflectorMaterial,
   PointerLockControls,
-  KeyboardControls
+  KeyboardControls,
+  useTexture,
+  Text,
+  Box,
+  Plane
 } from "@react-three/drei";
 import { useCityStore } from "@/lib/stores/use-city";
 import * as THREE from "three";
+import { CityUI } from "./city-ui";
 
 // KEYBOARD CONTROLS MAPPING 🎮
 const MOVEMENT_KEYS = [
@@ -1246,118 +1251,344 @@ function TradingMarketplace({ position, marketId }: { position: [number, number,
   );
 }
 
-// STUDIO 3D GALLERY VIEW 🎨
+// STUDIO 3D GALLERY VIEW - SICKO MODE VR EXPERIENCE 🎨🔥
 function StudioGallery({ studio }: { studio: any }) {
   const { exitGalleryMode } = useCityStore();
   const galleryRef = useRef<THREE.Group>(null);
+  const particleRef = useRef<THREE.Group>(null);
+  
+  // Real artwork URLs for the gallery
+  const realArtworks = [
+    {
+      id: "art-1",
+      title: "Neural Dreams",
+      image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
+      position: [0, 3, -8] as [number, number, number],
+      rotation: [0, 0, 0] as [number, number, number],
+      scale: [3, 2.2, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-2", 
+      title: "Digital Renaissance",
+      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
+      position: [8, 5, -4] as [number, number, number],
+      rotation: [0, -Math.PI/4, 0] as [number, number, number],
+      scale: [2.5, 3, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-3",
+      title: "Cyber Baroque",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
+      position: [-8, 2, -4] as [number, number, number],
+      rotation: [0, Math.PI/4, 0] as [number, number, number],
+      scale: [3.5, 2.5, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-4",
+      title: "AI Abstraction",
+      image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
+      position: [5, 1, 8] as [number, number, number],
+      rotation: [0, Math.PI, 0] as [number, number, number],
+      scale: [2.8, 3.2, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-5",
+      title: "Quantum Canvas",
+      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
+      position: [-5, 6, 6] as [number, number, number],
+      rotation: [0, -Math.PI/2, 0] as [number, number, number],
+      scale: [4, 2, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-6",
+      title: "Holographic Memory",
+      image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
+      position: [0, 8, 4] as [number, number, number],
+      rotation: [Math.PI/6, 0, 0] as [number, number, number],
+      scale: [3, 2.5, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-7",
+      title: "Virtual Visions",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
+      position: [10, 3, 0] as [number, number, number],
+      rotation: [0, -Math.PI/2, Math.PI/12] as [number, number, number],
+      scale: [2.5, 3.5, 0.1] as [number, number, number]
+    },
+    {
+      id: "art-8",
+      title: "Data Streams",
+      image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
+      position: [-10, 4, 2] as [number, number, number],
+      rotation: [0, Math.PI/2, -Math.PI/12] as [number, number, number],
+      scale: [3.2, 2.8, 0.1] as [number, number, number]
+    }
+  ];
   
   useFrame((state) => {
     if (galleryRef.current) {
-      // Gentle rotation
-      galleryRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+      // Gentle ambient rotation
+      galleryRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.05;
+    }
+    
+    if (particleRef.current) {
+      particleRef.current.rotation.y += 0.001;
+      particleRef.current.rotation.x += 0.0005;
     }
   });
 
   return (
     <>
-      {/* GALLERY LIGHTING */}
-      <ambientLight intensity={0.4} color="#ffffff" />
-      <directionalLight position={[10, 10, 5]} intensity={1} color="#ffffff" castShadow />
-      <pointLight position={[0, 8, 0]} intensity={2} color="#ffdd88" />
+      {/* INSANE CYBERPUNK LIGHTING SYSTEM 🌈 */}
+      <ambientLight intensity={0.3} color="#0a0a2e" />
       
-      {/* GALLERY FLOOR */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[40, 40]} />
+      {/* MAIN GALLERY SPOTLIGHTS */}
+      <directionalLight position={[0, 20, 0]} intensity={2} color="#ffffff" castShadow />
+      <pointLight position={[0, 15, 0]} intensity={3} color="#00ffff" distance={50} />
+      <pointLight position={[15, 10, 15]} intensity={2} color="#ff00ff" distance={40} />
+      <pointLight position={[-15, 10, -15]} intensity={2} color="#ffff00" distance={40} />
+      <pointLight position={[0, 25, 0]} intensity={4} color="#ffffff" distance={60} />
+      
+      {/* NEON ACCENT LIGHTS */}
+      <spotLight position={[20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#00ff88" />
+      <spotLight position={[-20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#ff0088" />
+      <spotLight position={[0, 15, 20]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#8800ff" />
+      
+      {/* CYBERPUNK FOG */}
+      <fog attach="fog" args={["#000511", 20, 100]} />
+      
+      {/* HOLOGRAPHIC FLOOR */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
+        <planeGeometry args={[60, 60]} />
         <meshStandardMaterial 
-          color="#f8f8f8"
+          color="#001122"
+          emissive="#001155"
+          emissiveIntensity={0.5}
+          metalness={1}
           roughness={0.1}
-          metalness={0.1}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+      
+      {/* NEON GRID FLOOR OVERLAY */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, 0]}>
+        <planeGeometry args={[60, 60]} />
+        <meshStandardMaterial
+          color="#00ffff"
+          emissive="#00ffff"
+          emissiveIntensity={1}
+          transparent
+          opacity={0.2}
+          wireframe
         />
       </mesh>
 
-      {/* GALLERY WALLS */}
-      {[
-        { pos: [0, 5, -20] as [number, number, number], rot: [0, 0, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
-        { pos: [0, 5, 20] as [number, number, number], rot: [0, 0, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
-        { pos: [-20, 5, 0] as [number, number, number], rot: [0, Math.PI/2, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] },
-        { pos: [20, 5, 0] as [number, number, number], rot: [0, Math.PI/2, 0] as [number, number, number], size: [40, 10, 1] as [number, number, number] }
-      ].map((wall, i) => (
-        <mesh key={i} position={wall.pos} rotation={wall.rot} receiveShadow>
-          <boxGeometry args={wall.size} />
-          <meshStandardMaterial color="#ffffff" />
-        </mesh>
-      ))}
+      {/* FLOATING ENERGY CEILING */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 25, 0]}>
+        <planeGeometry args={[60, 60]} />
+        <meshStandardMaterial 
+          color="#000033"
+          emissive="#000066"
+          emissiveIntensity={1}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
 
-      {/* ARTWORKS DISPLAYED ON WALLS */}
+      {/* INSANE FLOATING ARTWORKS - VR STYLE */}
       <group ref={galleryRef}>
-        {studio.recentArtworks.map((artwork: any, index: number) => {
-          const angle = (index / studio.recentArtworks.length) * Math.PI * 2;
-          const radius = 15;
-          const x = Math.cos(angle) * radius;
-          const z = Math.sin(angle) * radius;
-          
-          return (
-            <group key={artwork.id} position={[x, 3, z]} rotation={[0, -angle + Math.PI, 0]}>
-              {/* GALLERY ARTWORK FRAME */}
-              <Float speed={0.5} rotationIntensity={0.02} floatIntensity={0.1}>
-                <ArtworkDisplay 
-                  artwork={artwork} 
-                  position={[0, 0, 0]} 
+        {realArtworks.map((artwork, index) => (
+          <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
+            <group position={artwork.position} rotation={artwork.rotation}>
+              {/* HOLOGRAPHIC FRAME */}
+              <RoundedBox args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} radius={0.1} castShadow>
+                <meshStandardMaterial 
+                  color="#ffffff"
+                  emissive="#00ffff"
+                  emissiveIntensity={1.5}
+                  metalness={1}
+                  roughness={0}
+                  transparent
+                  opacity={0.9}
                 />
-              </Float>
+              </RoundedBox>
               
-              {/* ARTWORK SPOTLIGHT */}
+              {/* GLOWING BORDER */}
+              <RoundedBox 
+                args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
+                radius={0.12} 
+                position={[0, 0, 0.1]}
+              >
+                <meshStandardMaterial
+                  color="#ff00ff"
+                  emissive="#ff00ff"
+                  emissiveIntensity={2}
+                  transparent
+                  opacity={0.7}
+                />
+              </RoundedBox>
+              
+              {/* ARTWORK IMAGE */}
+              <mesh position={[0, 0, 0.11]}>
+                <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
+                <meshStandardMaterial 
+                  map={new THREE.TextureLoader().load(artwork.image)}
+                  emissive="#ffffff"
+                  emissiveIntensity={0.3}
+                />
+              </mesh>
+              
+              {/* HOLOGRAPHIC INTERFERENCE PATTERN */}
+              <mesh position={[0, 0, 0.12]}>
+                <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
+                <meshStandardMaterial 
+                  color="#00ffff"
+                  transparent 
+                  opacity={0.1}
+                />
+              </mesh>
+              
+              {/* INDIVIDUAL ARTWORK SPOTLIGHTS */}
               <spotLight
-                position={[0, 8, 3]}
-                target-position={[x, 3, z]}
-                angle={0.3}
+                position={[0, 5, 3]}
+                target-position={artwork.position}
+                angle={0.5}
                 penumbra={0.5}
-                intensity={1}
+                intensity={2}
                 color="#ffffff"
                 castShadow
               />
+              
+              {/* FLOATING ARTWORK INFO */}
+              <Html position={[0, -(artwork.scale[1]/2 + 1), 0]} center>
+                <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-center border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px]">
+                  <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
+                  <div className="font-bold text-lg">{artwork.title}</div>
+                  <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
+                  <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
+                </div>
+              </Html>
+              
+              {/* INDIVIDUAL PARTICLE AURA */}
+              <Sparkles count={30} scale={artwork.scale[0] + 2} size={1} speed={1} color="#00ffff" />
             </group>
-          );
-        })}
+          </Float>
+        ))}
       </group>
 
-      {/* CENTRAL STUDIO LOGO/NAME */}
-      <Float speed={1} rotationIntensity={0.1} floatIntensity={0.3}>
-        <mesh position={[0, 8, 0]}>
-          <cylinderGeometry args={[0.5, 0.5, 0.1]} />
-          <meshStandardMaterial color="#000000" />
-        </mesh>
-        <Html position={[0, 8.5, 0]} center>
-          <div className="bg-black/90 backdrop-blur-xl text-white px-6 py-3 rounded-xl text-center border border-white/20">
-            <div className="text-2xl font-bold text-gold-400">{studio.name}</div>
-            <div className="text-sm opacity-70">Virtual Gallery</div>
-          </div>
-        </Html>
+      {/* CENTRAL STUDIO MONUMENT */}
+      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.5}>
+        <group position={[0, 12, 0]}>
+          {/* FLOATING CRYSTAL */}
+          <mesh>
+            <octahedronGeometry args={[2]} />
+            <MeshTransmissionMaterial
+              samples={32}
+              resolution={1024}
+              transmission={0.95}
+              roughness={0}
+              clearcoat={1}
+              thickness={1}
+              chromaticAberration={1.5}
+              distortionScale={0.5}
+              temporalDistortion={0.3}
+              color="#00ffff"
+            />
+          </mesh>
+          
+          {/* STUDIO NAME HOLOGRAM */}
+          <Html position={[0, 3, 0]} center>
+            <div className="bg-black/95 backdrop-blur-xl text-cyan-400 px-8 py-4 rounded-2xl text-center border-2 border-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse">
+              <div className="text-3xl font-bold text-white">{studio.name}</div>
+              <div className="text-lg opacity-80">Virtual Gallery</div>
+              <div className="text-sm text-purple-400 mt-2">Neural Art Exhibition</div>
+            </div>
+          </Html>
+          
+          {/* ENERGY RINGS */}
+          {[3, 4, 5].map((radius, i) => (
+            <mesh key={i} rotation={[Math.PI / 4, 0, 0]}>
+              <torusGeometry args={[radius, 0.1, 8, 32]} />
+              <meshStandardMaterial
+                color="#ffff00"
+                emissive="#ffff00"
+                emissiveIntensity={2}
+                transparent
+                opacity={0.8}
+              />
+            </mesh>
+          ))}
+        </group>
       </Float>
 
-      {/* EXIT GALLERY BUTTON */}
-      <Html position={[0, 1, 18]} center>
-        <button 
-          className="bg-red-500 hover:bg-red-400 text-white font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer shadow-lg"
-          onClick={(e) => {
-            e.stopPropagation();
-            exitGalleryMode();
-          }}
-        >
-          🚪 EXIT GALLERY
-        </button>
-      </Html>
+      {/* MASSIVE PARTICLE SYSTEMS */}
+      <Sparkles count={1000} scale={50} size={2} speed={0.5} color="#00ffff" />
+      <Sparkles count={500} scale={30} size={1.5} speed={0.8} color="#ff00ff" />
+      <Sparkles count={300} scale={20} size={1} speed={1.2} color="#ffff00" />
+      
+      {/* FLOATING DATA STREAMS */}
+      <group ref={particleRef}>
+        {Array.from({length: 20}).map((_, i) => (
+          <Float key={i} speed={1 + i * 0.1} rotationIntensity={0.2} floatIntensity={0.8}>
+            <mesh position={[
+              (Math.random() - 0.5) * 40,
+              Math.random() * 20 + 5,
+              (Math.random() - 0.5) * 40
+            ]}>
+              <sphereGeometry args={[0.2]} />
+              <meshStandardMaterial
+                color="#00ffff"
+                emissive="#00ffff"
+                emissiveIntensity={3}
+                transparent
+                opacity={0.8}
+              />
+            </mesh>
+          </Float>
+        ))}
+      </group>
 
-      {/* GALLERY CAMERA CONTROLS */}
+      {/* CYBERPUNK EXIT PORTAL */}
+      <Float speed={2} rotationIntensity={0.3} floatIntensity={0.2}>
+        <group position={[0, 3, 25]}>
+          <mesh>
+            <torusGeometry args={[3, 0.5, 16, 32]} />
+            <meshStandardMaterial
+              color="#ff0000"
+              emissive="#ff0000"
+              emissiveIntensity={2}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+          <Html position={[0, 0, 0]} center>
+            <button 
+              className="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-500/50 border-2 border-red-500 backdrop-blur-xl"
+              onClick={(e) => {
+                e.stopPropagation();
+                exitGalleryMode();
+              }}
+            >
+              🚪 EXIT GALLERY
+            </button>
+          </Html>
+          <Sparkles count={100} scale={8} size={3} speed={2} color="#ff0000" />
+        </group>
+      </Float>
+
+      {/* ENHANCED GALLERY CAMERA CONTROLS */}
       <OrbitControls 
         enablePan={true}
         enableZoom={true}
         enableRotate={true}
         enableDamping={true}
-        dampingFactor={0.1}
-        maxDistance={25}
-        minDistance={3}
-        target={[0, 3, 0]}
+        dampingFactor={0.05}
+        maxDistance={40}
+        minDistance={5}
+        target={[0, 8, 0]}
+        maxPolarAngle={Math.PI / 2.2}
+        minPolarAngle={Math.PI / 6}
       />
     </>
   );
