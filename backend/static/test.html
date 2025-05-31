@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memedici - AI Creative Platform</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #f59e0b;
+            --bg-dark: #1a1b23;
+            --bg-card: #252631;
+            --text-light: #e5e7eb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #2d1b69 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .agent-selection {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .agent-selection h3 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .agent-header h3 {
+            margin-bottom: 0;
+        }
+
+        .create-agent-btn {
+            background: linear-gradient(135deg, var(--accent-color), #f97316);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .create-agent-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .agent-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .agent-card {
+            background: linear-gradient(135deg, var(--primary-color)20, var(--secondary-color)20);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .agent-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .agent-card.selected {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .agent-card h4 {
+            color: var(--text-light);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .agent-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .agent-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .chat-section {
+            background: var(--bg-card);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px 15px 0 0;
+        }
+
+        .chat-header h3 {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--bg-dark);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            margin-left: auto;
+            color: white;
+        }
+
+        .message.agent {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .message.system {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            text-align: center;
+            margin: 10px auto;
+            max-width: 60%;
+            font-size: 0.9rem;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card);
+            border-radius: 0 0 15px 15px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: var(--text-light);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tools-section {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            margin-top: 30px;
+        }
+
+        .tools-section h3 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tool-card {
+            background: var(--bg-dark);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .tool-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .tool-category {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-color);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online { background: var(--success-color); }
+        .status-busy { background: var(--accent-color); }
+        .status-offline { background: var(--error-color); }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Form Styles */
+        .agent-form {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .form-section h3 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input[type="range"] {
+            width: calc(100% - 60px);
+            margin-right: 10px;
+        }
+
+        #temperatureValue {
+            color: var(--accent-color);
+            font-weight: 600;
+            min-width: 40px;
+            display: inline-block;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .checkbox-label:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            background: var(--border-color);
+        }
+
+        /* Custom Tools Styles */
+        .custom-tools-section {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            background: var(--bg-dark);
+        }
+
+        .selected-tools {
+            min-height: 40px;
+            margin-bottom: 15px;
+        }
+
+        .selected-tool {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 4px;
+            font-size: 0.9rem;
+            gap: 8px;
+        }
+
+        .selected-tool .remove-tool {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .selected-tool .remove-tool:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tool Creation Modal Styles */
+        .tool-form {
+            padding: 30px;
+        }
+
+        .tool-input-method {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tool-input-method h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 20px;
+        }
+
+        .method-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: var(--bg-dark);
+        }
+
+        .method-option:hover {
+            border-color: var(--primary-color);
+        }
+
+        .method-option input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .method-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .input-section {
+            transition: opacity 0.3s ease;
+        }
+
+        .auth-details {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .auth-help {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* File Upload Styles */
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-dark);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--accent-color);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .upload-placeholder {
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-placeholder p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .upload-placeholder small {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* JSON/Code textarea styling */
+        textarea[id$="Schema"],
+        textarea[id$="Example"],
+        textarea[id$="Preview"] {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Tool Category Badges */
+        .tool-category-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tool-category-badge.art_creation { background: rgba(16, 185, 129, 0.2); color: var(--success-color); }
+        .tool-category-badge.analysis { background: rgba(99, 102, 241, 0.2); color: var(--primary-color); }
+        .tool-category-badge.enhancement { background: rgba(139, 92, 246, 0.2); color: var(--secondary-color); }
+        .tool-category-badge.blockchain { background: rgba(245, 158, 11, 0.2); color: var(--accent-color); }
+        .tool-category-badge.utility { background: rgba(156, 163, 175, 0.2); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Memedici</h1>
+            <p>AI-Powered Creative Platform - Where artificial intelligence meets artistic expression</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="agent-selection">
+                <div class="agent-header">
+                    <h3>🏛️ Select Your Creative Agent</h3>
+                    <button id="createAgentBtn" class="create-agent-btn">+ Create New Agent</button>
+                </div>
+                <div class="agent-grid" id="agentGrid">
+                    <!-- Agents will be loaded here -->
+                </div>
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h3 id="chatTitle">
+                        <span class="status-indicator status-offline"></span>
+                        Select an agent to begin creating
+                    </h3>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">
+                        Welcome to Memedici! Select an agent from the left to start your artistic journey.
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <div class="input-container">
+                        <textarea 
+                            id="messageInput" 
+                            class="message-input" 
+                            placeholder="Describe your creative vision... 🎨"
+                            rows="2"
+                            disabled
+                        ></textarea>
+                        <button id="sendBtn" class="send-btn" disabled>Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-section">
+            <h3>🛠️ Available Creative Tools</h3>
+            <div class="tools-grid" id="toolsGrid">
+                <!-- Tools will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Creation Modal -->
+    <div id="createAgentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎨 Create New Creative Agent</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="createAgentForm" class="agent-form">
+                <div class="form-section">
+                    <h3>🆔 Basic Information</h3>
+                    <div class="form-group">
+                        <label for="agentId">Agent ID</label>
+                        <input type="text" id="agentId" required placeholder="e.g., neon_painter">
+                    </div>
+                    <div class="form-group">
+                        <label for="agentType">Agent Type</label>
+                        <select id="agentType" required>
+                            <option value="creative_artist">Creative Artist</option>
+                            <option value="ethereal_artist">Ethereal Artist</option>
+                            <option value="blockchain_artist">Blockchain Artist</option>
+                            <option value="algorithmic_poet">Algorithmic Poet</option>
+                            <option value="generative_musician">Generative Musician</option>
+                            <option value="metaverse_architect">Metaverse Architect</option>
+                            <option value="crypto_conceptualist">Crypto Conceptualist</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modelName">AI Model</label>
+                        <select id="modelName">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Creativity Level (Temperature)</label>
+                        <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                        <span id="temperatureValue">0.7</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🏛️ Studio Configuration</h3>
+                    <div class="form-group">
+                        <label for="studioName">Studio Name</label>
+                        <input type="text" id="studioName" required placeholder="e.g., Neon Dreams Gallery">
+                    </div>
+                    <div class="form-group">
+                        <label for="studioDescription">Studio Description</label>
+                        <textarea id="studioDescription" required placeholder="Describe the creative space and atmosphere..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="studioTheme">Studio Theme</label>
+                        <select id="studioTheme" required>
+                            <option value="ethereal">Ethereal</option>
+                            <option value="futuristic">Futuristic</option>
+                            <option value="minimalist">Minimalist</option>
+                            <option value="cyberpunk">Cyberpunk</option>
+                            <option value="abstract">Abstract</option>
+                            <option value="vintage">Vintage</option>
+                            <option value="organic">Organic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="artStyle">Art Style</label>
+                        <input type="text" id="artStyle" required placeholder="e.g., neon_digital, crypto_sculpture">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🎭 Persona Configuration</h3>
+                    <div class="form-group">
+                        <label for="personaName">Persona Name</label>
+                        <input type="text" id="personaName" required placeholder="e.g., Neon, CryptoForge">
+                    </div>
+                    <div class="form-group">
+                        <label for="personaBackground">Background Story</label>
+                        <textarea id="personaBackground" required placeholder="Describe the agent's artistic background and vision..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="personalityTraits">Personality Traits (comma-separated)</label>
+                        <input type="text" id="personalityTraits" placeholder="e.g., innovative, mystical, experimental">
+                    </div>
+                    <div class="form-group">
+                        <label for="artisticInfluences">Artistic Influences (comma-separated)</label>
+                        <input type="text" id="artisticInfluences" placeholder="e.g., Van Gogh, Bitcoin, Blade Runner">
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredMediums">Preferred Mediums (comma-separated)</label>
+                        <input type="text" id="preferredMediums" placeholder="e.g., digital, NFT, 3D, blockchain">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🛠️ Tools & Capabilities</h3>
+                    <div class="form-group">
+                        <label>Enabled Tools</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="tools" value="create_artwork" checked> Create Artwork
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="tools" value="analyze_art" checked> Analyze Art
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="tools" value="remix_concept" checked> Remix Concept
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="tools" value="blockchain_integration"> Blockchain Integration
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Custom Tools</label>
+                        <div class="custom-tools-section">
+                            <div id="selectedCustomTools" class="selected-tools">
+                                <!-- Selected custom tools will appear here -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="addCustomToolBtn">
+                                + Create Custom Tool
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customInstructions">Custom Instructions (Optional)</label>
+                        <textarea id="customInstructions" placeholder="Additional creative instructions for this agent..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Tool Creation Modal -->
+    <div id="customToolModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔧 Create Custom Tool</h2>
+                <span class="close-tool">&times;</span>
+            </div>
+            <form id="customToolForm" class="tool-form">
+                <div class="tool-input-method">
+                    <h3>Input Method</h3>
+                    <div class="method-selector">
+                        <label class="method-option">
+                            <input type="radio" name="inputMethod" value="manual" checked>
+                            <span>Manual Entry</span>
+                        </label>
+                        <label class="method-option">
+                            <input type="radio" name="inputMethod" value="upload">
+                            <span>Upload API Spec</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Manual Entry Section -->
+                <div id="manualEntry" class="input-section">
+                    <div class="form-section">
+                        <h3>🔧 Tool Information</h3>
+                        <div class="form-group">
+                            <label for="toolName">Tool Name *</label>
+                            <input type="text" id="toolName" required placeholder="e.g., generate_color_palette">
+                        </div>
+                        <div class="form-group">
+                            <label for="toolDescription">Description *</label>
+                            <textarea id="toolDescription" required placeholder="Describe what this tool does and how it helps with creative work..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="toolCategory">Category</label>
+                            <select id="toolCategory">
+                                <option value="art_creation">Art Creation</option>
+                                <option value="analysis">Analysis</option>
+                                <option value="enhancement">Enhancement</option>
+                                <option value="blockchain">Blockchain</option>
+                                <option value="utility">Utility</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🌐 API Configuration</h3>
+                        <div class="form-group">
+                            <label for="apiEndpoint">API Endpoint URL *</label>
+                            <input type="url" id="apiEndpoint" required placeholder="https://api.example.com/v1/generate">
+                        </div>
+                        <div class="form-group">
+                            <label for="httpMethod">HTTP Method</label>
+                            <select id="httpMethod">
+                                <option value="GET">GET</option>
+                                <option value="POST" selected>POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contentType">Content Type</label>
+                            <select id="contentType">
+                                <option value="application/json">application/json</option>
+                                <option value="application/x-www-form-urlencoded">form-urlencoded</option>
+                                <option value="multipart/form-data">multipart/form-data</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>🔑 Authentication (Optional)</h3>
+                        <div class="form-group">
+                            <label for="authType">Authentication Type</label>
+                            <select id="authType">
+                                <option value="none">None</option>
+                                <option value="bearer">Bearer Token</option>
+                                <option value="api_key">API Key</option>
+                                <option value="basic">Basic Auth</option>
+                            </select>
+                        </div>
+                        <div class="form-group auth-details" id="authDetails" style="display: none;">
+                            <label for="authValue">Authentication Value</label>
+                            <input type="text" id="authValue" placeholder="Enter API key, token, or credentials">
+                            <small class="auth-help">This will be stored securely and used for API calls</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📝 Parameters & Schema</h3>
+                        <div class="form-group">
+                            <label for="requestSchema">Request Parameters (JSON Schema)</label>
+                            <textarea id="requestSchema" rows="6" placeholder='{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string", 
+      "description": "Creative prompt for generation"
+    },
+    "style": {
+      "type": "string",
+      "enum": ["abstract", "realistic", "minimalist"],
+      "description": "Art style to apply"
+    },
+    "colors": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Preferred color palette"
+    },
+    "size": {
+      "type": "string",
+      "enum": ["small", "medium", "large"],
+      "default": "medium"
+    }
+  },
+  "required": ["prompt"]
+}'></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="responseFormat">Expected Response Format</label>
+                            <select id="responseFormat">
+                                <option value="json">JSON</option>
+                                <option value="text">Plain Text</option>
+                                <option value="image">Image URL</option>
+                                <option value="binary">Binary Data</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="responseExample">Response Example</label>
+                            <textarea id="responseExample" rows="4" placeholder='Example of successful API response...'></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div id="uploadEntry" class="input-section" style="display: none;">
+                    <div class="form-section">
+                        <h3>📁 Upload API Specification</h3>
+                        <div class="form-group">
+                            <label for="specFile">API Spec File (JSON/YAML)</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input type="file" id="specFile" accept=".json,.yaml,.yml" style="display: none;">
+                                <div class="upload-placeholder">
+                                    <div class="upload-icon">📁</div>
+                                    <p>Click to upload or drag & drop</p>
+                                    <small>Supports OpenAPI, Swagger, or custom JSON/YAML specs</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="specPreview">Specification Preview</label>
+                            <textarea id="specPreview" rows="10" placeholder="Upload a file to see preview or paste your API specification here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelToolBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Tool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedAgent = null;
+        let isTyping = false;
+        let customTools = []; // Store created custom tools
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAgents();
+            loadTools();
+            setupEventListeners();
+            setupModalHandlers();
+            setupFormHandlers();
+            setupCustomToolHandlers();
+        });
+
+        function setupEventListeners() {
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!isTyping && selectedAgent) {
+                        sendMessage();
+                    }
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+        }
+
+        function setupModalHandlers() {
+            const modal = document.getElementById('createAgentModal');
+            const createBtn = document.getElementById('createAgentBtn');
+            const closeBtn = document.querySelector('.close');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            createBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                resetForm();
+            });
+
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        function setupFormHandlers() {
+            const temperatureSlider = document.getElementById('temperature');
+            const temperatureValue = document.getElementById('temperatureValue');
+            const form = document.getElementById('createAgentForm');
+
+            temperatureSlider.addEventListener('input', function() {
+                temperatureValue.textContent = this.value;
+            });
+
+            form.addEventListener('submit', handleFormSubmit);
+        }
+
+        function resetForm() {
+            const form = document.getElementById('createAgentForm');
+            form.reset();
+            document.getElementById('temperatureValue').textContent = '0.7';
+            
+            // Check default tools
+            const defaultTools = ['create_artwork', 'analyze_art', 'remix_concept'];
+            defaultTools.forEach(tool => {
+                const checkbox = document.querySelector(`input[name="tools"][value="${tool}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            try {
+                submitBtn.textContent = 'Creating...';
+                submitBtn.disabled = true;
+                
+                const formData = collectFormData();
+                const result = await createAgent(formData);
+                
+                if (result.success) {
+                    addMessage('system', `✅ Created new agent: ${result.agent_info.studio.name}`);
+                    document.getElementById('createAgentModal').style.display = 'none';
+                    await loadAgents(); // Refresh agent list
+                } else {
+                    addMessage('system', `❌ Error creating agent: ${result.error || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                addMessage('system', `❌ Error: ${error.message}`);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function collectFormData() {
+            const formData = {
+                agent_id: document.getElementById('agentId').value.trim(),
+                config: {
+                    agent_type: document.getElementById('agentType').value,
+                    model_name: document.getElementById('modelName').value,
+                    temperature: parseFloat(document.getElementById('temperature').value),
+                    max_tokens: null,
+                    memory_enabled: true,
+                    structured_output: false,
+                    
+                    // Studio fields
+                    studio_name: document.getElementById('studioName').value.trim(),
+                    studio_description: document.getElementById('studioDescription').value.trim(),
+                    studio_theme: document.getElementById('studioTheme').value,
+                    art_style: document.getElementById('artStyle').value.trim(),
+                    
+                    // Persona fields
+                    persona_name: document.getElementById('personaName').value.trim(),
+                    persona_background: document.getElementById('personaBackground').value.trim(),
+                    personality_traits: document.getElementById('personalityTraits').value
+                        .split(',').map(trait => trait.trim()).filter(trait => trait),
+                    artistic_influences: document.getElementById('artisticInfluences').value
+                        .split(',').map(influence => influence.trim()).filter(influence => influence),
+                    preferred_mediums: document.getElementById('preferredMediums').value
+                        .split(',').map(medium => medium.trim()).filter(medium => medium),
+                    
+                    // Tools
+                    tools_enabled: Array.from(document.querySelectorAll('input[name="tools"]:checked'))
+                        .map(checkbox => checkbox.value),
+                    custom_tools: customTools,
+                    
+                    // Custom instructions
+                    custom_instructions: document.getElementById('customInstructions').value.trim() || null,
+                    
+                    // Evolution fields
+                    interaction_count: 0,
+                    artworks_created: 0,
+                    persona_evolution_history: []
+                }
+            };
+            
+            return formData;
+        }
+
+        async function createAgent(formData) {
+            const response = await fetch('/agents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            return await response.json();
+        }
+
+        async function loadAgents() {
+            try {
+                const response = await fetch('/agents');
+                const data = await response.json();
+                displayAgents(data.agents);
+            } catch (error) {
+                console.error('Error loading agents:', error);
+            }
+        }
+
+        async function loadTools() {
+            try {
+                const response = await fetch('/tools');
+                const data = await response.json();
+                displayTools(data.standard_tools);
+            } catch (error) {
+                console.error('Error loading tools:', error);
+            }
+        }
+
+        function displayAgents(agents) {
+            const agentGrid = document.getElementById('agentGrid');
+            agentGrid.innerHTML = '';
+
+            agents.forEach(agent => {
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                agentCard.onclick = () => selectAgent(agent);
+
+                const studio = agent.studio || {};
+                const persona = agent.persona || {};
+                const evolution = agent.evolution || {};
+
+                agentCard.innerHTML = `
+                    <h4>${studio.name || agent.agent_id}</h4>
+                    <p>${persona.name || 'Creative Soul'} • ${studio.art_style || 'Digital'}</p>
+                    <p style="font-size: 0.8rem; margin-bottom: 15px;">${studio.description || 'A creative space for artistic expression'}</p>
+                    <div class="agent-stats">
+                        <div class="stat">🎨 ${evolution.artworks_created || 0}</div>
+                        <div class="stat">💬 ${evolution.interaction_count || 0}</div>
+                        <div class="stat">${studio.theme || 'abstract'}</div>
+                    </div>
+                `;
+
+                agentGrid.appendChild(agentCard);
+            });
+        }
+
+        function displayTools(tools) {
+            const toolsGrid = document.getElementById('toolsGrid');
+            toolsGrid.innerHTML = '';
+
+            tools.forEach(tool => {
+                const toolCard = document.createElement('div');
+                toolCard.className = 'tool-card';
+
+                toolCard.innerHTML = `
+                    <h4>${tool.name}</h4>
+                    <p>${tool.description}</p>
+                    <div class="tool-category">${tool.category}</div>
+                `;
+
+                toolsGrid.appendChild(toolCard);
+            });
+        }
+
+        function selectAgent(agent) {
+            selectedAgent = agent;
+            
+            // Update UI to show selected agent
+            document.querySelectorAll('.agent-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Update chat header
+            const chatTitle = document.getElementById('chatTitle');
+            const studio = agent.studio || {};
+            const persona = agent.persona || {};
+            
+            chatTitle.innerHTML = `
+                <span class="status-indicator status-online"></span>
+                ${persona.name || agent.agent_id} • ${studio.name || 'Creative Studio'}
+            `;
+
+            // Enable input
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+
+            // Add welcome message
+            addMessage('system', `You're now connected to ${persona.name || agent.agent_id} in ${studio.name || 'their studio'}. Let's create something amazing together! 🎨`);
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !selectedAgent || isTyping) return;
+
+            // Clear input and disable
+            messageInput.value = '';
+            isTyping = true;
+            updateSendButton(true);
+
+            // Add user message
+            addMessage('user', message);
+
+            // Add typing indicator
+            const typingId = addMessage('agent', '<div class="loading"></div>');
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        agent_id: selectedAgent.agent_id,
+                        thread_id: 'web_interface'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove typing indicator
+                document.getElementById(typingId).remove();
+
+                if (data.success) {
+                    addMessage('agent', data.response);
+                    
+                    if (data.tools_used && data.tools_used.length > 0) {
+                        addMessage('system', `✨ Tools used: ${data.tools_used.join(', ')}`);
+                    }
+                    
+                    if (data.persona_evolved) {
+                        addMessage('system', '🎭 Agent persona has evolved through this interaction!');
+                    }
+                } else {
+                    addMessage('system', `❌ Error: ${data.error}`);
+                }
+
+            } catch (error) {
+                document.getElementById(typingId).remove();
+                addMessage('system', `❌ Connection error: ${error.message}`);
+            }
+
+            isTyping = false;
+            updateSendButton(false);
+        }
+
+        function addMessage(type, content) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            messageDiv.id = messageId;
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = content;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageId;
+        }
+
+        function updateSendButton(loading) {
+            const sendBtn = document.getElementById('sendBtn');
+            if (loading) {
+                sendBtn.innerHTML = '<div class="loading"></div>';
+                sendBtn.disabled = true;
+            } else {
+                sendBtn.innerHTML = 'Create';
+                sendBtn.disabled = !selectedAgent;
+            }
+        }
+
+        function setupCustomToolHandlers() {
+            const toolModal = document.getElementById('customToolModal');
+            const addToolBtn = document.getElementById('addCustomToolBtn');
+            const closeToolBtn = document.querySelector('.close-tool');
+            const cancelToolBtn = document.getElementById('cancelToolBtn');
+            const toolForm = document.getElementById('customToolForm');
+            
+            // Modal controls
+            addToolBtn.addEventListener('click', function() {
+                toolModal.style.display = 'block';
+                resetToolForm();
+            });
+            
+            closeToolBtn.addEventListener('click', function() {
+                toolModal.style.display = 'none';
+            });
+            
+            cancelToolBtn.addEventListener('click', function() {
+                toolModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(e) {
+                if (e.target === toolModal) {
+                    toolModal.style.display = 'none';
+                }
+            });
+
+            // Input method selection
+            const methodRadios = document.querySelectorAll('input[name="inputMethod"]');
+            methodRadios.forEach(radio => {
+                radio.addEventListener('change', toggleInputMethod);
+            });
+
+            // Authentication type handling
+            const authType = document.getElementById('authType');
+            authType.addEventListener('change', toggleAuthDetails);
+
+            // File upload handling
+            setupFileUpload();
+
+            // Form submission
+            toolForm.addEventListener('submit', handleToolFormSubmit);
+        }
+
+        function toggleInputMethod() {
+            const method = document.querySelector('input[name="inputMethod"]:checked').value;
+            const manualEntry = document.getElementById('manualEntry');
+            const uploadEntry = document.getElementById('uploadEntry');
+            
+            if (method === 'manual') {
+                manualEntry.style.display = 'block';
+                uploadEntry.style.display = 'none';
+                
+                // Enable required validation for manual entry fields
+                document.getElementById('toolName').setAttribute('required', '');
+                document.getElementById('toolDescription').setAttribute('required', '');
+                document.getElementById('apiEndpoint').setAttribute('required', '');
+                
+                // Disable required validation for upload fields (none currently required)
+                // No upload fields are required, so nothing to disable
+            } else {
+                manualEntry.style.display = 'none';
+                uploadEntry.style.display = 'block';
+                
+                // Disable required validation for manual entry fields when hidden
+                document.getElementById('toolName').removeAttribute('required');
+                document.getElementById('toolDescription').removeAttribute('required');
+                document.getElementById('apiEndpoint').removeAttribute('required');
+                
+                // Enable required validation for upload fields if needed
+                // Currently no upload fields are required, but this is where we'd add them
+            }
+
+            // Update method option styling
+            document.querySelectorAll('.method-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`input[value="${method}"]`).closest('.method-option').classList.add('selected');
+        }
+
+        function toggleAuthDetails() {
+            const authType = document.getElementById('authType').value;
+            const authDetails = document.getElementById('authDetails');
+            
+            if (authType === 'none') {
+                authDetails.style.display = 'none';
+            } else {
+                authDetails.style.display = 'block';
+                const authValue = document.getElementById('authValue');
+                
+                // Update placeholder based on auth type
+                switch(authType) {
+                    case 'bearer':
+                        authValue.placeholder = 'Bearer token (e.g., your-api-token)';
+                        break;
+                    case 'api_key':
+                        authValue.placeholder = 'API key (e.g., your-api-key)';
+                        break;
+                    case 'basic':
+                        authValue.placeholder = 'Username:Password';
+                        break;
+                }
+            }
+        }
+
+        function setupFileUpload() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('specFile');
+            const specPreview = document.getElementById('specPreview');
+
+            // Click to upload
+            fileUploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+            });
+
+            // Drag and drop
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+        }
+
+        function handleFileUpload(file) {
+            const specPreview = document.getElementById('specPreview');
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let parsedContent;
+                    
+                    if (file.name.endsWith('.json')) {
+                        parsedContent = JSON.parse(content);
+                    } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                        // Basic YAML to JSON conversion (simplified)
+                        parsedContent = parseYAML(content);
+                    }
+                    
+                    specPreview.value = JSON.stringify(parsedContent, null, 2);
+                    
+                    // Try to auto-populate fields from spec
+                    autoPopulateFromSpec(parsedContent);
+                    
+                } catch (error) {
+                    specPreview.value = `Error parsing file: ${error.message}`;
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function parseYAML(yamlText) {
+            // Very basic YAML parser - for production, use a proper library
+            // This handles simple key-value pairs and basic structure
+            const lines = yamlText.split('\n');
+            const result = {};
+            
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed && !trimmed.startsWith('#')) {
+                    const [key, ...valueParts] = trimmed.split(':');
+                    if (valueParts.length > 0) {
+                        const value = valueParts.join(':').trim();
+                        result[key.trim()] = value.replace(/^["']|["']$/g, '');
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        function autoPopulateFromSpec(spec) {
+            // Auto-populate fields from OpenAPI/Swagger spec
+            if (spec.info) {
+                const toolName = document.getElementById('toolName');
+                const toolDescription = document.getElementById('toolDescription');
+                
+                if (spec.info.title && !toolName.value) {
+                    toolName.value = spec.info.title.toLowerCase().replace(/\s+/g, '_');
+                }
+                
+                if (spec.info.description && !toolDescription.value) {
+                    toolDescription.value = spec.info.description;
+                }
+            }
+            
+            // Extract first endpoint
+            if (spec.paths) {
+                const firstPath = Object.keys(spec.paths)[0];
+                if (firstPath && spec.servers && spec.servers[0]) {
+                    const endpoint = document.getElementById('apiEndpoint');
+                    if (!endpoint.value) {
+                        endpoint.value = spec.servers[0].url + firstPath;
+                    }
+                }
+                
+                // Extract HTTP method
+                if (firstPath && spec.paths[firstPath]) {
+                    const methods = Object.keys(spec.paths[firstPath]);
+                    if (methods.length > 0) {
+                        const httpMethod = document.getElementById('httpMethod');
+                        httpMethod.value = methods[0].toUpperCase();
+                    }
+                }
+            }
+        }
+
+        function resetToolForm() {
+            const form = document.getElementById('customToolForm');
+            form.reset();
+            
+            // Reset method selection to manual
+            document.querySelector('input[value="manual"]').checked = true;
+            toggleInputMethod();
+            
+            // Reset auth details
+            toggleAuthDetails();
+            
+            // Clear file upload
+            document.getElementById('specPreview').value = '';
+            
+            // Ensure correct required attributes are set for manual mode
+            document.getElementById('toolName').setAttribute('required', '');
+            document.getElementById('toolDescription').setAttribute('required', '');
+            document.getElementById('apiEndpoint').setAttribute('required', '');
+        }
+
+        async function handleToolFormSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            try {
+                submitBtn.textContent = 'Creating...';
+                submitBtn.disabled = true;
+                
+                const toolData = collectToolFormData();
+                const result = await createCustomTool(toolData);
+                
+                if (result.success) {
+                    customTools.push(result.tool);
+                    updateSelectedCustomTools();
+                    addMessage('system', `✅ Created custom tool: ${result.tool.name}`);
+                    document.getElementById('customToolModal').style.display = 'none';
+                } else {
+                    addMessage('system', `❌ Error creating tool: ${result.error || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                addMessage('system', `❌ Error: ${error.message}`);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function collectToolFormData() {
+            const method = document.querySelector('input[name="inputMethod"]:checked').value;
+            
+            if (method === 'upload') {
+                return {
+                    method: 'upload',
+                    spec: document.getElementById('specPreview').value
+                };
+            } else {
+                const authType = document.getElementById('authType').value;
+                const toolData = {
+                    method: 'manual',
+                    name: document.getElementById('toolName').value.trim(),
+                    description: document.getElementById('toolDescription').value.trim(),
+                    category: document.getElementById('toolCategory').value,
+                    api_config: {
+                        endpoint: document.getElementById('apiEndpoint').value.trim(),
+                        method: document.getElementById('httpMethod').value,
+                        content_type: document.getElementById('contentType').value,
+                        response_format: document.getElementById('responseFormat').value
+                    }
+                };
+                
+                // Add authentication if specified
+                if (authType !== 'none') {
+                    toolData.api_config.auth = {
+                        type: authType,
+                        value: document.getElementById('authValue').value.trim()
+                    };
+                }
+                
+                // Add request schema if provided
+                const requestSchema = document.getElementById('requestSchema').value.trim();
+                if (requestSchema) {
+                    try {
+                        toolData.api_config.request_schema = JSON.parse(requestSchema);
+                    } catch (e) {
+                        throw new Error('Invalid JSON in request schema');
+                    }
+                }
+                
+                // Add response example
+                const responseExample = document.getElementById('responseExample').value.trim();
+                if (responseExample) {
+                    toolData.api_config.response_example = responseExample;
+                }
+                
+                return toolData;
+            }
+        }
+
+        async function createCustomTool(toolData) {
+            const response = await fetch('/tools/custom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(toolData)
+            });
+            
+            return await response.json();
+        }
+
+        function updateSelectedCustomTools() {
+            const selectedToolsDiv = document.getElementById('selectedCustomTools');
+            selectedToolsDiv.innerHTML = '';
+            
+            customTools.forEach((tool, index) => {
+                const toolElement = document.createElement('div');
+                toolElement.className = 'selected-tool';
+                toolElement.innerHTML = `
+                    <span class="tool-category-badge ${tool.category}">${tool.category}</span>
+                    <span>${tool.name}</span>
+                    <span class="remove-tool" onclick="removeCustomTool(${index})">×</span>
+                `;
+                selectedToolsDiv.appendChild(toolElement);
+            });
+        }
+
+        function removeCustomTool(index) {
+            customTools.splice(index, 1);
+            updateSelectedCustomTools();
+        }
+    </script>
+</body>
+</html> 
