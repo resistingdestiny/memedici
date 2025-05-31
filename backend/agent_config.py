@@ -235,7 +235,11 @@ class AgentConfig(BaseModel):
 class AgentRegistry:
     """Registry to manage different agent configurations with database persistence."""
     
-    def __init__(self, db_url: str = "sqlite:///agents.db"):
+    def __init__(self, db_url: str = None):
+        # Use DATABASE_URL environment variable if available, otherwise default to SQLite
+        if db_url is None:
+            db_url = os.getenv('DATABASE_URL', 'sqlite:///agents.db')
+        
         self.engine = create_engine(db_url)
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
@@ -560,7 +564,7 @@ class AgentRegistry:
         }
 
 # Global agent registry instance
-agent_registry = AgentRegistry()
+agent_registry = AgentRegistry(db_url=None)
 
 # Global SessionLocal for external database access
 SessionLocal = agent_registry.SessionLocal 
