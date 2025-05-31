@@ -59,6 +59,111 @@
         .header p {
             color: var(--text-muted);
             font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Server Toggle Styles */
+        .server-toggle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .server-toggle label {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border-color);
+            transition: 0.4s;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: 0.4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch:hover .toggle-slider {
+            background: var(--text-muted);
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Focus state for accessibility */
+        .toggle-switch input:focus + .toggle-slider {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .server-status.localhost {
+            color: var(--accent-color);
+        }
+
+        .server-status.production {
+            color: var(--success-color);
+        }
+
+        .server-url {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
         }
 
         .main-grid {
@@ -228,6 +333,160 @@
             margin: 10px auto;
             max-width: 60%;
             font-size: 0.9rem;
+        }
+
+        .message.asset {
+            background: var(--bg-dark);
+            border: 2px solid var(--primary-color);
+            color: var(--text-light);
+            max-width: 90%;
+            margin-left: auto;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .asset-container {
+            width: 100%;
+        }
+
+        .asset-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .asset-header h4 {
+            margin: 0;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .asset-metadata {
+            display: flex;
+            gap: 8px;
+        }
+
+        .asset-type,
+        .asset-model {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .asset-content {
+            padding: 16px;
+        }
+
+        .asset-image {
+            width: 100%;
+            max-width: 512px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .asset-image:hover {
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+
+        .asset-video {
+            width: 100%;
+            max-width: 512px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .asset-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .asset-prompt {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .asset-params {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .param-tag {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-color);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .asset-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .asset-link {
+            background: linear-gradient(135deg, var(--accent-color), #f97316);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .asset-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .copy-btn {
+            background: var(--bg-card);
+            color: var(--text-light);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
         }
 
         .chat-input {
@@ -750,6 +1009,24 @@
         <div class="header">
             <h1>🎨 Memedici</h1>
             <p>AI-Powered Creative Platform - Where artificial intelligence meets artistic expression</p>
+            
+            <div class="server-toggle">
+                <label for="serverToggle">Server:</label>
+                <div class="server-status localhost" id="serverStatus">
+                    <span class="status-indicator status-busy"></span>
+                    <span>Localhost</span>
+                    <span class="server-url" id="serverUrl">http://localhost:8000</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="serverToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+                <div class="server-status production" style="opacity: 0.5;">
+                    <span class="status-indicator status-online"></span>
+                    <span>Production</span>
+                    <span class="server-url">https://memedici-backend.onrender.com</span>
+                </div>
+            </div>
         </div>
 
         <div class="main-grid">
@@ -773,6 +1050,7 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="message system">
                         Welcome to Memedici! Select an agent from the left to start your artistic journey.
+                        <br><small>Connected to: <span id="initialServerInfo">Loading...</span></small>
                     </div>
                 </div>
                 <div class="chat-input">
@@ -1185,13 +1463,27 @@
     </div>
 
     <script>
+        // Server configuration
+        const SERVERS = {
+            localhost: 'http://localhost:8000',
+            production: 'https://memedici-backend.onrender.com'
+        };
+        
+        let currentServer = 'localhost'; // Default to localhost
         let selectedAgent = null;
         let isTyping = false;
         let customTools = []; // Store created custom tools
         let studioItems = []; // Store created studio items
 
+        // Get the current API base URL
+        function getApiUrl(endpoint = '') {
+            const baseUrl = SERVERS[currentServer];
+            return endpoint ? `${baseUrl}${endpoint}` : baseUrl;
+        }
+
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            initializeServerToggle();
             loadAgents();
             loadTools();
             setupEventListeners();
@@ -1200,6 +1492,154 @@
             setupCustomToolHandlers();
             setupStudioItemHandlers();
         });
+
+        function initializeServerToggle() {
+            const serverToggle = document.getElementById('serverToggle');
+            
+            if (!serverToggle) {
+                console.error('Server toggle element not found!');
+                return;
+            }
+            
+            console.log('Initializing server toggle...');
+            
+            // Load saved preference from localStorage
+            const savedServer = localStorage.getItem('memedici-server');
+            if (savedServer && SERVERS[savedServer]) {
+                currentServer = savedServer;
+            }
+            
+            // Set initial state
+            updateServerUI();
+            
+            // Handle toggle change
+            serverToggle.addEventListener('change', handleToggleChange);
+            
+            // Also add click handler to the toggle switch container as fallback
+            const toggleSwitch = document.querySelector('.toggle-switch');
+            if (toggleSwitch) {
+                toggleSwitch.addEventListener('click', function(e) {
+                    console.log('Toggle switch clicked');
+                    // Let the label handle the click naturally
+                });
+            }
+        }
+        
+        function handleToggleChange(e) {
+            console.log('Toggle changed:', e.target.checked);
+            const wasProduction = currentServer === 'production';
+            currentServer = e.target.checked ? 'production' : 'localhost';
+            
+            // Only proceed if actually changed
+            if ((wasProduction && currentServer === 'production') || (!wasProduction && currentServer === 'localhost')) {
+                return;
+            }
+            
+            localStorage.setItem('memedici-server', currentServer);
+            console.log('Switched to server:', currentServer);
+            
+            // Show switching message
+            addMessage('system', `🔄 Switching to ${currentServer} server...`);
+            
+            updateServerUI();
+            
+            // Reload data from new server
+            loadAgents();
+            loadTools();
+            
+            // Clear current chat if agent is selected
+            if (selectedAgent) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = '<div class="message system">Switched to ' + 
+                    (currentServer === 'localhost' ? 'localhost' : 'production') + 
+                    ' server. Please reselect your agent.</div>';
+                
+                // Deselect current agent
+                selectedAgent = null;
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Update chat header
+                const chatTitle = document.getElementById('chatTitle');
+                chatTitle.innerHTML = `
+                    <span class="status-indicator status-offline"></span>
+                    Select an agent to begin creating
+                `;
+                
+                // Disable input
+                const messageInput = document.getElementById('messageInput');
+                const sendBtn = document.getElementById('sendBtn');
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+            }
+        }
+
+        function updateServerUI() {
+            const serverToggle = document.getElementById('serverToggle');
+            const serverStatus = document.getElementById('serverStatus');
+            const serverUrl = document.getElementById('serverUrl');
+            const productionStatus = document.querySelector('.server-status.production');
+            const localhostStatus = document.querySelector('.server-status.localhost');
+            const initialServerInfo = document.getElementById('initialServerInfo');
+            
+            // Update toggle state
+            serverToggle.checked = currentServer === 'production';
+            
+            // Update active status display
+            if (currentServer === 'localhost') {
+                localhostStatus.style.opacity = '1';
+                productionStatus.style.opacity = '0.5';
+                serverStatus.innerHTML = `
+                    <span class="status-indicator status-busy"></span>
+                    <span>Localhost</span>
+                    <span class="server-url">http://localhost:8000</span>
+                `;
+                serverStatus.className = 'server-status localhost';
+                if (initialServerInfo) {
+                    initialServerInfo.textContent = 'localhost (http://localhost:8000)';
+                }
+            } else {
+                localhostStatus.style.opacity = '0.5';
+                productionStatus.style.opacity = '1';
+                serverStatus.innerHTML = `
+                    <span class="status-indicator status-online"></span>
+                    <span>Production</span>
+                    <span class="server-url">https://memedici-backend.onrender.com</span>
+                `;
+                serverStatus.className = 'server-status production';
+                if (initialServerInfo) {
+                    initialServerInfo.textContent = 'production (https://memedici-backend.onrender.com)';
+                }
+            }
+            
+            // Test server connectivity
+            testServerConnection();
+        }
+
+        async function testServerConnection() {
+            try {
+                const response = await fetch(getApiUrl('/health'), { 
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000) // 5 second timeout
+                });
+                
+                if (response.ok) {
+                    const statusIndicator = document.querySelector('#serverStatus .status-indicator');
+                    statusIndicator.className = currentServer === 'localhost' ? 
+                        'status-indicator status-busy' : 'status-indicator status-online';
+                } else {
+                    throw new Error('Server responded with error');
+                }
+            } catch (error) {
+                console.warn(`Failed to connect to ${currentServer} server:`, error.message);
+                const statusIndicator = document.querySelector('#serverStatus .status-indicator');
+                statusIndicator.className = 'status-indicator status-offline';
+                
+                // Show connection error message
+                addMessage('system', `⚠️ Unable to connect to ${currentServer} server. Please check if the server is running.`);
+            }
+        }
 
         function setupEventListeners() {
             const messageInput = document.getElementById('messageInput');
@@ -1379,7 +1819,7 @@
         }
 
         async function createAgent(formData) {
-            const response = await fetch('/agents', {
+            const response = await fetch(getApiUrl('/agents'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1392,21 +1832,23 @@
 
         async function loadAgents() {
             try {
-                const response = await fetch('/agents');
+                const response = await fetch(getApiUrl('/agents'));
                 const data = await response.json();
                 displayAgents(data.agents);
             } catch (error) {
                 console.error('Error loading agents:', error);
+                addMessage('system', `❌ Failed to load agents from ${currentServer} server`);
             }
         }
 
         async function loadTools() {
             try {
-                const response = await fetch('/tools');
+                const response = await fetch(getApiUrl('/tools'));
                 const data = await response.json();
                 displayTools(data.standard_tools);
             } catch (error) {
                 console.error('Error loading tools:', error);
+                addMessage('system', `❌ Failed to load tools from ${currentServer} server`);
             }
         }
 
@@ -1558,7 +2000,7 @@
             const typingId = addMessage('agent', '<div class="loading"></div>');
             
             try {
-                const response = await fetch('/chat', {
+                const response = await fetch(getApiUrl('/chat'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1575,8 +2017,15 @@
                 // Remove typing indicator
                 document.getElementById(typingId).remove();
                 
-                if (data.success) {
+                if (data.success && data.response) {
+                    // Add agent response message
                     addMessage('agent', data.response);
+                    
+                    // Display any created assets
+                    if (data.assets && Object.keys(data.assets).length > 0) {
+                        displayAssets(data.assets);
+                        addMessage('system', `🎨 Created ${Object.keys(data.assets).length} artwork(s): ${Object.keys(data.assets).join(', ')}`);
+                    }
                     
                     if (data.tools_used && data.tools_used.length > 0) {
                         addMessage('system', `✨ Tools used: ${data.tools_used.join(', ')}`);
@@ -1585,8 +2034,17 @@
                     if (data.persona_evolved) {
                         addMessage('system', '🎭 Agent persona has evolved through this interaction!');
                     }
+                } else if (data.message) {
+                    // Handle direct AgentResponse format
+                    addMessage('agent', data.message);
+                    
+                    // Display any created assets
+                    if (data.assets && Object.keys(data.assets).length > 0) {
+                        displayAssets(data.assets);
+                        addMessage('system', `🎨 Created ${Object.keys(data.assets).length} artwork(s): ${Object.keys(data.assets).join(', ')}`);
+                    }
                 } else {
-                    addMessage('system', `❌ Error: ${data.error}`);
+                    addMessage('system', `❌ Error: ${data.error || data.detail || 'Unknown error'}`);
                 }
 
             } catch (error) {
@@ -1596,6 +2054,125 @@
 
             isTyping = false;
             updateSendButton(false);
+        }
+
+        function displayAssets(assets) {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            Object.entries(assets).forEach(([assetId, assetInfo]) => {
+                const assetDiv = document.createElement('div');
+                assetDiv.className = 'message asset';
+                
+                let assetContent = '';
+                
+                if (assetInfo.type === 'image') {
+                    assetContent = `
+                        <div class="asset-container">
+                            <div class="asset-header">
+                                <h4>🖼️ ${assetId}</h4>
+                                <div class="asset-metadata">
+                                    <span class="asset-type">Image</span>
+                                    <span class="asset-model">${assetInfo.model}</span>
+                                </div>
+                            </div>
+                            <div class="asset-content">
+                                <img src="${assetInfo.url}" alt="${assetInfo.prompt}" class="asset-image" loading="lazy">
+                                <div class="asset-details">
+                                    <p class="asset-prompt"><strong>Prompt:</strong> ${assetInfo.prompt}</p>
+                                    <div class="asset-params">
+                                        ${Object.entries(assetInfo.parameters).map(([key, value]) => 
+                                            `<span class="param-tag">${key}: ${value}</span>`
+                                        ).join('')}
+                                    </div>
+                                    <div class="asset-actions">
+                                        <a href="${assetInfo.url}" target="_blank" class="asset-link">View Full Size</a>
+                                        <button onclick="copyToClipboard('${assetInfo.url}')" class="copy-btn">Copy URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (assetInfo.type === 'video') {
+                    assetContent = `
+                        <div class="asset-container">
+                            <div class="asset-header">
+                                <h4>🎬 ${assetId}</h4>
+                                <div class="asset-metadata">
+                                    <span class="asset-type">Video</span>
+                                    <span class="asset-model">${assetInfo.model}</span>
+                                </div>
+                            </div>
+                            <div class="asset-content">
+                                <video controls class="asset-video" preload="metadata">
+                                    <source src="${assetInfo.url}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="asset-details">
+                                    <p class="asset-prompt"><strong>Prompt:</strong> ${assetInfo.prompt}</p>
+                                    <div class="asset-params">
+                                        ${Object.entries(assetInfo.parameters).map(([key, value]) => 
+                                            `<span class="param-tag">${key}: ${value}</span>`
+                                        ).join('')}
+                                    </div>
+                                    <div class="asset-actions">
+                                        <a href="${assetInfo.url}" target="_blank" class="asset-link">View Full Size</a>
+                                        <button onclick="copyToClipboard('${assetInfo.url}')" class="copy-btn">Copy URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Generic asset type
+                    assetContent = `
+                        <div class="asset-container">
+                            <div class="asset-header">
+                                <h4>📄 ${assetId}</h4>
+                                <div class="asset-metadata">
+                                    <span class="asset-type">${assetInfo.type}</span>
+                                    <span class="asset-model">${assetInfo.model}</span>
+                                </div>
+                            </div>
+                            <div class="asset-content">
+                                <div class="asset-details">
+                                    <p class="asset-prompt"><strong>Prompt:</strong> ${assetInfo.prompt}</p>
+                                    <div class="asset-params">
+                                        ${Object.entries(assetInfo.parameters).map(([key, value]) => 
+                                            `<span class="param-tag">${key}: ${value}</span>`
+                                        ).join('')}
+                                    </div>
+                                    <div class="asset-actions">
+                                        <a href="${assetInfo.url}" target="_blank" class="asset-link">View Asset</a>
+                                        <button onclick="copyToClipboard('${assetInfo.url}')" class="copy-btn">Copy URL</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                assetDiv.innerHTML = assetContent;
+                chatMessages.appendChild(assetDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show a brief success message
+                const message = addMessage('system', '📋 URL copied to clipboard!');
+                setTimeout(() => {
+                    const msgElement = document.getElementById(message);
+                    if (msgElement) {
+                        msgElement.style.opacity = '0.5';
+                        setTimeout(() => msgElement.remove(), 2000);
+                    }
+                }, 1000);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                addMessage('system', '❌ Failed to copy URL to clipboard');
+            });
         }
 
         function addMessage(type, content) {
@@ -1959,7 +2536,7 @@
         }
 
         async function createCustomTool(toolData) {
-            const response = await fetch('/tools/custom', {
+            const response = await fetch(getApiUrl('/tools/custom'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
