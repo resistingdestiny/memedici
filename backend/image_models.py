@@ -14,7 +14,6 @@ class ImageModelCategory(Enum):
     REALISTIC = "realistic"
     ANIMATION = "animation"
     DREAMY = "dreamy"
-    ARTISTIC = "artistic"
 
 
 class VideoModelCategory(Enum):
@@ -94,17 +93,6 @@ class ImageModelRegistry:
             is_sdxl=True
         ),
         
-        ImageModelCategory.ARTISTIC: ModelInfo(
-            model_name="Line Art Style LoRA XL_238329",
-            display_name="Line Art Style LoRA XL",
-            model_type="lora",
-            base_model="SDXL 1.0",
-            description="Specialized for creating clean line art and artistic illustrations",
-            tags=["line art", "artistic", "illustration", "clean", "minimalist"],
-            best_for=["line drawings", "artistic illustrations", "clean art", "minimalist designs"],
-            is_nsfw=False,
-            is_sdxl=True
-        )
     }
     
     @classmethod

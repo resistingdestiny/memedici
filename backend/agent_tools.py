@@ -51,7 +51,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def generate_full_url(filename: str, base_url: str = "http://localhost:8000") -> str:
     """Generate a full URL for a static file."""
-    return f"{base_url}/static/artworks/{filename}"
+    return f"{get_base_url()}/static/artworks/{filename}"
 
 def get_base_url() -> str:
     """Get the base URL for the server. In production, this should be configurable."""
