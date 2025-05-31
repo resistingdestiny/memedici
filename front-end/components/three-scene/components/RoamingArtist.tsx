@@ -40,6 +40,10 @@ export function RoamingArtist({
   ));
   const [isHovered, setIsHovered] = useState(false);
   const [lastDirection, setLastDirection] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0));
+  
+  // Store animation phase for subtle idle effects
+  const [animationPhase] = useState<number>(Math.random() * Math.PI * 2);
+  const [baseY] = useState<number>(initialPosition[1]);
 
   // Enhanced roaming behavior with physics
   useFrame((state, delta) => {
@@ -99,22 +103,33 @@ export function RoamingArtist({
       }
     }
 
-    // Cyberpunk agent animations (same as CyberpunkAgent)
+    // Cyberpunk agent animations with enhanced effects
     if (meshRef.current) {
-      // Slow cyberpunk floating
-      const bob = Math.sin(state.clock.elapsedTime * 2) * 0.3;
-      meshRef.current.position.y = 1 + bob;
+      // Enhanced floating with subtle vertical bobbing
+      const slowBob = Math.sin(state.clock.elapsedTime * 1.5 + animationPhase) * 0.15;
+      const fastBob = Math.sin(state.clock.elapsedTime * 3 + animationPhase) * 0.05;
+      meshRef.current.position.y = 1 + slowBob + fastBob;
+      
+      // Subtle rotation breathing effect
+      const breatheScale = 1 + Math.sin(state.clock.elapsedTime * 2 + animationPhase) * 0.02;
+      meshRef.current.scale.setScalar(breatheScale);
     }
 
     if (headRef.current) {
-      // Gentle head scanning
-      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.5) * 0.3;
+      // Enhanced head scanning with more natural movement
+      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.2 + animationPhase) * 0.4;
+      headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.8 + animationPhase) * 0.1;
     }
 
-    // Energy ring rotation
+    // Enhanced Energy ring rotation with multiple axes
     if (ringRef.current) {
-      ringRef.current.rotation.y = state.clock.elapsedTime * 2;
-      ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime) * 0.1;
+      ringRef.current.rotation.y = state.clock.elapsedTime * 2 + animationPhase;
+      ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 1.5 + animationPhase) * 0.2;
+      ringRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.8 + animationPhase) * 0.1;
+      
+      // Subtle ring scale pulsing
+      const ringPulse = 1 + Math.sin(state.clock.elapsedTime * 4 + animationPhase) * 0.05;
+      ringRef.current.scale.setScalar(ringPulse);
     }
 
     // Eye blinking effect
@@ -186,55 +201,58 @@ export function RoamingArtist({
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* Enhanced AI Agent Body (same as CyberpunkAgent) */}
+      {/* Enhanced AI Agent Body with better PBR materials */}
       <RoundedBox ref={meshRef} args={[0.8, 2, 0.8]} radius={0.1} position={[0, 1, 0]} castShadow receiveShadow
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}>
-        <MeshTransmissionMaterial
-          samples={16}
-          resolution={256}
-          transmission={0.9}
-          roughness={0}
-          clearcoat={1}
-          thickness={0.3}
-          chromaticAberration={0.8}
-          distortionScale={0.1}
-          temporalDistortion={0.1}
+        <meshStandardMaterial
           color={isHovered ? "#00ff88" : color}
+          emissive={isHovered ? "#004400" : color}
+          emissiveIntensity={isHovered ? 0.3 : 0.1}
+          roughness={0.2}
+          metalness={0.8}
+          envMapIntensity={1.5}
+          transparent
+          opacity={0.9}
         />
       </RoundedBox>
 
-      {/* Larger Spherical Head */}
+      {/* Enhanced Spherical Head with better materials */}
       <Sphere ref={headRef} args={[0.4, 32, 32]} position={[0, 1.5, 0]} castShadow>
         <meshStandardMaterial 
           color="#ffffff"
           emissive={color}
-          emissiveIntensity={0.8}
-          metalness={1}
-          roughness={0}
+          emissiveIntensity={0.6}
+          roughness={0.1}
+          metalness={1.0}
+          envMapIntensity={2.0}
         />
       </Sphere>
 
-      {/* Digital Face Screen */}
+      {/* Digital Face Screen with enhanced emission */}
       <mesh ref={faceScreenRef} position={[0, 1.5, 0.35]}>
         <planeGeometry args={[0.6, 0.4]} />
         <meshStandardMaterial 
           color="#001133"
           emissive={color}
-          emissiveIntensity={0.4}
+          emissiveIntensity={0.8}
+          roughness={0.9}
+          metalness={0.0}
           transparent
-          opacity={0.8}
+          opacity={0.9}
         />
       </mesh>
 
-      {/* Glowing Eyes */}
+      {/* Enhanced Glowing Eyes */}
       <mesh ref={eyeLeftRef} position={[-0.15, 1.6, 0.35]}>
         <sphereGeometry args={[0.05]} />
         <meshStandardMaterial 
           color="#ff0000"
           emissive="#ff0000"
-          emissiveIntensity={2}
+          emissiveIntensity={3}
+          roughness={0.0}
+          metalness={0.0}
         />
       </mesh>
       <mesh ref={eyeRightRef} position={[0.15, 1.6, 0.35]}>
@@ -242,42 +260,50 @@ export function RoamingArtist({
         <meshStandardMaterial 
           color="#ff0000"
           emissive="#ff0000"
-          emissiveIntensity={2}
+          emissiveIntensity={3}
+          roughness={0.0}
+          metalness={0.0}
         />
       </mesh>
 
-      {/* LED Mouth Strip */}
+      {/* Enhanced LED Mouth Strip */}
       <mesh ref={mouthRef} position={[0, 1.3, 0.35]}>
         <boxGeometry args={[0.3, 0.03, 0.01]} />
         <meshStandardMaterial 
           color={color}
           emissive={color}
-          emissiveIntensity={0.6}
+          emissiveIntensity={1.0}
+          roughness={0.0}
+          metalness={1.0}
         />
       </mesh>
 
-      {/* Energy Ring Around Agent */}
+      {/* Enhanced Energy Ring Around Agent */}
       <mesh ref={ringRef} position={[0, 1.5, 0]}>
         <torusGeometry args={[1, 0.05, 8, 32]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={1.2}
+          emissiveIntensity={2.0}
+          roughness={0.0}
+          metalness={1.0}
           transparent
-          opacity={0.8}
+          opacity={0.9}
         />
       </mesh>
 
-      {/* Holographic Scanning Lines */}
+      {/* Enhanced Holographic Scanning Lines */}
       {[0.5, 1, 1.5, 2].map((y, i) => (
         <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
           <ringGeometry args={[0.2, 1.2, 16]} />
           <meshStandardMaterial
             color={color}
             emissive={color}
-            emissiveIntensity={0.6}
+            emissiveIntensity={1.0}
+            roughness={0.0}
+            metalness={0.5}
             transparent
-            opacity={0.3}
+            opacity={0.4}
           />
         </mesh>
       ))}
@@ -297,12 +323,30 @@ export function RoamingArtist({
           <meshStandardMaterial 
             color={color}
             emissive={color}
-            emissiveIntensity={0.6}
+            emissiveIntensity={1.0}
+            roughness={0.0}
+            metalness={1.0}
           />
         </mesh>
       ))}
 
-      {/* Pulsing Light above head */}
+      {/* Enhanced floating effect ring */}
+      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.2}>
+        <mesh position={[0, 2.5, 0]}>
+          <torusGeometry args={[1.5, 0.1, 8, 16]} />
+          <meshStandardMaterial 
+            color={color}
+            emissive={color}
+            emissiveIntensity={0.5}
+            roughness={0.1}
+            metalness={0.9}
+            transparent
+            opacity={0.7}
+          />
+        </mesh>
+      </Float>
+
+      {/* Enhanced Pulsing Light above head */}
       <pointLight 
         ref={lightRef}
         position={[0, 3, 0]} 
@@ -312,33 +356,45 @@ export function RoamingArtist({
         decay={2}
       />
 
-      {/* Particle Aura */}
-      <Sparkles count={50} scale={3} size={2} speed={1} color={color} />
+      {/* Enhanced Particle Aura - Primary layer */}
+      <Sparkles 
+        count={50} 
+        scale={3} 
+        size={2} 
+        speed={1} 
+        color={color}
+        opacity={0.8}
+      />
       
-      {/* Data Streams */}
-      <Sparkles count={30} scale={1.5} size={1} speed={1.5} color="#ffff00" />
+      {/* Secondary particle layer */}
+      <Sparkles 
+        count={30} 
+        scale={2} 
+        size={1} 
+        speed={1.5} 
+        color="#ffffff"
+        opacity={0.4}
+      />
+      
+      {/* Data stream particles */}
+      <Sparkles 
+        count={20} 
+        scale={1.5} 
+        size={0.5} 
+        speed={2} 
+        color="#ffff00"
+        opacity={0.6}
+      />
 
-      {/* Enhanced Cyberpunk Effects */}
-      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.2}>
-        <mesh position={[0, 2.5, 0]}>
-          <torusGeometry args={[1.5, 0.1, 8, 16]} />
-          <meshStandardMaterial 
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      </Float>
-
-      {/* Status Indicator */}
+      {/* Enhanced Status Indicator */}
       <mesh position={[0, 0.2, 0]}>
         <cylinderGeometry args={[1.3, 1.3, 0.1]} />
         <meshStandardMaterial 
           color="#003366"
           emissive={color}
-          emissiveIntensity={0.2}
+          emissiveIntensity={0.3}
+          roughness={0.4}
+          metalness={0.6}
         />
       </mesh>
 

@@ -48,7 +48,6 @@
 # Environment variables (you can also set these in Netlify UI)
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--prefix=/dev/null"
 
 [dev]
   framework = "#auto"

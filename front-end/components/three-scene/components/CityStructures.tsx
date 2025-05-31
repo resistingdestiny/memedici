@@ -38,43 +38,74 @@ export function CyberpunkPlaza() {
 
   return (
     <group ref={plazaRef} position={[0, 0, 0]}>
-      {/* Central Plaza Platform */}
-      <mesh position={[0, 0.5, 0]} receiveShadow>
+      {/* Central Plaza Platform - Enhanced with PBR materials */}
+      <mesh position={[0, 0.5, 0]} receiveShadow castShadow>
         <cylinderGeometry args={[15, 15, 1, 16]} />
-        <meshPhysicalMaterial 
+        <meshStandardMaterial 
           color="#1a1a2e"
           emissive="#0066cc"
-          emissiveIntensity={0.1}
+          emissiveIntensity={0.2}
           roughness={0.3}
           metalness={0.8}
+          envMapIntensity={1.0}
         />
       </mesh>
 
-      {/* Neon Ring */}
-      <mesh position={[0, 1.1, 0]}>
+      {/* Neon Ring - Enhanced with better emission */}
+      <mesh position={[0, 1.1, 0]} castShadow>
         <torusGeometry args={[12, 0.5, 8, 32]} />
         <meshStandardMaterial 
           color="#00ffff"
           emissive="#00ffff"
-          emissiveIntensity={0.5}
+          emissiveIntensity={1.0}
+          roughness={0.1}
+          metalness={0.9}
+          transparent
+          opacity={0.9}
         />
       </mesh>
 
-      {/* Central Hologram */}
+      {/* Central Hologram - Enhanced materials */}
       <Float speed={1} rotationIntensity={0.5} floatIntensity={0.3}>
-        <mesh position={[0, 5, 0]}>
+        <mesh position={[0, 5, 0]} castShadow>
           <octahedronGeometry args={[2]} />
           <meshStandardMaterial 
             color="#ff00ff"
             emissive="#ff00ff"
-            emissiveIntensity={0.8}
+            emissiveIntensity={1.2}
+            roughness={0.0}
+            metalness={0.0}
             transparent
-            opacity={0.7}
+            opacity={0.8}
+            envMapIntensity={2.0}
           />
         </mesh>
       </Float>
 
-      {/* Ambient Sparkles */}
+      {/* Add surrounding energy pillars */}
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = Math.cos(angle) * 8;
+        const z = Math.sin(angle) * 8;
+        return (
+          <Float key={i} speed={0.5 + i * 0.1} rotationIntensity={0.1} floatIntensity={0.2}>
+            <mesh position={[x, 2, z]} castShadow>
+              <cylinderGeometry args={[0.3, 0.3, 4]} />
+              <meshStandardMaterial
+                color="#00ffff"
+                emissive="#00ffff"
+                emissiveIntensity={0.8}
+                roughness={0.2}
+                metalness={0.9}
+                transparent
+                opacity={0.7}
+              />
+            </mesh>
+          </Float>
+        );
+      })}
+
+      {/* Enhanced Ambient Sparkles with layering */}
       <Sparkles
         count={200}
         scale={[30, 10, 30]}
@@ -82,6 +113,16 @@ export function CyberpunkPlaza() {
         speed={0.5}
         color="#00ffff"
         position={[0, 3, 0]}
+      />
+      
+      {/* Secondary sparkle layer */}
+      <Sparkles
+        count={100}
+        scale={[20, 8, 20]}
+        size={1}
+        speed={0.8}
+        color="#0088ff"
+        position={[0, 5, 0]}
       />
     </group>
   );
