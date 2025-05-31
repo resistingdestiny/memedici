@@ -127,8 +127,24 @@ export function MovementController() {
       const currentCameraPosition = camera.position.clone();
       const currentTarget = controlsRef.current.target.clone();
       
-      camera.position.add(movementVec);
-      controlsRef.current.target.add(movementVec);
+      // Get new position after movement
+      const newCameraPosition = currentCameraPosition.clone().add(movementVec);
+      const newTarget = currentTarget.clone().add(movementVec);
+      
+      // Define movement boundaries (adjust these based on your scene size)
+      const BOUNDARY_SIZE = 200; // This should contain the city area
+      const MIN_BOUNDARY = -BOUNDARY_SIZE;
+      const MAX_BOUNDARY = BOUNDARY_SIZE;
+      
+      // Clamp the new positions to boundaries
+      newCameraPosition.x = Math.max(MIN_BOUNDARY, Math.min(MAX_BOUNDARY, newCameraPosition.x));
+      newCameraPosition.z = Math.max(MIN_BOUNDARY, Math.min(MAX_BOUNDARY, newCameraPosition.z));
+      newTarget.x = Math.max(MIN_BOUNDARY, Math.min(MAX_BOUNDARY, newTarget.x));
+      newTarget.z = Math.max(MIN_BOUNDARY, Math.min(MAX_BOUNDARY, newTarget.z));
+
+      // Apply the bounded movement
+      camera.position.copy(newCameraPosition);
+      controlsRef.current.target.copy(newTarget);
       
       // Force update the controls
       controlsRef.current.update();

@@ -184,8 +184,6 @@ Thumbs.db
 tmp/
 temp/
 
-
-
 __pycache__/
 *.py[cod]
 *$py.class
@@ -198,6 +196,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!front-end/lib/
 lib64/
 parts/
 sdist/

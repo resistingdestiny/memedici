@@ -149,6 +149,7 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
   const mouthRef = useRef<THREE.Mesh>(null);
   const faceScreenRef = useRef<THREE.Mesh>(null);
   const antennaRefs = useRef<THREE.Mesh[]>([]);
+  const groupRef = useRef<THREE.Group>(null);
 
   // Get agent data from enhanced database
   const getAgentData = () => {
@@ -243,6 +244,19 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
         antenna.position.y = position[1] + 5.5 + Math.sin(state.clock.elapsedTime * 1.5 + i) * 0.1;
       }
     });
+
+    if (groupRef.current) {
+      // Gentle floating animation
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.5;
+      
+      // Subtle rotation
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+      
+      // Additional hover effect when active
+      if (isActive) {
+        groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 3) * 0.1;
+      }
+    }
   });
 
   const handleClick = (e: any) => {
@@ -255,127 +269,15 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
   };
 
   return (
-    <group position={position} onClick={handleClick}>
-      {/* ORIGINAL: Enhanced AI Agent Body */}
-      <RoundedBox ref={meshRef} args={[0.8, 2, 0.8]} radius={0.1} position={[0, 1, 0]} castShadow receiveShadow>
-        <MeshTransmissionMaterial
-          samples={16}
-          resolution={256}
-          transmission={0.9}
-          roughness={0}
-          clearcoat={1}
-          thickness={0.3}
-          chromaticAberration={0.8}
-          distortionScale={0.1}
-          temporalDistortion={0.1}
-          color={isActive ? "#00ff88" : "#0088ff"}
-        />
-      </RoundedBox>
+    <group ref={groupRef} position={position} onClick={handleClick}>
+      {/* ROBOT PLAYGROUND GLB MODEL with automatic scaling - NO LABEL */}
+      <ScaledGLB 
+        glbFile="robot_playground.glb"
+        castShadow
+        receiveShadow
+      />
 
-      {/* ORIGINAL: Larger Spherical Head */}
-      <Sphere ref={headRef} args={[0.4, 32, 32]} position={[0, 1.5, 0]} castShadow>
-        <meshStandardMaterial 
-          color="#ffffff"
-          emissive={isActive ? "#00ff88" : "#0088ff"}
-          emissiveIntensity={0.8}
-          metalness={1}
-          roughness={0}
-        />
-      </Sphere>
-
-      {/* ORIGINAL: Digital Face Screen */}
-      <mesh ref={faceScreenRef} position={[0, 1.5, 0.35]}>
-        <planeGeometry args={[0.6, 0.4]} />
-        <meshStandardMaterial 
-          color="#001133"
-          emissive="#0066ff"
-          emissiveIntensity={0.4}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-
-      {/* ORIGINAL: Glowing Eyes */}
-      <mesh ref={eyeLeftRef} position={[-0.15, 1.6, 0.35]}>
-        <sphereGeometry args={[0.05]} />
-        <meshStandardMaterial 
-          color="#ff0000"
-          emissive="#ff0000"
-          emissiveIntensity={2}
-        />
-      </mesh>
-      <mesh ref={eyeRightRef} position={[0.15, 1.6, 0.35]}>
-        <sphereGeometry args={[0.05]} />
-        <meshStandardMaterial 
-          color="#ff0000"
-          emissive="#ff0000"
-          emissiveIntensity={2}
-        />
-      </mesh>
-
-      {/* ORIGINAL: LED Mouth Strip */}
-      <mesh ref={mouthRef} position={[0, 1.3, 0.35]}>
-        <boxGeometry args={[0.3, 0.03, 0.01]} />
-        <meshStandardMaterial 
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={0.6}
-        />
-      </mesh>
-
-      {/* ORIGINAL: Energy Ring Around Agent */}
-      <mesh ref={ringRef} position={[0, 1.5, 0]}>
-        <torusGeometry args={[1, 0.05, 8, 32]} />
-        <meshStandardMaterial
-          color="#ffff00"
-          emissive="#ffff00"
-          emissiveIntensity={1.2}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-
-      {/* ORIGINAL: Holographic Scanning Lines */}
-      {[0.5, 1, 1.5, 2].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
-          <ringGeometry args={[0.2, 1.2, 16]} />
-          <meshStandardMaterial
-            color="#00ffff"
-            emissive="#00ffff"
-            emissiveIntensity={0.6}
-            transparent
-            opacity={0.3}
-          />
-        </mesh>
-      ))}
-
-      {/* ORIGINAL: Enhanced Spinning Antenna Array */}
-      {[0, 1, 2].map((i) => (
-        <mesh 
-          key={i}
-          ref={(el) => el && (antennaRefs.current[i] = el)}
-          position={[
-            Math.cos(i * Math.PI * 2 / 3) * 0.6,
-            3.5,
-            Math.sin(i * Math.PI * 2 / 3) * 0.6
-          ]}
-        >
-          <cylinderGeometry args={[0.02, 0.02, 1]} />
-          <meshStandardMaterial 
-            color="#ff00ff"
-            emissive="#ff00ff"
-            emissiveIntensity={0.6}
-          />
-        </mesh>
-      ))}
-
-      {/* ORIGINAL: Particle Aura */}
-      <Sparkles count={50} scale={3} size={2} speed={1} color={isActive ? "#00ff88" : "#0088ff"} />
-      
-      {/* ORIGINAL: Data Streams */}
-      <Sparkles count={30} scale={1.5} size={1} speed={1.5} color="#ffff00" />
-
-      {/* ORIGINAL: Hover Information */}
+      {/* HOVER INFORMATION (only when active) */}
       {isActive && (
         <Html position={[0, 4, 0]}>
           <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-lg px-4 py-3 text-cyan-400 font-mono text-center shadow-lg shadow-cyan-400/25 animate-in fade-in duration-200 pointer-events-none">
@@ -386,45 +288,8 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
         </Html>
       )}
 
-      {/* ORIGINAL: Enhanced Cyberpunk Effects */}
-      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.2}>
-        <mesh position={[0, 2.5, 0]}>
-          <torusGeometry args={[1.5, 0.1, 8, 16]} />
-          <meshStandardMaterial 
-            color="#00ffff"
-            emissive="#00ffff"
-            emissiveIntensity={0.3}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      </Float>
-
-      {/* ORIGINAL: Status Indicator */}
-      <mesh position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[1.3, 1.3, 0.1]} />
-        <meshStandardMaterial 
-          color="#003366"
-          emissive="#0066cc"
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-
-      {/* Agent Label - Using Html instead of Text to avoid troika-worker issues */}
-      <Float speed={0.3}>
-        <Html center position={[0, 4.5, 0]}>
-          <div 
-            className="text-sm font-mono text-center pointer-events-none select-none"
-            style={{ 
-              color: '#00ffff',
-              textShadow: '0 0 10px #00ffff80',
-              fontFamily: 'monospace'
-            }}
-          >
-            {agentData.name}
-          </div>
-        </Html>
-      </Float>
+      {/* SUBTLE PARTICLE EFFECTS AROUND ROBOT */}
+      <Sparkles count={30} scale={3} size={1} speed={0.5} color={isActive ? "#00ff88" : "#0088ff"} />
     </group>
   );
 } 
