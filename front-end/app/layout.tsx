@@ -2,7 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Space_Grotesk, Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
+import { RainbowKitProviders } from '@/components/providers/rainbowkit-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { NavBar } from '@/components/layout/navbar';
 
@@ -40,11 +41,13 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem={false}
         >
-          <NavBar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Toaster />
+          <RainbowKitProviders>
+            <NavBar />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Toaster />
+          </RainbowKitProviders>
         </ThemeProvider>
       </body>
     </html>

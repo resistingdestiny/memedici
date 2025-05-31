@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAgents } from "@/lib/stores/use-agents";
 import { AgentCard } from "@/components/dashboard/agent-card";
 import { AgentTable } from "@/components/agents/agent-table";
-import { CreateAgentModal } from "@/components/agents/create-agent-modal";
+import { CreateAgentWizard } from "@/components/agents/create-agent-wizard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ export default function AgentsPage() {
     setViewMode
   } = useAgents();
   
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
   
   // Extract all unique specialties from agents
   const allSpecialties = Array.from(
@@ -56,37 +56,32 @@ export default function AgentsPage() {
     
     return matchesSearch && matchesSpecialties;
   });
-  
-  // Sort agents
+
+  // Sort filtered agents
   const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortBy === "output") {
-      return sortOrder === "desc"
-        ? b.stats.artworksCreated - a.stats.artworksCreated
-        : a.stats.artworksCreated - b.stats.artworksCreated;
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case "price":
+        aValue = a.stats.totalStaked || 0;
+        bValue = b.stats.totalStaked || 0;
+        break;
+      case "output":
+        aValue = a.stats.artworksCreated;
+        bValue = b.stats.artworksCreated;
+        break;
+      case "date":
+        // Since there's no createdAt in the Agent interface, use name as fallback
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      default:
+        return 0;
     }
-    if (sortBy === "price") {
-      const priceA = a.stats.totalStaked || 0;
-      const priceB = b.stats.totalStaked || 0;
-      return sortOrder === "desc" ? priceB - priceA : priceA - priceB;
-    }
-    return 0;
+    
+    return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
   });
-  
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedTags([]);
-  };
-  
-  // Toggle specialty selection
-  const toggleSpecialty = (specialty: string) => {
-    const newTags = selectedTags.includes(specialty)
-      ? selectedTags.filter((s) => s !== specialty)
-      : [...selectedTags, specialty];
-    setSelectedTags(newTags);
-  };
-  
-  // Fetch agents on component mount
+
   useEffect(() => {
     fetchAgents();
   }, [fetchAgents]);
@@ -106,129 +101,157 @@ export default function AgentsPage() {
               </p>
             </div>
             
-            <CreateAgentModal
-              open={showCreateModal}
-              onOpenChange={setShowCreateModal}
-            />
-            
-            <Button onClick={() => setShowCreateModal(true)}>
+            <Button onClick={() => setShowCreateWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Agent
             </Button>
           </div>
           
           {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="md:col-span-2 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name or description..."
+                placeholder="Search agents..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             
-            <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="output">Output</SelectItem>
-                  <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="date">Date</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={sortOrder} onValueChange={(value: any) => setSortOrder(value)}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Order" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">Ascending</SelectItem>
-                  <SelectItem value="desc">Descending</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
-              >
-                {viewMode === "table" ? (
-                  <Grid className="h-4 w-4" />
-                ) : (
-                  <TableIcon className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-          
-          {/* Specialty Filters */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            {allSpecialties.map((specialty) => (
-              <Badge
-                key={specialty}
-                variant={selectedTags.includes(specialty) ? "default" : "outline"}
-                className="cursor-pointer"
-                onClick={() => toggleSpecialty(specialty)}
-              >
-                {specialty}
-              </Badge>
-            ))}
+            {/* Sort */}
+            <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
+              const [sort, order] = value.split('-');
+              setSortBy(sort as any);
+              setSortOrder(order as any);
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="output-desc">Most Productive</SelectItem>
+                <SelectItem value="output-asc">Least Productive</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="date-desc">Newest First</SelectItem>
+                <SelectItem value="date-asc">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
             
-            {(selectedTags.length > 0 || searchTerm) && (
-              <Button variant="ghost" onClick={clearFilters} className="ml-2">
-                Clear Filters
+            {/* View Mode */}
+            <div className="flex rounded-lg border">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="flex-1 rounded-r-none"
+              >
+                <TableIcon className="h-4 w-4" />
               </Button>
-            )}
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="flex-1 rounded-l-none"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
-          <div className="flex items-center text-sm text-muted-foreground mt-4">
-            <Users className="h-4 w-4 mr-2" />
-            {isLoading ? "Loading..." : `${sortedAgents.length} agents found`}
-          </div>
-        </div>
-      </div>
-      
-      {/* Content */}
-      <div className="py-12 px-4">
-        <div className="container max-w-6xl">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-[400px] rounded-lg bg-muted/50 animate-pulse"
-                />
-              ))}
-            </div>
-          ) : sortedAgents.length === 0 ? (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-2">No agents found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
-              <Button onClick={clearFilters} className="mt-4">
-                Clear Filters
-              </Button>
-            </div>
-          ) : viewMode === "table" ? (
-            <AgentTable agents={sortedAgents} />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedAgents.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  agent={agent}
-                  featured={agent.featured}
-                />
-              ))}
+          {/* Specialty Tags */}
+          {allSpecialties.length > 0 && (
+            <div className="mt-4">
+              <div className="flex flex-wrap gap-2">
+                {allSpecialties.map((specialty) => (
+                  <Badge
+                    key={specialty}
+                    variant={selectedTags.includes(specialty) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      if (selectedTags.includes(specialty)) {
+                        setSelectedTags(selectedTags.filter(tag => tag !== specialty));
+                      } else {
+                        setSelectedTags([...selectedTags, specialty]);
+                      }
+                    }}
+                  >
+                    {specialty}
+                  </Badge>
+                ))}
+                {selectedTags.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedTags([])}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Content */}
+      <div className="container max-w-6xl py-8 px-4">
+        {/* Stats */}
+        <div className="flex items-center gap-6 mb-8">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {sortedAgents.length} {sortedAgents.length === 1 ? 'agent' : 'agents'} available
+            </span>
+          </div>
+          {selectedTags.length > 0 && (
+            <div className="text-sm text-muted-foreground">
+              Filtered by: {selectedTags.join(', ')}
+            </div>
+          )}
+        </div>
+
+        {/* Agents Display */}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading agents...</p>
+          </div>
+        ) : sortedAgents.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No agents found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchTerm || selectedTags.length > 0 
+                ? "Try adjusting your search or filters"
+                : "Be the first to create an agent!"
+              }
+            </p>
+            {(!searchTerm && selectedTags.length === 0) && (
+              <Button onClick={() => setShowCreateWizard(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Agent
+              </Button>
+            )}
+          </div>
+        ) : viewMode === "table" ? (
+          <AgentTable agents={sortedAgents} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedAgents.map((agent) => (
+              <AgentCard key={agent.id} agent={agent} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Create Agent Wizard */}
+      <CreateAgentWizard
+        open={showCreateWizard}
+        onOpenChange={setShowCreateWizard}
+      />
     </div>
   );
 }

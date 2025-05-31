@@ -1,43 +1,51 @@
 "use client";
 
 import { create } from "zustand";
+import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
+import { useEffect } from "react";
 
 interface WalletState {
   isConnected: boolean;
   address: string | null;
   balance: number;
-  connect: () => void;
-  disconnect: () => void;
+  isConnecting: boolean;
+  error: string | null;
 }
 
-export const useWallet = create<WalletState>((set) => ({
+export const useWallet = create<WalletState>(() => ({
   isConnected: false,
   address: null,
   balance: 0,
-  
-  connect: () => {
-    // Mock implementation - would connect to real wallet in production
-    console.log("Connecting wallet...");
-    
-    // Simulate successful connection
-    setTimeout(() => {
-      set({
-        isConnected: true,
-        address: "0x1234567890abcdef1234567890abcdef12345678",
-        balance: 1.234
-      });
-      
-      console.log("Wallet connected!");
-    }, 500);
-  },
-  
-  disconnect: () => {
-    console.log("Disconnecting wallet...");
-    
-    set({
-      isConnected: false,
-      address: null,
-      balance: 0
-    });
-  }
+  isConnecting: false,
+  error: null,
 }));
+
+// Custom hook that combines wagmi hooks with zustand store
+export const useWalletConnection = () => {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors, isPending, error } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { data: balance } = useBalance({
+    address: address,
+  });
+
+  const setWalletState = useWallet((state) => state);
+
+  useEffect(() => {
+    useWallet.setState({
+      isConnected,
+      address: address || null,
+      balance: balance ? parseFloat(balance.formatted) : 0,
+      isConnecting: isPending,
+      error: error?.message || null,
+    });
+  }, [address, isConnected, balance, isPending, error]);
+
+  return {
+    connect,
+    disconnect,
+    connectors,
+    isConnecting: isPending,
+    error,
+  };
+};

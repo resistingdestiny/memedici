@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { cn } from "@/lib/utils";
@@ -14,13 +15,14 @@ import {
   Users, 
   Compass
 } from "lucide-react";
-import { useWallet } from "@/lib/stores/use-wallet";
+import { useWallet, useWalletConnection } from "@/lib/stores/use-wallet";
 
 export function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const { isConnected, connect } = useWallet();
+  const { isConnected } = useWallet();
+  const { connect, disconnect, connectors } = useWalletConnection();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -72,15 +74,113 @@ export function NavBar() {
         
         <div className="flex items-center gap-4">
           <div className="hidden md:block">
-            {!isConnected ? (
-              <Button onClick={connect} variant="outline" size="sm" className="tech-border">
-                Connect Wallet
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" className="tech-border">
-                0x12...8F9E
-              </Button>
-            )}
+            <ConnectButton.Custom>
+              {({
+                account,
+                chain,
+                openAccountModal,
+                openChainModal,
+                openConnectModal,
+                authenticationStatus,
+                mounted,
+              }) => {
+                // Note: If your app doesn't use authentication, you
+                // can remove all 'authenticationStatus' checks
+                const ready = mounted && authenticationStatus !== 'loading';
+                const connected =
+                  ready &&
+                  account &&
+                  chain &&
+                  (!authenticationStatus ||
+                    authenticationStatus === 'authenticated');
+
+                return (
+                  <div
+                    {...(!ready && {
+                      'aria-hidden': true,
+                      'style': {
+                        opacity: 0,
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                      },
+                    })}
+                  >
+                    {(() => {
+                      if (!connected) {
+                        return (
+                          <Button 
+                            onClick={openConnectModal} 
+                            variant="outline" 
+                            size="sm" 
+                            className="tech-border"
+                          >
+                            Connect Wallet
+                          </Button>
+                        );
+                      }
+
+                      if (chain.unsupported) {
+                        return (
+                          <Button 
+                            onClick={openChainModal} 
+                            variant="destructive" 
+                            size="sm"
+                          >
+                            Wrong network
+                          </Button>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <Button
+                            onClick={openChainModal}
+                            variant="outline"
+                            size="sm"
+                            className="tech-border"
+                            style={{ display: 'flex', alignItems: 'center' }}
+                          >
+                            {chain.hasIcon && (
+                              <div
+                                style={{
+                                  background: chain.iconBackground,
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 999,
+                                  overflow: 'hidden',
+                                  marginRight: 4,
+                                }}
+                              >
+                                {chain.iconUrl && (
+                                  <img
+                                    alt={chain.name ?? 'Chain icon'}
+                                    src={chain.iconUrl}
+                                    style={{ width: 12, height: 12 }}
+                                  />
+                                )}
+                              </div>
+                            )}
+                            {chain.name}
+                          </Button>
+
+                          <Button 
+                            onClick={openAccountModal} 
+                            variant="outline" 
+                            size="sm" 
+                            className="tech-border"
+                          >
+                            {account.displayName}
+                            {account.displayBalance
+                              ? ` (${account.displayBalance})`
+                              : ''}
+                          </Button>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                );
+              }}
+            </ConnectButton.Custom>
           </div>
           
           <ModeToggle />
@@ -119,15 +219,9 @@ export function NavBar() {
               </Link>
             ))}
             
-            {!isConnected ? (
-              <Button onClick={connect} className="mt-2">
-                Connect Wallet
-              </Button>
-            ) : (
-              <Button variant="outline" className="mt-2">
-                0x12...8F9E
-              </Button>
-            )}
+            <div className="mt-2">
+              <ConnectButton />
+            </div>
           </div>
         </div>
       )}

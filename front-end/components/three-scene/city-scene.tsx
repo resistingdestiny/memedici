@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { 
   OrbitControls, 
@@ -18,1813 +18,311 @@ import {
   MeshTransmissionMaterial,
   MeshReflectorMaterial,
   PointerLockControls,
-  KeyboardControls,
   useTexture,
-  Text,
   Box,
   Plane
 } from "@react-three/drei";
 import { useCityStore } from "@/lib/stores/use-city";
 import * as THREE from "three";
 import { CityUI } from "./city-ui";
+import { StudioBuilding } from "./components/StudioBuilding";
+import { CyberpunkAgent } from "./components/CyberpunkAgent";
+import { RoamingArtist } from "./components/RoamingArtist";
+import { StudioGallery } from "./components/StudioGallery";
+import { CityEnvironment, CityGround } from "./components/CityEnvironment";
+import { MovementController } from "./components/MovementController";
+import { CyberpunkPlaza, AgentBuildingHub, TradingMarketplace, LoadingFallback } from "./components/CityStructures";
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
 
-// KEYBOARD CONTROLS MAPPING 🎮
-const MOVEMENT_KEYS = [
-  { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
-  { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
-  { name: 'leftward', keys: ['ArrowLeft', 'KeyA'] },
-  { name: 'rightward', keys: ['ArrowRight', 'KeyD'] },
-  { name: 'jump', keys: ['Space'] },
-  { name: 'run', keys: ['ShiftLeft'] },
-  { name: 'toggleView', keys: ['KeyV'] },
-  { name: 'zoomIn', keys: ['Equal', 'NumpadAdd'] },
-  { name: 'zoomOut', keys: ['Minus', 'NumpadSubtract'] }
-];
-
-// UNIQUE ARTIST STUDIO BUILDINGS WITH DISTINCTIVE DESIGNS 🎨
-function StudioBuilding({ studio }: { studio: any }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
-  const cubistRefs = useRef<(THREE.Mesh | null)[]>([null, null, null, null]); // For cubist fragments
-  const { activeStudio, hoveredStudio, setHoveredStudio, setActiveStudio, enterGalleryMode } = useCityStore();
-  
-  const isActive = activeStudio === studio.id;
-  const isHovered = hoveredStudio === studio.id;
-  const showInterface = isHovered || isActive;
-  
-  useFrame((state) => {
-    if (meshRef.current && glowRef.current) {
-      // Different floating animations for each artist
-      let offset = 0;
-      if (studio.id === "leonardo-studio") {
-        offset = Math.sin(state.clock.elapsedTime * 2) * 0.3; // Mechanical rhythm
-      } else if (studio.id === "raphael-studio") {
-        offset = Math.sin(state.clock.elapsedTime * 1.5) * 0.2; // Graceful flow
-      } else if (studio.id === "michelangelo-studio") {
-        offset = Math.sin(state.clock.elapsedTime * 1) * 0.4; // Powerful, slow
-      } else if (studio.id === "van-gogh-studio") {
-        offset = Math.sin(state.clock.elapsedTime * 4) * 0.5; // Energetic swirls
-      } else if (studio.id === "picasso-studio") {
-        offset = Math.sin(state.clock.elapsedTime * 3) * 0.3 + Math.cos(state.clock.elapsedTime * 2) * 0.2; // Cubist complexity
-      } else {
-        offset = Math.sin(state.clock.elapsedTime * 2.5) * 0.25; // Default
-      }
-      
-      // Apply floating to main mesh or all cubist fragments
-      if (studio.id === "picasso-studio") {
-        // Apply floating to all cubist fragments
-        cubistRefs.current.forEach((ref, i) => {
-          if (ref) {
-            ref.position.y = (i === 0 ? 2 : i === 1 ? 4 : i === 2 ? 6 : 8) + offset;
-          }
-        });
-      } else {
-      meshRef.current.position.y = studio.position[1] + offset;
-      }
-      
-      // FIXED: Consistent glow pulsing without random flickering
-      const studioSeed = studio.id.charCodeAt(0) + studio.id.charCodeAt(1); // Consistent seed per studio
-      const glow = 0.5 + Math.sin(state.clock.elapsedTime * 2 + studioSeed) * 0.3;
-      glowRef.current.scale.setScalar(1 + glow * 0.1);
-      
-      // Artist-specific rotations
-      if (isActive) {
-        if (studio.id === "picasso-studio") {
-          // Rotate all cubist fragments
-          cubistRefs.current.forEach((ref) => {
-            if (ref) {
-              ref.rotation.y += 0.02; // Fast, cubist rotation
-              ref.rotation.z += 0.01;
-            }
-          });
-        } else if (studio.id === "van-gogh-studio") {
-          meshRef.current.rotation.y += 0.015; // Swirling motion
-        } else {
-          meshRef.current.rotation.y += 0.01; // Standard rotation
-        }
-      }
-    }
-  });
-  
-  // Get studio-specific colors and materials
-  const getStudioStyle = () => {
-    switch (studio.id) {
-      case "leonardo-studio":
-        return {
-          primaryColor: "#8B4513", // Renaissance brown
-          secondaryColor: "#DAA520", // Golden
-          emissiveColor: isActive ? "#FFD700" : isHovered ? "#FFA500" : "#CD853F",
-          shape: "octagonal", // Technical, precise
-          height: 10,
-          width: 7
-        };
-      case "raphael-studio":
-        return {
-          primaryColor: "#4169E1", // Royal blue
-          secondaryColor: "#87CEEB", // Sky blue
-          emissiveColor: isActive ? "#00BFFF" : isHovered ? "#1E90FF" : "#4169E1",
-          shape: "classical", // Elegant columns
-          height: 12,
-          width: 6
-        };
-      case "michelangelo-studio":
-        return {
-          primaryColor: "#DC143C", // Deep red
-          secondaryColor: "#B22222", // Fire brick
-          emissiveColor: isActive ? "#FF4500" : isHovered ? "#FF6347" : "#DC143C",
-          shape: "monumental", // Massive and imposing
-          height: 15,
-          width: 10
-        };
-      case "caravaggio-studio":
-        return {
-          primaryColor: "#4B0082", // Indigo (shadows)
-          secondaryColor: "#8A2BE2", // Blue violet
-          emissiveColor: isActive ? "#9370DB" : isHovered ? "#8A2BE2" : "#4B0082",
-          shape: "dramatic", // High contrast, chiaroscuro
-          height: 11,
-          width: 5
-        };
-      case "da-vinci-studio":
-        return {
-          primaryColor: "#8B4513", // Changed from forest green to brown
-          secondaryColor: "#DAA520", // Changed from lime green to golden rod  
-          emissiveColor: isActive ? "#D2691E" : isHovered ? "#DAA520" : "#8B4513", // Changed from bright green to orange/brown tones
-          shape: "innovative", // Complex, multi-level
-          height: 14,
-          width: 7
-        };
-      case "picasso-studio":
-        return {
-          primaryColor: "#696969", // Dim gray
-          secondaryColor: "#2F4F4F", // Dark slate gray
-          emissiveColor: isActive ? "#FF1493" : isHovered ? "#FF69B4" : "#696969",
-          shape: "cubist", // Angular, fragmented
-          height: 8,
-          width: 12
-        };
-      case "monet-studio":
-        return {
-          primaryColor: "#98FB98", // Pale green
-          secondaryColor: "#90EE90", // Light green
-          emissiveColor: isActive ? "#00FF7F" : isHovered ? "#7FFF00" : "#98FB98",
-          shape: "organic", // Flowing, natural
-          height: 9,
-          width: 8
-        };
-      case "van-gogh-studio":
-        return {
-          primaryColor: "#FFD700", // Gold
-          secondaryColor: "#FFA500", // Orange
-          emissiveColor: isActive ? "#FFFF00" : isHovered ? "#FFD700" : "#FFA500",
-          shape: "swirling", // Dynamic, energetic
-          height: 11,
-          width: 9
-        };
-      default:
-        return {
-          primaryColor: "#0088ff",
-          secondaryColor: "#00ffff",
-          emissiveColor: isActive ? "#00ff88" : isHovered ? "#ff0088" : "#0088ff",
-          shape: "default",
-          height: 8,
-          width: 6
-        };
-    }
-  };
-
-  const style = getStudioStyle();
-
-  const renderUniqueStructure = () => {
-    switch (style.shape) {
-      case "octagonal": // Leonardo - Technical precision
-        return (
-          <>
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-        onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <cylinderGeometry args={[style.width/2, style.width/2, style.height, 8]} />
-        <MeshTransmissionMaterial
-                backside samples={16} resolution={512} transmission={0.8}
-                roughness={0.1} clearcoat={1} clearcoatRoughness={0.1}
-                thickness={0.5} chromaticAberration={0.5}
-                distortionScale={0.1} temporalDistortion={0.1}
-                color={style.primaryColor}
-              />
-            </mesh>
-            {/* Technical gear elements */}
-            {[0, 1, 2].map((i) => (
-              <mesh key={i} position={[0, 2 + i * 3, 0]} rotation={[0, i * Math.PI/4, 0]}>
-                <torusGeometry args={[style.width/2 + 0.5, 0.2, 8, 16]} />
-                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
-              </mesh>
-            ))}
-          </>
-        );
-
-      case "classical": // Raphael - Elegant columns
-        return (
-          <>
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <cylinderGeometry args={[style.width/2, style.width/2 + 1, style.height, 16]} />
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
-            </mesh>
-            {/* Classical columns */}
-            {[-2, 2].map((x) => [-2, 2].map((z) => (
-              <mesh key={`${x}-${z}`} position={[x, style.height/2, z]} castShadow>
-                <cylinderGeometry args={[0.3, 0.3, style.height]} />
-                <meshStandardMaterial color="#ffffff" emissive={style.secondaryColor} emissiveIntensity={0.8} />
-              </mesh>
-            )))}
-          </>
-        );
-
-      case "monumental": // Michelangelo - Massive blocks
-        return (
-          <>
-            <RoundedBox ref={meshRef} args={[style.width, style.height, style.width]} radius={0.5} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.7} roughness={0.3} metalness={0.7} />
-      </RoundedBox>
-            {/* Massive supporting pillars */}
-            {[[-3, 3], [3, 3], [-3, -3], [3, -3]].map(([x, z], i) => (
-              <RoundedBox key={i} args={[1.5, style.height + 2, 1.5]} radius={0.2} position={[x, 1, z]} castShadow>
-                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
-              </RoundedBox>
-            ))}
-          </>
-        );
-
-      case "dramatic": // Caravaggio - High contrast
-        return (
-          <>
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <coneGeometry args={[style.width/2, style.height, 6]} />
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={1.2} />
-            </mesh>
-            {/* Dramatic light beams */}
-            {[0, 1, 2].map((i) => (
-              <mesh key={i} position={[0, 2 + i * 3, 0]} rotation={[0, i * Math.PI/3, 0]}>
-                <coneGeometry args={[0.5, 2, 6]} />
-                <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} transparent opacity={0.7} />
-              </mesh>
-            ))}
-          </>
-        );
-
-      case "innovative": // Da Vinci - Multi-level complexity
-        return (
-          <>
-            {/* Main tower */}
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <cylinderGeometry args={[style.width/2, style.width/3, style.height, 12]} />
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.6} />
-            </mesh>
-            {/* Flying machine elements */}
-            {[3, 6, 9].map((y) => (
-              <group key={y} position={[0, y, 0]}>
-                <mesh rotation={[0, y * 0.3, 0]}>
-                  <torusGeometry args={[2, 0.3, 8, 16]} />
-                  <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} />
-                </mesh>
-                {/* Spinning elements */}
-                <mesh rotation={[Math.PI/2, 0, y * 0.2]}>
-                  <cylinderGeometry args={[0.1, 0.1, 4]} />
-                  <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} />
-                </mesh>
-              </group>
-            ))}
-          </>
-        );
-
-      case "cubist": // Picasso - Angular fragments
-        return (
-          <>
-            {/* Multiple angular pieces */}
-            {[
-              { pos: [0, 2, 0] as [number, number, number], rot: [0, 0, 0] as [number, number, number], scale: [style.width, 4, 4] as [number, number, number] },
-              { pos: [2, 4, 2] as [number, number, number], rot: [0, Math.PI/4, 0] as [number, number, number], scale: [4, 6, 3] as [number, number, number] },
-              { pos: [-2, 6, -2] as [number, number, number], rot: [0, -Math.PI/4, 0] as [number, number, number], scale: [3, 4, 5] as [number, number, number] },
-              { pos: [1, 8, -1] as [number, number, number], rot: [0, Math.PI/3, 0] as [number, number, number], scale: [2, 3, 3] as [number, number, number] }
-            ].map((fragment, i) => (
-      <RoundedBox
-                key={i} 
-                ref={(ref) => {
-                  if (i === 0) meshRef.current = ref; // First fragment also goes to meshRef
-                  cubistRefs.current[i] = ref; // All fragments go to cubistRefs
-                }}
-                args={fragment.scale} 
-                radius={0.2} 
-                position={fragment.pos} 
-                rotation={fragment.rot}
-                castShadow receiveShadow
-                onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-                onPointerEnter={() => setHoveredStudio(studio.id)}
-                onPointerLeave={() => setHoveredStudio(null)}>
-        <meshStandardMaterial
-                  color={i % 2 === 0 ? style.primaryColor : style.secondaryColor} 
-                  emissive={style.emissiveColor} 
-                  emissiveIntensity={0.8} 
-        />
-      </RoundedBox>
-            ))}
-          </>
-        );
-
-      case "organic": // Monet - Flowing natural forms
-        return (
-          <>
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <sphereGeometry args={[style.width/2, 16, 12]} />
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
-      </mesh>
-            {/* Water lily pads */}
-            {[1, 2, 3].map((i) => (
-              <mesh key={i} position={[Math.cos(i) * 3, 1 + i, Math.sin(i) * 3]} rotation={[-Math.PI/2, 0, 0]}>
-                <ringGeometry args={[0.5, 2, 8]} />
-                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1} transparent opacity={0.8} />
-          </mesh>
-            ))}
-          </>
-        );
-
-      case "swirling": // Van Gogh - Dynamic energy
-        return (
-          <>
-            <mesh ref={meshRef} castShadow receiveShadow
-              onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-              onPointerEnter={() => setHoveredStudio(studio.id)}
-              onPointerLeave={() => setHoveredStudio(null)}>
-              <cylinderGeometry args={[style.width/2, style.width/3, style.height, 8]} />
-              <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.8} />
-          </mesh>
-            {/* Swirling energy ribbons */}
-            {[0, 1, 2, 3].map((i) => (
-              <mesh key={i} position={[
-                Math.cos(i * Math.PI/2) * 3, 
-                2 + i * 2, 
-                Math.sin(i * Math.PI/2) * 3
-              ]} rotation={[0, i * Math.PI/2, 0]}>
-                <torusGeometry args={[1.5, 0.3, 6, 12]} />
-                <meshStandardMaterial color={style.secondaryColor} emissive={style.emissiveColor} emissiveIntensity={1.5} />
-        </mesh>
-      ))}
-          </>
-        );
-
-      default:
-        return (
-          <RoundedBox ref={meshRef} args={[style.width, style.height, style.width]} radius={0.3} castShadow receiveShadow
-            onClick={(e) => { e.stopPropagation(); setActiveStudio(studio.id); }}
-            onPointerEnter={() => setHoveredStudio(studio.id)}
-            onPointerLeave={() => setHoveredStudio(null)}>
-            <meshStandardMaterial color={style.primaryColor} emissive={style.emissiveColor} emissiveIntensity={0.5} />
-          </RoundedBox>
-        );
-    }
-  };
-  
-  return (
-    <group position={studio.position} rotation={studio.rotation} scale={studio.scale}>
-      {renderUniqueStructure()}
-
-      {/* ARTIST-SPECIFIC NEON GLOW OUTLINE */}
-      <mesh ref={glowRef} position={[0, style.height/2, 0]}>
-        <sphereGeometry args={[style.width/2 + 2, 16, 16]} />
-        <meshStandardMaterial
-          color={style.emissiveColor}
-          emissive={style.emissiveColor}
-          emissiveIntensity={0.8} // Reduced from 1.5 to prevent harsh flickering
-          transparent
-          opacity={0.15} // Reduced opacity for subtlety
-        />
-      </mesh>
-      
-      {/* CYBERPUNK AI AGENT */}
-      <CyberpunkAgent agentId={studio.agentId} position={[0, 1, style.width/2 + 1]} isActive={isActive} />
-      
-      {/* ARTIST-SPECIFIC PARTICLE EFFECTS */}
-      {isActive && (
-        <>
-          <Sparkles count={200} scale={style.width + 5} size={6} speed={2} color={style.emissiveColor} />
-          <Sparkles count={100} scale={style.width + 2} size={3} speed={1.5} color={style.secondaryColor} />
-        </>
-      )}
-
-      {/* Removed extra popup - only keeping bottom left interface via city-ui.tsx */}
-    </group>
-  );
-}
-
-// CYBERPUNK AI AGENT WITH INSANE EFFECTS 🤖
-function CyberpunkAgent({ agentId, position, isActive }: { agentId: string; position: [number, number, number]; isActive: boolean }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const headRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current && headRef.current && ringRef.current) {
-      // Cyberpunk floating
-      const bob = Math.sin(state.clock.elapsedTime * 4) * 0.3;
-      meshRef.current.position.y = position[1] + bob;
-      headRef.current.position.y = position[1] + 1.5 + bob;
-      
-      // Head scanning rotation
-      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 3) * 0.5;
-      
-      // Energy ring rotation
-      ringRef.current.rotation.x += 0.02;
-      ringRef.current.rotation.z += 0.01;
-    }
-  });
-  
-  return (
-    <group position={position}>
-      {/* MAIN AI BODY */}
-      <RoundedBox ref={meshRef} args={[0.8, 2, 0.8]} radius={0.1} castShadow>
-        <MeshTransmissionMaterial
-          samples={16}
-          resolution={256}
-          transmission={0.9}
-          roughness={0}
-          clearcoat={1}
-          thickness={0.3}
-          chromaticAberration={0.8}
-          distortionScale={0.1}
-          temporalDistortion={0.1}
-          color={isActive ? "#00ff88" : "#0088ff"}
-        />
-      </RoundedBox>
-      
-      {/* CYBERPUNK HEAD */}
-      <Sphere ref={headRef} args={[0.4, 32, 32]} position={[0, 1.5, 0]} castShadow>
-        <meshStandardMaterial 
-          color="#ffffff"
-          emissive={isActive ? "#00ff88" : "#0088ff"}
-          emissiveIntensity={0.8} // Reduced from 1.5
-          metalness={1}
-          roughness={0}
-        />
-      </Sphere>
-      
-      {/* GLOWING EYES */}
-      {[-0.15, 0.15].map((x, i) => (
-        <mesh key={i} position={[x, 1.6, 0.35]} castShadow>
-          <sphereGeometry args={[0.05]} />
-          <meshStandardMaterial 
-            color="#ff0000"
-            emissive="#ff0000"
-            emissiveIntensity={2} // Reduced from 3
-          />
-        </mesh>
-      ))}
-      
-      {/* ENERGY RING AROUND AGENT */}
-      <mesh ref={ringRef} position={[0, 1.5, 0]}>
-        <torusGeometry args={[1, 0.05, 8, 32]} />
-        <meshStandardMaterial
-          color="#ffff00"
-          emissive="#ffff00"
-          emissiveIntensity={1.2} // Reduced from 2
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-      
-      {/* HOLOGRAPHIC SCANNING LINES */}
-      {[0.5, 1, 1.5, 2].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
-          <ringGeometry args={[0.2, 1.2, 16]} />
-          <meshStandardMaterial
-            color="#00ffff"
-            emissive="#00ffff"
-            emissiveIntensity={0.6} // Reduced from 1
-            transparent
-            opacity={0.3}
-          />
-        </mesh>
-      ))}
-      
-      {/* PARTICLE AURA */}
-      <Sparkles count={50} scale={3} size={2} speed={2} color={isActive ? "#0088ff" : "#0088ff"} />
-      
-      {/* DATA STREAMS */}
-      <Sparkles count={30} scale={1.5} size={1} speed={3} color="#ffff00" />
-    </group>
-  );
-}
-
-// Enhanced Artwork display component
-function ArtworkDisplay({ artwork, position }: { artwork: any; position: [number, number, number] }) {
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
-  const [error, setError] = useState(false);
-  const frameRef = useRef<THREE.Mesh>(null);
-  
-  useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    loader.load(
-      artwork.image,
-      (loadedTexture) => {
-        setTexture(loadedTexture);
-        setError(false);
-      },
-      undefined,
-      (err) => {
-        console.warn('Failed to load texture:', artwork.image, err);
-        setError(true);
-        // Create a fallback colored texture
-        const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Create gradient background
-          const gradient = ctx.createLinearGradient(0, 0, 256, 256);
-          gradient.addColorStop(0, '#7C4DFF');
-          gradient.addColorStop(1, '#9C7AFF');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, 256, 256);
-          
-          // Add artistic pattern
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-          for (let i = 0; i < 10; i++) {
-            ctx.beginPath();
-            ctx.arc(Math.random() * 256, Math.random() * 256, Math.random() * 30, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          
-          ctx.fillStyle = 'white';
-          ctx.font = 'bold 20px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('AI Art', 128, 128);
-        }
-        const fallbackTexture = new THREE.CanvasTexture(canvas);
-        setTexture(fallbackTexture);
-      }
-    );
-  }, [artwork.image]);
-
-  useFrame((state) => {
-    if (frameRef.current) {
-      // Gentle floating animation
-      frameRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.05;
-    }
-  });
-  
-  return (
-    <group position={position}>
-      {/* Enhanced ornate frame */}
-      <mesh ref={frameRef} castShadow>
-        <boxGeometry args={[1.8, 1.4, 0.15]} />
-        <meshStandardMaterial 
-          color="#8D6E63" 
-          roughness={0.3}
-          metalness={0.7}
-          envMapIntensity={1}
-        />
-      </mesh>
-      
-      {/* Inner frame decoration */}
-      <mesh position={[0, 0, 0.08]} castShadow>
-        <boxGeometry args={[1.6, 1.2, 0.05]} />
-        <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.9} />
-      </mesh>
-      
-      {/* Artwork canvas */}
-      <mesh position={[0, 0, 0.12]}>
-        <planeGeometry args={[1.4, 1]} />
-        <meshStandardMaterial 
-          map={texture} 
-          color={error ? "#ddd" : "white"}
-          roughness={0.9}
-          metalness={0.1}
-        />
-      </mesh>
-      
-      {/* Glass protection with reflections */}
-      <mesh position={[0, 0, 0.15]}>
-        <planeGeometry args={[1.4, 1]} />
-        <meshStandardMaterial 
-          transparent 
-          opacity={0.1}
-          roughness={0}
-          metalness={0.1}
-          envMapIntensity={1}
-        />
-      </mesh>
-      
-      {/* Artwork lighting */}
-      <spotLight
-        position={[0, 2, 1]}
-        target-position={position}
-        angle={0.3}
-        penumbra={0.5}
-        intensity={0.5}
-        color="#FFFFFF"
-        castShadow
-      />
-      
-      {/* Enhanced artwork info */}
-      <Html position={[0, -0.9, 0]} center>
-        <div className="bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-xs font-medium border border-white/20 shadow-lg">
-          <div className="text-gold-400 font-bold">{artwork.title}</div>
-          <div className="text-xs opacity-80">Digital Masterpiece</div>
-        </div>
-      </Html>
-    </group>
-  );
-}
-
-// HOLOGRAPHIC ARTWORK DISPLAY 🎨
-function HolographicArt({ artwork, position, isActive }: { artwork: any; position: [number, number, number]; isActive: boolean }) {
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const frameRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
-  
-  useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    loader.load(
-      artwork.image,
-      (loadedTexture) => {
-        setTexture(loadedTexture);
-      },
-      undefined,
-      (err) => {
-        // Create cyberpunk fallback
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Cyberpunk gradient
-          const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
-          gradient.addColorStop(0, '#ff00ff');
-          gradient.addColorStop(0.5, '#00ffff');
-          gradient.addColorStop(1, '#ffff00');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, 512, 512);
-          
-          // Add circuit pattern
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2;
-          for (let i = 0; i < 20; i++) {
-            ctx.beginPath();
-            ctx.moveTo(Math.random() * 512, Math.random() * 512);
-            ctx.lineTo(Math.random() * 512, Math.random() * 512);
-            ctx.stroke();
-          }
-          
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 24px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText('AI.ART', 256, 256);
-          ctx.fillText('NEURAL_GEN', 256, 290);
-        }
-        const fallbackTexture = new THREE.CanvasTexture(canvas);
-        setTexture(fallbackTexture);
-      }
-    );
-  }, [artwork.image]);
-
-  useFrame((state) => {
-    if (frameRef.current && glowRef.current) {
-      // Floating hologram
-      frameRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 3 + position[0]) * 0.1;
-      frameRef.current.rotation.y += 0.005;
-      
-      // Glow pulsing
-      const glow = 0.8 + Math.sin(state.clock.elapsedTime * 5) * 0.2;
-      glowRef.current.scale.setScalar(glow);
-    }
-  });
-  
-  return (
-    <group position={position}>
-      {/* HOLOGRAPHIC FRAME */}
-      <RoundedBox 
-        ref={frameRef} 
-        args={[2.5, 2, 0.1]} 
-        radius={0.1} 
-        castShadow
-        onPointerEnter={() => setIsHovered(true)}
-        onPointerLeave={() => setIsHovered(false)}
-      >
-        <meshStandardMaterial 
-          color="#ffffff"
-          emissive={isActive ? "#0088ff" : "#0088ff"} // Changed from green to blue
-          emissiveIntensity={0.5}
-          metalness={1}
-          roughness={0}
-        />
-      </RoundedBox>
-      
-      {/* GLOWING BORDER */}
-      <RoundedBox ref={glowRef} args={[2.7, 2.2, 0.05]} radius={0.1} position={[0, 0, 0.1]}>
-        <meshStandardMaterial
-          color={isActive ? "#0088ff" : "#ff00ff"} // Changed from green to blue
-          emissive={isActive ? "#0088ff" : "#ff00ff"} // Changed from green to blue
-          emissiveIntensity={1.5} // Reduced intensity
-          transparent
-          opacity={0.6}
-        />
-      </RoundedBox>
-      
-      {/* ARTWORK DISPLAY */}
-      <mesh position={[0, 0, 0.11]}>
-        <planeGeometry args={[2.2, 1.8]} />
-        <meshStandardMaterial 
-          map={texture} 
-          emissive="#ffffff"
-          emissiveIntensity={0.3}
-          transparent
-          opacity={0.9}
-        />
-      </mesh>
-      
-      {/* HOLOGRAPHIC INTERFERENCE */}
-      <mesh position={[0, 0, 0.12]}>
-        <planeGeometry args={[2.2, 1.8]} />
-        <meshStandardMaterial 
-          color="#00ffff"
-          transparent 
-          opacity={0.1}
-        />
-      </mesh>
-      
-      {/* FLOATING INFO DISPLAY - Only show on hover */}
-      {isHovered && (
-        <Html position={[0, -1.5, 0]} center>
-          <div className="bg-black/90 backdrop-blur-xl text-green-400 px-4 py-2 rounded-xl text-sm font-mono border border-green-400/50 shadow-lg shadow-green-400/25 animate-in fade-in duration-200">
-            <div className="text-xs opacity-70">NEURAL_ART.dat</div>
-            <div className="font-bold">{artwork.title}</div>
-            <div className="text-xs text-cyan-400">HOLOGRAPHIC_RENDER</div>
-          </div>
-        </Html>
-      )}
-      
-      {/* SCANNING EFFECT */}
-      <Sparkles count={20} scale={2} size={1} speed={1} color="#00ffff" />
-    </group>
-  );
-}
-
-// CYBERPUNK REFLECTIVE GROUND WITH NEON GRID 🌆
-function CyberpunkGround() {
-  const groundRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (groundRef.current) {
-      // Subtle pulsing effect
-      const material = groundRef.current.material as THREE.MeshStandardMaterial;
-      if (material.emissiveIntensity !== undefined) {
-        material.emissiveIntensity = 0.1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-      }
-    }
-  });
-
-  return (
-    <>
-      {/* MAIN REFLECTIVE GROUND */}
-      <mesh ref={groundRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[200, 200]} />
-        <MeshReflectorMaterial
-          blur={[400, 100]}
-          resolution={1024}
-          mixBlur={1}
-          mixStrength={15}
-          roughness={0.1}
-          depthScale={1}
-          minDepthThreshold={0.85}
-          maxDepthThreshold={1.2}
-          color="#0a0a0a"
-          metalness={0.8}
-          mirror={0.3}
-        />
-      </mesh>
-
-      {/* NEON GRID OVERLAY */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.48, 0]}>
-        <planeGeometry args={[200, 200]} />
-        <meshStandardMaterial
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={0.3}
-          transparent
-          opacity={0.1}
-          wireframe
-        />
-      </mesh>
-
-      {/* SUBTLE CONTACT SHADOWS */}
-      <ContactShadows
-        position={[0, -0.49, 0]}
-        opacity={0.6}
-        scale={80}
-        blur={2}
-        far={20}
-        color="#000000"
-      />
-    </>
-  );
-}
-
-// Simplified Ground component - no flickering
-function Ground() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-      <planeGeometry args={[100, 100]} />
-      <meshLambertMaterial color="#2a2a2a" />
-    </mesh>
-  );
-}
-
-// CYBERPUNK CENTRAL PLAZA 🏢
-function CyberpunkPlaza() {
-  const fountainRef = useRef<THREE.Mesh>(null);
-  const centerRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (fountainRef.current && centerRef.current) {
-      // Rotating holographic fountain
-      fountainRef.current.rotation.y += 0.01;
-      centerRef.current.rotation.y -= 0.005;
-      
-      // Pulsing effect
-      const pulse = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.1;
-      centerRef.current.scale.setScalar(pulse);
-    }
-  });
-  
-  return (
-    <group>
-      {/* HOLOGRAPHIC PLAZA BASE */}
-      <mesh position={[0, -0.3, 0]} receiveShadow>
-        <cylinderGeometry args={[12, 12, 0.6, 32]} />
-        <meshStandardMaterial 
-          color="#1a1a1a"
-          emissive="#00ffff"
-          emissiveIntensity={0.3}
-          metalness={1}
-          roughness={0.1}
-        />
-      </mesh>
-      
-      {/* NEON RING PATTERNS */}
-      {[8, 6, 4].map((radius, i) => (
-        <mesh key={i} position={[0, -0.1 + i * 0.05, 0]}>
-          <ringGeometry args={[radius - 0.2, radius, 32]} />
-          <meshStandardMaterial 
-            color={i === 0 ? "#ff00ff" : i === 1 ? "#00ffff" : "#ffff00"}
-            emissive={i === 0 ? "#ff00ff" : i === 1 ? "#00ffff" : "#ffff00"}
-            emissiveIntensity={2}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
-      ))}
-      
-      {/* CENTRAL HOLOGRAPHIC CORE */}
-      <mesh ref={centerRef} position={[0, 2, 0]} castShadow>
-        <sphereGeometry args={[1.5, 32, 32]} />
-        <MeshTransmissionMaterial
-          samples={16}
-          resolution={512}
-          transmission={0.95}
-          roughness={0}
-          clearcoat={1}
-          thickness={0.5}
-          chromaticAberration={1}
-          distortionScale={0.3}
-          temporalDistortion={0.2}
-          color="#00ffff"
-        />
-      </mesh>
-      
-      {/* ENERGY PILLARS */}
-      {[0, 1, 2, 3].map((i) => {
-        const angle = (i / 4) * Math.PI * 2;
-        const x = Math.cos(angle) * 8;
-        const z = Math.sin(angle) * 8;
-        return (
-          <Float key={i} speed={1 + i * 0.2} rotationIntensity={0.2} floatIntensity={0.5}>
-            <mesh position={[x, 3, z]} castShadow>
-              <cylinderGeometry args={[0.3, 0.3, 6]} />
-              <meshStandardMaterial
-                color="#ffffff"
-                emissive="#00ff88"
-                emissiveIntensity={1.0} // Reduced from 2 to prevent flickering
-                metalness={1}
-                roughness={0}
-              />
-            </mesh>
-          </Float>
-        );
-      })}
-      
-      {/* HOLOGRAPHIC FOUNTAIN */}
-      <mesh ref={fountainRef} position={[0, 1, 0]} castShadow>
-        <torusGeometry args={[2, 0.5, 16, 32]} />
-        <meshStandardMaterial 
-          color="#2196F3" 
-          emissive="#2196F3"
-          emissiveIntensity={0.8} // Reduced from 1.5 to prevent flickering
-          transparent 
-          opacity={0.8}
-        />
-      </mesh>
-      
-      {/* ENERGY STREAMS */}
-      <Sparkles count={200} scale={8} size={2} speed={1} color="#00ffff" />
-      <Sparkles count={150} scale={6} size={1.5} speed={0.8} color="#ff00ff" />
-      
-      {/* PLAZA LIGHTING */}
-      <pointLight position={[0, 4, 0]} intensity={3} color="#00ffff" />
-      <pointLight position={[0, 1, 0]} intensity={2} color="#ff00ff" />
-    </group>
-  );
-}
-
-// SMOOTH MOVEMENT CONTROLLER - CURSOR ALWAYS VISIBLE 🎮
-function MovementController() {
-  const { camera, gl } = useThree();
-  const controlsRef = useRef<any>(null);
-  const keyState = useRef({
-    forward: false,
-    backward: false,
-    leftward: false,
-    rightward: false,
-  });
-  const SPEED = 150;
-
-  // Preallocated vectors
-  const movementVec = useRef(new THREE.Vector3()).current;
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          keyState.current.forward = true;
-          break;
-        case 'KeyS':
-        case 'ArrowDown':
-          keyState.current.backward = true;
-          break;
-        case 'KeyA':
-        case 'ArrowLeft':
-          keyState.current.leftward = true;
-          break;
-        case 'KeyD':
-        case 'ArrowRight':
-          keyState.current.rightward = true;
-          break;
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      switch (e.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          keyState.current.forward = false;
-          break;
-        case 'KeyS':
-        case 'ArrowDown':
-          keyState.current.backward = false;
-          break;
-        case 'KeyA':
-        case 'ArrowLeft':
-          keyState.current.leftward = false;
-          break;
-        case 'KeyD':
-        case 'ArrowRight':
-          keyState.current.rightward = false;
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-
-  useFrame((state, delta) => {
-    if (!controlsRef.current) return;
-    
-    // Fixed delta for completely consistent movement
-    const fixedDelta = 1/60; // Always use 60fps delta for consistency
-    
-    const { forward, backward, leftward, rightward } = keyState.current;
-
-    let moveX = 0;
-    let moveZ = 0;
-    if (forward) moveZ += 1;   // W moves forward
-    if (backward) moveZ -= 1;  // S moves backward
-    if (leftward) moveX -= 1;  // A moves left
-    if (rightward) moveX += 1; // D moves right
-
-    if (moveX !== 0 || moveZ !== 0) {
-      // Normalize input direction
-      const len = Math.hypot(moveX, moveZ);
-      moveX /= len;
-      moveZ /= len;
-
-      // Get camera's current orientation (independent of distance)
-      const cameraDirection = new THREE.Vector3();
-      camera.getWorldDirection(cameraDirection);
-      cameraDirection.y = 0; // Keep movement horizontal
-      cameraDirection.normalize();
-      
-      const right = new THREE.Vector3();
-      right.crossVectors(cameraDirection, camera.up).normalize();
-
-      // Fixed movement distance per frame (independent of camera distance)
-      const moveDistance = SPEED * fixedDelta;
-
-      // Calculate movement vector with fixed distance
-      movementVec.set(0, 0, 0);
-      movementVec.addScaledVector(right, moveX * moveDistance);
-      movementVec.addScaledVector(cameraDirection, moveZ * moveDistance);
-
-      // Move both camera and target together to maintain relative position
-      const currentCameraPosition = camera.position.clone();
-      const currentTarget = controlsRef.current.target.clone();
-      
-      camera.position.add(movementVec);
-      controlsRef.current.target.add(movementVec);
-      
-      // Force update the controls
-      controlsRef.current.update();
-    }
-  });
-
-  return (
-    <>
-      {/* Add OrbitControls for camera look */}
-      <OrbitControls 
-        ref={controlsRef}
-        enablePan={false}
-        enableZoom={true}
-        enableRotate={true}
-        enableDamping={true}
-        dampingFactor={0.1}
-        maxPolarAngle={Math.PI / 2.2}
-        minPolarAngle={Math.PI / 6}
-        maxDistance={50}
-        minDistance={5}
-      />
-    </>
-  );
-}
-
-// Enhanced Loading fallback
-function LoadingFallback() {
-  return (
-    <Html center>
-      <div className="flex flex-col items-center gap-4 text-foreground">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-primary opacity-20"></div>
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-medium">Loading Medici City...</div>
-          <div className="text-sm text-muted-foreground">Preparing immersive experience</div>
-        </div>
+// Simple fallback component that doesn't use Three.js
+const SimpleFallback = () => (
+  <Html center>
+    <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-xl p-8 text-cyan-400 font-mono text-center shadow-lg shadow-cyan-400/25">
+      <div className="text-2xl font-bold mb-4">🏛️ MEDICI CITY</div>
+      <div className="text-lg mb-2">Loading Virtual Art Gallery...</div>
+      <div className="text-sm opacity-70">Initializing 3D Environment</div>
+      <div className="mt-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto"></div>
       </div>
-    </Html>
-  );
+    </div>
+  </Html>
+);
+
+// Error Boundary Component for Three.js
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
 }
 
-// MASSIVE AGENT BUILDING HUB 🏗️
-function AgentBuildingHub({ position, hubId }: { position: [number, number, number]; hubId: string }) {
-  const hubRef = useRef<THREE.Group>(null);
-  const beaconRef = useRef<THREE.Mesh>(null);
-  const { pinnedAgentHub, hoveredAgentHub, setPinnedAgentHub, setHoveredAgentHub } = useCityStore();
-  const isPinned = pinnedAgentHub === hubId;
-  const isHovered = hoveredAgentHub === hubId;
-  
-  useFrame((state) => {
-    if (hubRef.current && beaconRef.current) {
-      // Rotating hub
-      hubRef.current.rotation.y += 0.002;
-      
-      // Pulsing beacon
-      const pulse = 1 + Math.sin(state.clock.elapsedTime * 4) * 0.3;
-      beaconRef.current.scale.setScalar(pulse);
-    }
-  });
-  
-  return (
-    <group ref={hubRef} position={position}>
-      {/* MAIN HUB STRUCTURE */}
-      <RoundedBox 
-        args={[20, 15, 20]} 
-        radius={1} 
-        castShadow 
-        receiveShadow
-        onClick={(e) => {
-          e.stopPropagation();
-          // Mark the time of this building click
-          lastBuildingClickTime = Date.now();
-          console.log('🔥🔥🔥 AGENT HUB CLICKED! 🔥🔥🔥');
-          console.log('  Current isPinned:', isPinned);
-          console.log('  Current hubId:', hubId);
-          console.log('  Will set pinnedAgentHub to:', isPinned ? null : hubId);
-          setPinnedAgentHub(isPinned ? null : hubId);
-          console.log('  ✅ setPinnedAgentHub called successfully');
-        }}
-        onPointerEnter={(e) => {
-          e.stopPropagation();
-          console.log('🔥 AGENT HUB HOVERED! Setting hover state');
-          console.log('  Setting hoveredAgentHub to:', hubId);
-          setHoveredAgentHub(hubId);
-        }}
-        onPointerLeave={(e) => {
-          e.stopPropagation();
-          console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredAgentHub to: null');
-          setHoveredAgentHub(null);
-        }}
-      >
-        <meshStandardMaterial
-          color={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#1a1a1a"}
-          emissive={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#0088ff"}
-          emissiveIntensity={0.5}
-          metalness={0.8}
-          roughness={0.2}
-        />
-      </RoundedBox>
-      
-      {/* CENTRAL BEACON TOWER */}
-      <mesh position={[0, 12, 0]} castShadow>
-        <cylinderGeometry args={[2, 3, 24, 16]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          emissive={isPinned ? "#ffff00" : "#00ffff"}
-          emissiveIntensity={2}
-          metalness={1}
-          roughness={0}
-        />
-      </mesh>
-      
-      {/* BEACON CRYSTAL */}
-      <mesh ref={beaconRef} position={[0, 20, 0]} castShadow>
-        <octahedronGeometry args={[3]} />
-        <MeshTransmissionMaterial
-          samples={32}
-          resolution={1024}
-          transmission={0.95}
-          roughness={0}
-          clearcoat={1}
-          thickness={0.8}
-          chromaticAberration={1.5}
-          distortionScale={0.5}
-          temporalDistortion={0.3}
-          color={isPinned ? "#ffff00" : "#00ffff"}
-        />
-      </mesh>
-      
-      {/* ENERGY RINGS AROUND BEACON */}
-      {[6, 8, 10].map((radius, i) => (
-        <mesh key={i} position={[0, 20, 0]} rotation={[Math.PI / 4, 0, 0]}>
-          <torusGeometry args={[radius, 0.3, 8, 32]} />
-          <meshStandardMaterial
-            color="#ffff00"
-            emissive="#ffff00"
-            emissiveIntensity={2}
-            transparent
-            opacity={0.7}
-          />
-        </mesh>
-      ))}
-      
-      {/* CORNER TOWERS */}
-      {[[-8, 8], [8, 8], [-8, -8], [8, -8]].map(([x, z], i) => (
-        <Float key={i} speed={1} rotationIntensity={0.1} floatIntensity={0.5}>
-          <mesh position={[x, 5, z]} castShadow>
-            <cylinderGeometry args={[1, 1, 10]} />
-            <meshStandardMaterial
-              color="#ffffff"
-              emissive="#00ff88"
-              emissiveIntensity={1.0}
-              metalness={1}
-              roughness={0}
-            />
-          </mesh>
-        </Float>
-      ))}
-      
-      {/* MASSIVE PARTICLE EFFECTS */}
-      <Sparkles count={300} scale={25} size={4} speed={1} color={isPinned ? "#ffff00" : "#00ffff"} />
-      <Sparkles count={200} scale={15} size={2} speed={1.5} color={isPinned ? "#ffaa00" : "#ffff00"} />
-      
-      {/* HUB LIGHTING */}
-      <pointLight position={[0, 25, 0]} intensity={5} color="#00ffff" distance={50} />
-      <pointLight position={[0, 15, 0]} intensity={3} color="#ffff00" />
-    </group>
-  );
-}
+class ThreeErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError: boolean }> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-// TRADING MARKETPLACE 💰 - SIMPLIFIED VERSION
-function TradingMarketplace({ position, marketId }: { position: [number, number, number]; marketId: string }) {
-  const { pinnedMarketplace, hoveredMarketplace, setPinnedMarketplace, setHoveredMarketplace } = useCityStore();
-  const isPinned = pinnedMarketplace === marketId;
-  const isHovered = hoveredMarketplace === marketId;
-  
-  return (
-    <group position={position}>
-      {/* SIMPLE MARKETPLACE PLATFORM */}
-      <mesh 
-        position={[0, 0, 0]} 
-        receiveShadow
-        onClick={(e) => {
-          e.stopPropagation();
-          // Mark the time of this building click
-          lastBuildingClickTime = Date.now();
-          console.log('🔥🔥🔥 MARKETPLACE CLICKED! 🔥🔥🔥');
-          console.log('  Current isPinned:', isPinned);
-          console.log('  Current marketId:', marketId);
-          console.log('  Will set pinnedMarketplace to:', isPinned ? null : marketId);
-          setPinnedMarketplace(isPinned ? null : marketId);
-          console.log('  ✅ setPinnedMarketplace called successfully');
-        }}
-        onPointerEnter={(e) => {
-          e.stopPropagation();
-          console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
-          console.log('  Setting hoveredMarketplace to:', marketId);
-          setHoveredMarketplace(marketId);
-        }}
-        onPointerLeave={(e) => {
-          e.stopPropagation();
-          console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredMarketplace to: null');
-          setHoveredMarketplace(null);
-        }}
-      >
-        <cylinderGeometry args={[25, 25, 3, 16]} />
-        <meshStandardMaterial
-          color={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#2a2a2a"}
-          emissive={isPinned ? "#ffff00" : isHovered ? "#ff0088" : "#ff00ff"}
-          emissiveIntensity={0.5}
-          metalness={0.7}
-          roughness={0.3}
-        />
-      </mesh>
-      
-      {/* MARKETPLACE LIGHTING */}
-      <pointLight position={[0, 15, 0]} intensity={4} color="#ff00ff" distance={40} />
-    </group>
-  );
-}
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
 
-// FLOATING ARTWORK WITH HOVER LABELS 🖼️
-function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: any; index: number; studio: any; onLightboxOpen?: (artwork: any, studio: any) => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  
-  useEffect(() => {
-    console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image}`);
-    setIsLoading(true);
-    setHasError(false);
-    
-    const loader = new THREE.TextureLoader();
-    
-    // Special handling for NightCafe artwork
-    if (artwork.title.includes('NIGHTCAFE')) {
-      console.log('🌟 Loading YOUR NightCafe artwork via proxy...');
-    }
-    
-    loader.load(
-      artwork.image,
-      (loadedTexture) => {
-        console.log(`✅ Successfully loaded: ${artwork.title}`);
-        if (artwork.title.includes('NIGHTCAFE')) {
-          console.log('🎉 YOUR NIGHTCAFE ARTWORK LOADED SUCCESSFULLY!');
-        }
-        // Optimize texture settings for better display
-        loadedTexture.generateMipmaps = false;
-        loadedTexture.minFilter = THREE.LinearFilter;
-        loadedTexture.magFilter = THREE.LinearFilter;
-        loadedTexture.flipY = true; // Change to true to fix upside-down orientation
-        setTexture(loadedTexture);
-        setIsLoading(false);
-        setHasError(false);
-      },
-      (progress) => {
-        console.log(`⏳ Loading progress for ${artwork.title}:`, progress);
-        if (artwork.title.includes('NIGHTCAFE')) {
-          console.log('⏳ NightCafe loading progress:', progress);
-        }
-      },
-      (error) => {
-        console.error(`❌ Failed to load ${artwork.title}:`, error);
-        if (artwork.title.includes('NIGHTCAFE')) {
-          console.error('💥 NIGHTCAFE LOADING FAILED:', error);
-          console.error('🔍 Attempted URL:', artwork.image);
-        }
-        setHasError(true);
-        // Create a vibrant fallback texture with better visibility
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Create a bright, cyberpunk-style fallback
-          const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-          gradient.addColorStop(0, '#ff0080');
-          gradient.addColorStop(0.3, '#8000ff');
-          gradient.addColorStop(0.6, '#0080ff');
-          gradient.addColorStop(1, '#00ff80');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, 512, 512);
-          
-          // Add bright pattern for visibility
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          for (let i = 0; i < 100; i++) {
-            ctx.beginPath();
-            ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 10, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          
-          // Add text
-          ctx.fillStyle = '#ffffff';
-          ctx.strokeStyle = '#000000';
-          ctx.lineWidth = 2;
-          ctx.font = 'bold 48px Arial';
-          ctx.textAlign = 'center';
-          ctx.strokeText('NIGHTCAFE', 256, 200);
-          ctx.fillText('NIGHTCAFE', 256, 200);
-          ctx.strokeText('ARTWORK', 256, 260);
-          ctx.fillText('ARTWORK', 256, 260);
-          
-          ctx.font = 'bold 24px Arial';
-          ctx.strokeText('Loading Failed', 256, 320);
-          ctx.fillText('Loading Failed', 256, 320);
-        }
-        const fallbackTexture = new THREE.CanvasTexture(canvas);
-        fallbackTexture.needsUpdate = true;
-        setTexture(fallbackTexture);
-        setIsLoading(false);
-      }
-    );
-  }, [artwork.image, artwork.title]);
-  
-  return (
-    <>
-      <Float key={artwork.id} speed={1 + index * 0.2} rotationIntensity={0.1} floatIntensity={0.3}>
-        <group 
-          position={artwork.position} 
-          rotation={artwork.rotation}
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log(`🖼️ Clicked artwork: ${artwork.title}`);
-            onLightboxOpen?.(artwork, studio);
-          }}
-          onPointerEnter={() => setIsHovered(true)}
-          onPointerLeave={() => setIsHovered(false)}
-        >
-          {/* HOLOGRAPHIC FRAME - No hover color changes */}
-          <RoundedBox 
-            args={[artwork.scale[0] + 0.3, artwork.scale[1] + 0.3, 0.2]} 
-            radius={0.1} 
-            castShadow
-          >
-            <meshStandardMaterial 
-              color="#ffffff"
-              emissive="#00ffff"
-              emissiveIntensity={0.8} // Reduced from 1.5 to prevent flickering
-              metalness={1}
-              roughness={0}
-              transparent
-              opacity={0.9}
-            />
-          </RoundedBox>
-          
-          {/* GLOWING BORDER - Consistent glow */}
-          <RoundedBox 
-            args={[artwork.scale[0] + 0.4, artwork.scale[1] + 0.4, 0.15]} 
-            radius={0.12} 
-            position={[0, 0, 0.1]}
-          >
-            <meshStandardMaterial
-              color="#ff00ff"
-              emissive="#ff00ff"
-              emissiveIntensity={1.0} // Reduced from 2 to prevent flickering
-              transparent
-              opacity={0.7}
-            />
-          </RoundedBox>
-          
-          {/* ARTWORK IMAGE - No brightness changes on hover */}
-          <mesh position={[0, 0, 0.11]}>
-            <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
-            <meshBasicMaterial 
-              map={texture}
-              transparent={false}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-          
-          {/* INDIVIDUAL ARTWORK SPOTLIGHTS - Consistent lighting */}
-          <spotLight
-            position={[0, 8, 5]}
-            target-position={artwork.position}
-            angle={0.8}
-            penumbra={0.2}
-            intensity={5}
-            color="#ffffff"
-            castShadow
-          />
-          
-          {/* Additional front lighting */}
-          <pointLight
-            position={[0, 0, 2]}
-            intensity={3}
-            color="#ffffff"
-            distance={10}
-          />
-          
-          {/* INDIVIDUAL PARTICLE AURA - Consistent particles */}
-          <Sparkles 
-            count={30} 
-            scale={artwork.scale[0] + 2} 
-            size={1} 
-            speed={1} 
-            color="#00ffff" 
-          />
-        </group>
-      </Float>
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('Three.js Error:', error, errorInfo);
+  }
 
-      {/* FLOATING ARTWORK INFO - Positioned FAR TO THE SIDE to not cover art */}
-      {isHovered && (
-        <Html position={[
-          artwork.position[0] > 10 
-            ? artwork.position[0] - (artwork.scale[0]/2 + 5) // Left side for far-right artworks
-            : artwork.position[0] + (artwork.scale[0]/2 + 5), // Right side for other artworks
-          artwork.position[1], // Same height as the artwork center
-          artwork.position[2]
-        ]} center>
-          <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-left border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px] animate-in fade-in duration-300 pointer-events-none">
-            <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
-            <div className="font-bold text-lg">{artwork.title}</div>
-            <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
-            <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
-            <div className="text-xs text-yellow-400 mt-1">🖱️ Click to view full-size</div>
-            {isLoading && <div className="text-xs text-yellow-400 mt-1">Loading...</div>}
-            {hasError && <div className="text-xs text-red-400 mt-1">Failed to load image</div>}
-            {!isLoading && !hasError && <div className="text-xs text-green-400 mt-1">Loaded successfully!</div>}
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Html center>
+          <div className="bg-red-900/90 backdrop-blur-xl border border-red-400 rounded-xl p-8 text-red-400 font-mono text-center shadow-lg shadow-red-400/25">
+            <div className="text-2xl font-bold mb-4">⚠️ 3D ERROR</div>
+            <div className="text-lg mb-2">Something went wrong with the 3D scene</div>
+            <div className="text-sm opacity-70">Please refresh the page</div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Refresh Page
+            </button>
           </div>
         </Html>
-      )}
-    </>
-  );
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
-// STUDIO 3D GALLERY VIEW - SICKO MODE VR EXPERIENCE 🎨🔥
-function StudioGallery({ studio, onLightboxOpen }: { studio: any; onLightboxOpen?: (artwork: any, studio: any) => void }) {
-  const { exitGalleryMode } = useCityStore();
-  const galleryRef = useRef<THREE.Group>(null);
-  const particleRef = useRef<THREE.Group>(null);
+export function CityScene() {
+  console.log('🏛️ CityScene component starting to load...');
   
-  // Real artwork URLs for the gallery
-  const realArtworks = [
+  const { 
+    studios, 
+    currentGalleryStudio, 
+    closeAllPinnedOverlays,
+    initializeStudios
+  } = useCityStore();
+
+  console.log('🏛️ CityScene - Studios loaded:', studios?.length);
+  console.log('🏛️ CityScene - Current gallery studio:', currentGalleryStudio);
+
+  // Initialize studios if they haven't been loaded yet
+  useEffect(() => {
+    if (studios.length === 0) {
+      console.log('🏛️ Initializing studios...');
+      initializeStudios();
+    }
+  }, [studios.length, initializeStudios]);
+
+  // Define roaming artists data directly
+  const roamingArtists = [
     {
-      id: "art-1",
-      title: "🎨 YOUR NIGHTCAFE CREATION",
-      image: "/api/proxy-image?url=" + encodeURIComponent("https://creator.nightcafe.studio/jobs/84lwOA5gRcR8SMq6m8ZD/84lwOA5gRcR8SMq6m8ZD--1--ljlvd.jpg"),
-      position: [0, 6, -12] as [number, number, number], // Much further back and higher
-      rotation: [0, 0, 0] as [number, number, number],
-      scale: [6, 4.5, 0.1] as [number, number, number] // Made it even larger as centerpiece
+      id: "maya-chen",
+      name: "Maya Chen",
+      specialty: "Digital Painter",
+      position: [20, 0, 15] as [number, number, number],
+      color: "#ff6b6b"
     },
     {
-      id: "art-2", 
-      title: "Digital Renaissance",
-      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [15, 4, -8] as [number, number, number], // Much further right
-      rotation: [0, -Math.PI/4, 0] as [number, number, number],
-      scale: [3, 3.5, 0.1] as [number, number, number]
+      id: "alex-rivera",
+      name: "Alex Rivera", 
+      specialty: "3D Sculptor",
+      position: [-15, 0, 25] as [number, number, number],
+      color: "#4ecdc4"
     },
     {
-      id: "art-3",
-      title: "Cyber Baroque",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      position: [-15, 3, -8] as [number, number, number], // Much further left
-      rotation: [0, Math.PI/4, 0] as [number, number, number],
-      scale: [3.5, 3, 0.1] as [number, number, number]
+      id: "jordan-kim",
+      name: "Jordan Kim",
+      specialty: "AI Collaborator", 
+      position: [30, 0, -20] as [number, number, number],
+      color: "#45b7d1"
     },
     {
-      id: "art-4",
-      title: "AI Abstraction",
-      image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
-      position: [12, 2, 15] as [number, number, number], // Way back behind you
-      rotation: [0, Math.PI, 0] as [number, number, number],
-      scale: [3.2, 3.8, 0.1] as [number, number, number]
+      id: "sam-torres",
+      name: "Sam Torres",
+      specialty: "Pixel Artist",
+      position: [-25, 0, -10] as [number, number, number],
+      color: "#96ceb4"
     },
     {
-      id: "art-5",
-      title: "Quantum Canvas",
-      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [-12, 8, 12] as [number, number, number], // High and far back
-      rotation: [0, -Math.PI/2, 0] as [number, number, number],
-      scale: [4.5, 2.5, 0.1] as [number, number, number]
+      id: "riley-patel",
+      name: "Riley Patel",
+      specialty: "Mixed Media",
+      position: [10, 0, 35] as [number, number, number],
+      color: "#feca57"
     },
     {
-      id: "art-6",
-      title: "Holographic Memory",
-      image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
-      position: [0, 12, 8] as [number, number, number], // High up overhead
-      rotation: [Math.PI/6, 0, 0] as [number, number, number],
-      scale: [3.5, 3, 0.1] as [number, number, number]
+      id: "casey-wong",
+      name: "Casey Wong",
+      specialty: "Concept Artist",
+      position: [-35, 0, 5] as [number, number, number],
+      color: "#ff9ff3"
     },
     {
-      id: "art-7",
-      title: "Virtual Visions",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      position: [20, 5, 0] as [number, number, number], // Far right side
-      rotation: [0, -Math.PI/2, Math.PI/12] as [number, number, number],
-      scale: [3, 4, 0.1] as [number, number, number]
+      id: "avery-smith",
+      name: "Avery Smith",
+      specialty: "Animation",
+      position: [25, 0, -35] as [number, number, number],
+      color: "#54a0ff"
     },
     {
-      id: "art-8",
-      title: "Data Streams",
-      image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
-      position: [-20, 6, 5] as [number, number, number], // Far left side
-      rotation: [0, Math.PI/2, -Math.PI/12] as [number, number, number],
-      scale: [3.8, 3.2, 0.1] as [number, number, number]
+      id: "taylor-brown",
+      name: "Taylor Brown",
+      specialty: "VR Designer",
+      position: [-20, 0, -30] as [number, number, number],
+      color: "#5f27cd"
+    },
+    {
+      id: "morgan-davis",
+      name: "Morgan Davis",
+      specialty: "NFT Creator",
+      position: [40, 0, 10] as [number, number, number],
+      color: "#00d2d3"
+    },
+    {
+      id: "quinn-lee",
+      name: "Quinn Lee",
+      specialty: "Generative Art",
+      position: [-10, 0, 40] as [number, number, number],
+      color: "#ff6348"
     }
   ];
-  
-  useFrame((state) => {
-    if (galleryRef.current) {
-      // Gentle ambient rotation
-      galleryRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.05;
-    }
-    
-    if (particleRef.current) {
-      particleRef.current.rotation.y += 0.001;
-      particleRef.current.rotation.x += 0.0005;
-    }
-  });
 
-  // Debug logging
-  useEffect(() => {
-    console.log('🎨 Gallery loaded for studio:', studio.name);
-    console.log('🖼️ Artworks to display:', realArtworks.length);
-    realArtworks.forEach((art, i) => {
-      console.log(`Art ${i + 1}: ${art.title} - ${art.image}`);
-    });
-    
-    // Test the NightCafe URL specifically
-    const testNightCafeUrl = async () => {
-      try {
-        console.log('🔍 Testing NightCafe URL via our proxy...');
-        const proxyUrl = realArtworks[0].image; // This is now our proxy URL
-        const response = await fetch(proxyUrl, { 
-          method: 'HEAD'
-        });
-        console.log('✅ NightCafe proxy test result:', response.status, response.statusText);
-        if (response.ok) {
-          console.log('🎉 NightCafe image should load successfully!');
-        } else {
-          console.warn('⚠️ NightCafe proxy returned:', response.status);
-        }
-      } catch (error) {
-        console.error('❌ NightCafe proxy test failed:', error);
+  // Define studio artists data directly
+  const studioArtists = [
+    {
+      id: "leonardo-assistant",
+      name: "Marco Benedetti",
+      specialty: "Renaissance Techniques",
+      homeStudio: "Leonardo Studio",
+      position: [-38, 0, -28] as [number, number, number],
+      color: "#8B4513"
+    },
+    {
+      id: "raphael-assistant", 
+      name: "Sofia Angelico",
+      specialty: "Classical Harmony",
+      homeStudio: "Raphael Studio",
+      position: [47, 0, -23] as [number, number, number],
+      color: "#4169E1"
+    },
+    {
+      id: "michelangelo-assistant",
+      name: "Giovanni Marmo",
+      specialty: "Stone & Digital",
+      homeStudio: "Michelangelo Studio", 
+      position: [2, 0, 52] as [number, number, number],
+      color: "#DC143C"
+    },
+    {
+      id: "caravaggio-assistant",
+      name: "Lucia Ombra",
+      specialty: "Light & Shadow",
+      homeStudio: "Caravaggio Studio",
+      position: [-33, 0, 37] as [number, number, number],
+      color: "#8A2BE2"
+    },
+    {
+      id: "da-vinci-assistant",
+      name: "Alessandro Inventore",
+      specialty: "Innovation & Art",
+      homeStudio: "Da Vinci Studio",
+      position: [42, 0, 32] as [number, number, number],
+      color: "#D2691E"
+    },
+    {
+      id: "picasso-assistant",
+      name: "Pablo Fragmento",
+      specialty: "Cubist Revolution",
+      homeStudio: "Picasso Studio",
+      position: [-58, 0, 2] as [number, number, number],
+      color: "#696969"
+    },
+    {
+      id: "monet-assistant",
+      name: "Claude Lumière",
+      specialty: "Impressionist Light",
+      homeStudio: "Monet Studio",
+      position: [27, 0, -43] as [number, number, number],
+      color: "#98FB98"
+    },
+    {
+      id: "van-gogh-assistant",
+      name: "Vincent Spirale",
+      specialty: "Expressive Energy",
+      homeStudio: "Van Gogh Studio",
+      position: [-23, 0, -38] as [number, number, number],
+      color: "#FFD700"
+    }
+  ];
+
+  // UI State
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [showControls, setShowControls] = useState(false);
+  const [lightboxData, setLightboxData] = useState<{ artwork: any; studio: any } | null>(null);
+  const [selectedArtist, setSelectedArtist] = useState<any>(null);
+  const [isChatMode, setIsChatMode] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{
+    id: string;
+    sender: 'user' | 'artist';
+    message: string;
+    timestamp: Date;
+  }>>([]);
+  const [chatInput, setChatInput] = useState("");
+
+  // Handle artist interactions
+  const handleArtistClick = (artist: any) => {
+    console.log('🎨 Artist interaction:', artist);
+    setSelectedArtist(artist);
+    setIsChatMode(false);
+    setChatMessages([
+      {
+        id: Date.now().toString(),
+        sender: "artist" as const,
+        message: artist.isAIAgent && artist.greeting 
+          ? artist.greeting 
+          : `Hello! I'm ${artist.name}, a ${artist.specialty}. Welcome to Medici City! What would you like to know about art?`,
+        timestamp: new Date()
+      }
+    ]);
+  };
+
+  // Handle sending chat messages
+  const handleSendMessage = () => {
+    if (!chatInput.trim() || !selectedArtist) return;
+
+    const userMessage = {
+      id: Date.now().toString() + "user",
+      sender: "user" as const,
+      message: chatInput.trim(),
+      timestamp: new Date()
+    };
+
+    // Generate AI response based on artist type and specialty
+    const generateResponse = () => {
+      if (selectedArtist.type === "AI Assistant") {
+        return `As an AI curator, I can tell you about the artworks here, the history of this ${selectedArtist.isActive ? "active studio" : "gallery space"}, or help you navigate the virtual experience. What interests you most?`;
+      } else {
+        const responses = [
+          `That's a great question! As a ${selectedArtist.specialty}, I find inspiration in the intersection of traditional techniques and digital innovation.`,
+          `You know, working ${selectedArtist.homeStudio ? `at ${selectedArtist.homeStudio}` : "as an independent artist"} has really shaped my perspective on art in the digital age.`,
+          `I'd love to show you some of my techniques! Have you tried experimenting with ${selectedArtist.specialty.toLowerCase()} yourself?`,
+          `The beauty of Medici City is how we can all learn from each other. What kind of art speaks to you most?`,
+          `Technology has revolutionized how we create, but the human touch in art will always be irreplaceable. What do you think?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
       }
     };
-    
-    testNightCafeUrl();
-  }, [studio.name]);
 
-  return (
-    <>
-      {/* INSANE CYBERPUNK LIGHTING SYSTEM 🌈 */}
-      <ambientLight intensity={0.3} color="#0a0a2e" />
-      
-      {/* MAIN GALLERY SPOTLIGHTS */}
-      <directionalLight position={[0, 20, 0]} intensity={2} color="#ffffff" castShadow />
-      <pointLight position={[0, 15, 0]} intensity={3} color="#00ffff" distance={50} />
-      <pointLight position={[15, 10, 15]} intensity={2} color="#ff00ff" distance={40} />
-      <pointLight position={[-15, 10, -15]} intensity={2} color="#ffff00" distance={40} />
-      <pointLight position={[0, 25, 0]} intensity={4} color="#ffffff" distance={60} />
-      
-      {/* NEON ACCENT LIGHTS */}
-      <spotLight position={[20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={2} color="#D2691E" />
-      <spotLight position={[-20, 15, 0]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#ff0088" />
-      <spotLight position={[0, 15, 20]} target-position={[0, 0, 0]} angle={0.4} intensity={3} color="#8800ff" />
-      
-      {/* CYBERPUNK FOG */}
-      <fog attach="fog" args={["#000511", 20, 100]} />
-      
-      {/* SIMPLE GALLERY FLOOR - NO FLICKERING */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <meshLambertMaterial 
-          color="#001122"
-        />
-      </mesh>
+    const artistResponse = {
+      id: Date.now().toString() + "artist",
+      sender: "artist" as const,
+      message: generateResponse(),
+      timestamp: new Date()
+    };
 
-      {/* INSANE FLOATING ARTWORKS - VR STYLE */}
-      <group ref={galleryRef}>
-        {realArtworks.map((artwork, index) => (
-          <FloatingArtwork 
-            key={artwork.id} 
-            artwork={artwork} 
-            index={index} 
-            studio={studio}
-            onLightboxOpen={onLightboxOpen}
-          />
-        ))}
-      </group>
-
-      {/* CENTRAL STUDIO MONUMENT */}
-      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.5}>
-        <group position={[0, 12, 0]}>
-          {/* FLOATING CRYSTAL */}
-          <mesh>
-            <octahedronGeometry args={[2]} />
-            <MeshTransmissionMaterial
-              samples={32}
-              resolution={1024}
-              transmission={0.95}
-              roughness={0}
-              clearcoat={1}
-              thickness={1}
-              chromaticAberration={1.5}
-              distortionScale={0.5}
-              temporalDistortion={0.3}
-              color="#00ffff"
-            />
-          </mesh>
-          
-          {/* STUDIO NAME HOLOGRAM */}
-          <Html position={[0, 3, 0]} center>
-            <div className="bg-black/95 backdrop-blur-xl text-cyan-400 px-8 py-4 rounded-2xl text-center border-2 border-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse">
-              <div className="text-3xl font-bold text-white">{studio.name}</div>
-              <div className="text-lg opacity-80">Virtual Gallery</div>
-              <div className="text-sm text-purple-400 mt-2">Neural Art Exhibition</div>
-            </div>
-          </Html>
-          
-          {/* ENERGY RINGS */}
-          {[3, 4, 5].map((radius, i) => (
-            <mesh key={i} rotation={[Math.PI / 4, 0, 0]}>
-              <torusGeometry args={[radius, 0.1, 8, 32]} />
-              <meshStandardMaterial
-                color="#ffff00"
-                emissive="#ffff00"
-                emissiveIntensity={2}
-                transparent
-                opacity={0.8}
-              />
-            </mesh>
-          ))}
-        </group>
-      </Float>
-
-      {/* PARTICLE SYSTEMS */}
-      <Sparkles count={500} scale={50} size={2} speed={0.5} color="#00ffff" />
-      <Sparkles count={300} scale={30} size={1.5} speed={0.8} color="#ff00ff" />
-      
-      {/* FLOATING DATA STREAMS */}
-      <group ref={particleRef}>
-        {Array.from({length: 20}).map((_, i) => (
-          <Float key={i} speed={1 + i * 0.1} rotationIntensity={0.2} floatIntensity={0.8}>
-            <mesh position={[
-              (Math.random() - 0.5) * 40,
-              Math.random() * 20 + 5,
-              (Math.random() - 0.5) * 40
-            ]}>
-              <sphereGeometry args={[0.2]} />
-              <meshStandardMaterial
-                color="#00ffff"
-                emissive="#00ffff"
-                emissiveIntensity={1.5}
-                transparent
-                opacity={0.8}
-              />
-            </mesh>
-          </Float>
-        ))}
-      </group>
-      
-      {/* CYBERPUNK EXIT PORTAL */}
-      <Float speed={2} rotationIntensity={0.3} floatIntensity={0.2}>
-        <group position={[0, 3, 25]}>
-          <mesh>
-            <torusGeometry args={[3, 0.5, 16, 32]} />
-            <meshStandardMaterial
-              color="#ff0000"
-              emissive="#ff0000"
-              emissiveIntensity={2}
-              transparent
-              opacity={0.8}
-            />
-          </mesh>
-          <Html position={[0, 0, 0]} center>
-            <button 
-              className="bg-red-600 hover:bg-red-500 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-red-500/50 border-2 border-red-500 backdrop-blur-xl"
-              onClick={(e) => {
-                e.stopPropagation();
-                exitGalleryMode();
-              }}
-            >
-              🚪 EXIT GALLERY
-            </button>
-          </Html>
-          <Sparkles count={100} scale={8} size={3} speed={2} color="#ff0000" />
-        </group>
-      </Float>
-
-      {/* ENHANCED GALLERY CAMERA CONTROLS */}
-      <OrbitControls 
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        enableDamping={true}
-        dampingFactor={0.05}
-        maxDistance={60}
-        minDistance={3}
-        target={[0, 6, -2]}
-        maxPolarAngle={Math.PI / 2.2}
-        minPolarAngle={Math.PI / 8}
-      />
-    </>
-  );
-}
-
-// SIMPLIFIED GROUND - NO FLICKERING 🌍
-function SimpleGround() {
-  return (
-    <group>
-      {/* MAIN GROUND */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[200, 200]} />
-        <meshStandardMaterial 
-          color="#1a1a1a"
-          roughness={0.8}
-          metalness={0.2}
-        />
-      </mesh>
-
-      {/* SIMPLE GRID OVERLAY */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.49, 0]}>
-        <planeGeometry args={[200, 200]} />
-        <meshBasicMaterial
-          color="#00ffff"
-          transparent
-          opacity={0.1}
-          wireframe
-        />
-      </mesh>
-
-      {/* CONTACT SHADOWS */}
-      <ContactShadows
-        position={[0, -0.48, 0]}
-        opacity={0.4}
-        scale={80}
-        blur={1}
-        far={15}
-        color="#000000"
-      />
-    </group>
-  );
-}
-
-// Main enhanced scene component
-export function CityScene() {
-  const { studios, initializeStudios, closeAllPinnedOverlays, currentGalleryStudio } = useCityStore();
-  const [showControls, setShowControls] = useState(false);
-  const [controlsVisible, setControlsVisible] = useState(true);
-  const [lightboxData, setLightboxData] = useState<{ artwork: any; studio: any } | null>(null);
-  
-  useEffect(() => {
-    initializeStudios();
-  }, [initializeStudios]);
+    setChatMessages(prev => [...prev, userMessage, artistResponse]);
+    setChatInput("");
+  };
   
   // Close pinned overlays when clicking outside - but not immediately after building clicks
   const handleSceneClick = (e: any) => {
@@ -1844,6 +342,8 @@ export function CityScene() {
 
   // Find the current studio if in gallery mode
   const currentStudio = currentGalleryStudio ? studios.find(s => s.id === currentGalleryStudio) : null;
+  
+  console.log('🏛️ CityScene - About to render, currentStudio:', currentStudio?.name || 'None (City mode)');
   
   return (
     <div className="w-full h-screen relative">
@@ -1898,19 +398,19 @@ export function CityScene() {
         </div>
       )}
 
-      <KeyboardControls map={MOVEMENT_KEYS}>
-        <Canvas
-          camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
-          shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
-          gl={{ 
-            antialias: true, 
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.5,
-            outputColorSpace: THREE.SRGBColorSpace
-          }}
-          onClick={handleSceneClick}
-        >
-          <Suspense fallback={<LoadingFallback />}>
+      <Canvas
+        camera={{ position: [15, 25, 25], fov: 85 }} // Higher position and wider FOV for spread-out city
+        shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
+        gl={{ 
+          antialias: true, 
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.5,
+          outputColorSpace: THREE.SRGBColorSpace
+        }}
+        onClick={handleSceneClick}
+      >
+        <Suspense fallback={<SimpleFallback />}>
+          <ThreeErrorBoundary>
             {currentStudio ? (
               // GALLERY MODE - Show 3D Studio Gallery
               <StudioGallery 
@@ -1923,88 +423,47 @@ export function CityScene() {
                     console.error('❌ Invalid lightbox data:', { artwork, studio });
                   }
                 }}
+                onArtistClick={handleArtistClick}
               />
             ) : (
               // CITY MODE - Show main cyberpunk city
               <>
-                {/* ENHANCED LIGHTING SYSTEM FOR LARGER CITY 🌈 */}
-                <ambientLight intensity={0.3} color="#0a0a2e" />
+                {/* ENHANCED LIGHTING AND ENVIRONMENT */}
+                <CityEnvironment />
                 
-                {/* MAIN NEON LIGHT - Higher and more intense for spread-out studios */}
-                <directionalLight
-                  position={[50, 50, 20]}
-                  intensity={2}
-                  color="#00ffff"
-                  castShadow
-                  shadow-mapSize-width={4096} // Higher quality shadows for larger area
-                  shadow-mapSize-height={4096}
-                  shadow-camera-near={0.5}
-                  shadow-camera-far={200} // Much larger shadow distance
-                  shadow-camera-left={-100} // Wider shadow coverage
-                  shadow-camera-right={100}
-                  shadow-camera-top={100}
-                  shadow-camera-bottom={-100}
-                />
-                
-                {/* REGIONAL LIGHTING FOR DIFFERENT STUDIO AREAS */}
-                <pointLight position={[-40, 20, -30]} intensity={3} color="#FFD700" distance={60} /> {/* Leonardo area */}
-                <pointLight position={[45, 20, -25]} intensity={3} color="#4169E1" distance={60} /> {/* Raphael area */}
-                <pointLight position={[0, 20, 50]} intensity={4} color="#DC143C" distance={80} /> {/* Michelangelo area */}
-                <pointLight position={[-35, 20, 35]} intensity={3} color="#8A2BE2" distance={60} /> {/* Caravaggio area */}
-                <pointLight position={[40, 20, 30]} intensity={1.5} color="#D2691E" distance={60} /> {/* Da Vinci area - changed from green to orange */}
-                <pointLight position={[-60, 20, 0]} intensity={3} color="#696969" distance={60} /> {/* Picasso area */}
-                <pointLight position={[25, 15, -45]} intensity={2} color="#98FB98" distance={50} /> {/* Monet area */}
-                <pointLight position={[-25, 15, -40]} intensity={3} color="#FFD700" distance={50} /> {/* Van Gogh area */}
-                
-                {/* ENHANCED ATMOSPHERIC EFFECTS FOR VAST CITY */}
-                <fog attach="fog" args={["#0a0a2e", 50, 300]} /> // Extended fog range
-                
-                {/* FUTURISTIC ENVIRONMENT */}
-                <Environment preset="night" />
-                
-                {/* CYBERPUNK SKY */}
-                <Sky 
-                  distance={450000}
-                  sunPosition={[0, -0.5, 0]}
-                  inclination={0.8}
-                  azimuth={0.5}
-                  turbidity={20}
-                  rayleigh={1}
-                />
-                
-                {/* ENHANCED NEON STARS FOR LARGER SCALE */}
-                <Stars radius={400} depth={100} count={5000} factor={12} saturation={1} fade speed={2} />
-                
-                {/* FLOATING NEON CLOUDS IN DIFFERENT AREAS */}
-                <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
-                  <Cloud position={[60, 30, -60]} speed={0.1} opacity={0.2} color="#ff00ff" />
-                </Float>
-                <Float speed={0.3} rotationIntensity={0.1} floatIntensity={0.2}>
-                  <Cloud position={[-80, 25, 40]} speed={0.08} opacity={0.15} color="#00ffff" />
-                </Float>
-                <Float speed={0.4} rotationIntensity={0.1} floatIntensity={0.25}>
-                  <Cloud position={[30, 35, 70]} speed={0.12} opacity={0.18} color="#ffff00" />
-                </Float>
-                
-                {/* SIMPLE NON-FLICKERING GROUND */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-                  <planeGeometry args={[400, 400]} />
-                  <meshLambertMaterial color="#1a1a1a" />
-                </mesh>
-
-                {/* BASIC CONTACT SHADOWS ONLY */}
-                <ContactShadows
-                  position={[0, -0.48, 0]}
-                  opacity={0.3}
-                  scale={200}
-                  blur={1}
-                  far={30}
-                  color="#000000"
-                />
+                {/* CITY GROUND */}
+                <CityGround />
                 
                 {/* SPREAD-OUT STUDIOS */}
                 {studios.map((studio) => (
                   <StudioBuilding key={studio.id} studio={studio} />
+                ))}
+                
+                {/* ROAMING ARTISTS - GLIDING AROUND THE MAIN CITY 🎨👥 */}
+                {roamingArtists.map((artist) => (
+                  <RoamingArtist
+                    key={artist.id}
+                    artistId={artist.id}
+                    name={artist.name}
+                    specialty={artist.specialty}
+                    initialPosition={artist.position}
+                    color={artist.color}
+                    onArtistClick={handleArtistClick}
+                  />
+                ))}
+                
+                {/* STUDIO ARTISTS - NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
+                {studioArtists.map((artist) => (
+                  <RoamingArtist
+                    key={artist.id}
+                    artistId={artist.id}
+                    name={artist.name}
+                    specialty={artist.specialty}
+                    homeStudio={artist.homeStudio}
+                    initialPosition={artist.position}
+                    color={artist.color}
+                    onArtistClick={handleArtistClick}
+                  />
                 ))}
                 
                 {/* ENHANCED CENTRAL PLAZA */}
@@ -2014,18 +473,13 @@ export function CityScene() {
                 <AgentBuildingHub position={[80, 0, 80]} hubId="hub1" />
                 <TradingMarketplace position={[0, 5, 120]} marketId="market1" />
                 
-                {/* ENHANCED ATMOSPHERIC PARTICLES FOR LARGER SPACE */}
-                <Sparkles count={1000} scale={200} size={3} speed={0.3} color="#00ffff" />
-                <Sparkles count={600} scale={120} size={2} speed={0.5} color="#ff00ff" />
-                <Sparkles count={400} scale={80} size={1} speed={0.8} color="#ffff00" />
-                
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />
               </>
             )}
-          </Suspense>
-        </Canvas>
-      </KeyboardControls>
+          </ThreeErrorBoundary>
+        </Suspense>
+      </Canvas>
       
       {/* CITY UI OVERLAY - Map, Studio Info, Controls */}
       <CityUI />
@@ -2085,6 +539,368 @@ export function CityScene() {
                   Click outside to close
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ARTIST INFORMATION PANEL WITH CHAT 🎨👤💬 */}
+      {selectedArtist && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[9998] animate-in fade-in duration-300"
+          onClick={() => setSelectedArtist(null)}
+        >
+          <div 
+            className="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl max-w-4xl w-full mx-4 shadow-2xl shadow-cyan-400/25 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Enhanced Header for AI Agents */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="flex items-center space-x-6">
+                {/* AI Agent Avatar */}
+                {selectedArtist.isAIAgent && selectedArtist.avatar ? (
+                  <div className="relative">
+                    <img 
+                      src={selectedArtist.avatar} 
+                      alt={selectedArtist.name}
+                      className="w-20 h-20 rounded-full object-cover border-4 shadow-lg border-cyan-400"
+                      style={{ boxShadow: `0 0 25px ${selectedArtist.color || '#00ffff'}80` }}
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-black flex items-center justify-center">
+                      <span className="text-xs">🤖</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    className="w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-lg"
+                    style={{ 
+                      backgroundColor: selectedArtist.color,
+                      borderColor: selectedArtist.color,
+                      boxShadow: `0 0 25px ${selectedArtist.color}50`
+                    }}
+                  >
+                    <span className="text-3xl">{selectedArtist.type === "AI Agent" ? "🤖" : "🎨"}</span>
+                  </div>
+                )}
+                
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-white">{selectedArtist.name}</h2>
+                  <p className="text-cyan-400 text-xl">{selectedArtist.specialty}</p>
+                  {selectedArtist.personality && (
+                    <p className="text-purple-400 text-sm">Personality: {selectedArtist.personality}</p>
+                  )}
+                  {selectedArtist.experience && (
+                    <p className="text-yellow-400 text-sm">Experience: {selectedArtist.experience}</p>
+                  )}
+                  {selectedArtist.homeStudio && !selectedArtist.isAIAgent && (
+                    <p className="text-green-400 text-sm">📍 {selectedArtist.homeStudio}</p>
+                  )}
+                  {selectedArtist.isAIAgent && (
+                    <p className="text-cyan-300 text-sm">🤖 Advanced AI Gallery Curator</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Mode Toggle Buttons */}
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setIsChatMode(false)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    !isChatMode 
+                      ? 'bg-cyan-600 text-white' 
+                      : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  }`}
+                >
+                  {selectedArtist.isAIAgent ? '📊 Profile' : 'ℹ️ Info'}
+                </button>
+                <button
+                  onClick={() => setIsChatMode(true)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isChatMode 
+                      ? 'bg-cyan-600 text-white' 
+                      : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  }`}
+                >
+                  💬 Chat
+                </button>
+                <button 
+                  onClick={() => setSelectedArtist(null)}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded px-3 py-2 font-bold transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden">
+              {!isChatMode ? (
+                // Enhanced Info Mode - Different for AI Agents
+                <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+                  {selectedArtist.isAIAgent ? (
+                    // AI Agent Profile Layout
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left Column - Stats and Info */}
+                      <div className="space-y-4">
+                        {/* AI Agent Description */}
+                        <div className="bg-black/50 rounded-lg p-4 border border-cyan-400/30">
+                          <h3 className="text-white font-semibold mb-2 flex items-center">
+                            <span className="mr-2">🤖</span>
+                            AI Agent Profile
+                          </h3>
+                          <p className="text-gray-300 text-sm leading-relaxed">
+                            {selectedArtist.description}
+                          </p>
+                        </div>
+
+                        {/* AI Capabilities Stats */}
+                        {selectedArtist.stats && (
+                          <div className="bg-black/50 rounded-lg p-4 border border-cyan-400/30">
+                            <h3 className="text-white font-semibold mb-3 flex items-center">
+                              <span className="mr-2">📊</span>
+                              AI Capabilities
+                            </h3>
+                            <div className="space-y-3">
+                              {Object.entries(selectedArtist.stats).map(([stat, value]) => (
+                                <div key={stat} className="flex items-center justify-between">
+                                  <span className="text-gray-300 text-sm">{stat}</span>
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-32 bg-gray-700 rounded-full h-2">
+                                      <div 
+                                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                                        style={{ width: `${value as number}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className="text-cyan-400 text-sm font-bold w-8 text-right">{value as number}%</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Column - Interactive Features */}
+                      <div className="space-y-4">
+                        {/* Greeting Message */}
+                        {selectedArtist.greeting && (
+                          <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-lg p-4 border border-blue-400/30">
+                            <h3 className="text-white font-semibold mb-2 flex items-center">
+                              <span className="mr-2">💬</span>
+                              AI Greeting
+                            </h3>
+                            <p className="text-blue-200 text-sm italic leading-relaxed">
+                              "{selectedArtist.greeting}"
+                            </p>
+                          </div>
+                        )}
+
+                        {/* AI Features */}
+                        <div className="bg-black/50 rounded-lg p-4 border border-purple-400/30">
+                          <h3 className="text-white font-semibold mb-3 flex items-center">
+                            <span className="mr-2">⚡</span>
+                            AI Features
+                          </h3>
+                          <div className="grid grid-cols-1 gap-2">
+                            <div className="flex items-center text-green-400 text-sm">
+                              <span className="mr-2">✓</span>
+                              Real-time art analysis
+                            </div>
+                            <div className="flex items-center text-green-400 text-sm">
+                              <span className="mr-2">✓</span>
+                              Interactive Q&A
+                            </div>
+                            <div className="flex items-center text-green-400 text-sm">
+                              <span className="mr-2">✓</span>
+                              Technique tutorials
+                            </div>
+                            <div className="flex items-center text-green-400 text-sm">
+                              <span className="mr-2">✓</span>
+                              Art history insights
+                            </div>
+                            <div className="flex items-center text-green-400 text-sm">
+                              <span className="mr-2">✓</span>
+                              Personalized recommendations
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="bg-black/50 rounded-lg p-4 border border-yellow-400/30">
+                          <h3 className="text-white font-semibold mb-3 flex items-center">
+                            <span className="mr-2">🎯</span>
+                            Quick Actions
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs py-2 px-3 rounded transition-colors">
+                              🎨 Analyze Art
+                            </button>
+                            <button className="bg-green-600 hover:bg-green-500 text-white text-xs py-2 px-3 rounded transition-colors">
+                              📚 Learn Techniques
+                            </button>
+                            <button className="bg-purple-600 hover:bg-purple-500 text-white text-xs py-2 px-3 rounded transition-colors">
+                              🏛️ Gallery Tour
+                            </button>
+                            <button className="bg-orange-600 hover:bg-orange-500 text-white text-xs py-2 px-3 rounded transition-colors">
+                              💡 Get Inspired
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular Artist Profile Layout
+                    <div className="space-y-4">
+                      <div className="bg-black/50 rounded-lg p-4 border border-white/10">
+                        <h3 className="text-white font-semibold mb-2 flex items-center">
+                          <span className="mr-2">🎯</span>
+                          Artist Type
+                        </h3>
+                        <p className="text-gray-300 text-sm">
+                          {selectedArtist.homeStudio 
+                            ? 'Studio Artist - Works closely with the studio, specializing in collaborative projects and mentoring.' 
+                            : 'Independent Artist - Roams the city freely, bringing fresh perspectives and cross-pollination of ideas between studios.'
+                          }
+                        </p>
+                      </div>
+
+                      <div className="bg-black/50 rounded-lg p-4 border border-white/10">
+                        <h3 className="text-white font-semibold mb-2 flex items-center">
+                          <span className="mr-2">✨</span>
+                          Artistic Philosophy
+                        </h3>
+                        <p className="text-gray-300 text-sm">
+                          {(() => {
+                            const specialty = selectedArtist.specialty;
+                            if (specialty === "Digital Painter") return "Bridges traditional painting techniques with cutting-edge digital tools, creating works that honor the past while embracing the future.";
+                            if (specialty === "3D Sculptor") return "Transforms virtual clay into digital masterpieces, pushing the boundaries of form and space in three-dimensional art.";
+                            if (specialty === "AI Collaborator") return "Partners with artificial intelligence to create unprecedented artworks, exploring the symbiosis between human creativity and machine learning.";
+                            if (specialty === "Pixel Artist") return "Masters the art of digital minimalism, creating complex narratives and emotions through carefully placed pixels.";
+                            if (specialty === "Mixed Media") return "Combines traditional and digital techniques, creating hybrid artworks that transcend medium boundaries.";
+                            if (specialty === "Concept Artist") return "Visualizes ideas and dreams, bringing abstract concepts to life through detailed artistic exploration.";
+                            if (specialty === "Animation") return "Brings static art to life, creating moving poetry that tells stories through motion and time.";
+                            if (specialty === "VR Designer") return "Crafts immersive virtual worlds, designing experiences that transport viewers into entirely new realities.";
+                            if (specialty === "NFT Creator") return "Pioneers the intersection of art and blockchain technology, creating unique digital assets with provable ownership.";
+                            if (specialty === "Generative Art") return "Programs creativity itself, designing algorithms that generate infinite unique artworks.";
+                            if (specialty.includes("Renaissance")) return "Honors the classical traditions while incorporating modern digital techniques, bridging centuries of artistic evolution.";
+                            if (specialty.includes("Classical")) return "Maintains the timeless principles of beauty and proportion while adapting them for the digital age.";
+                            if (specialty.includes("Stone")) return "Translates the ancient art of sculpture into the digital realm, maintaining the soul of stone in virtual marble.";
+                            if (specialty.includes("Light")) return "Masters the interplay of illumination and shadow, creating dramatic narratives through contrast.";
+                            if (specialty.includes("Innovation")) return "Constantly pushes the boundaries of what's possible, inventing new techniques and approaches to art.";
+                            return "A unique artistic voice contributing to the rich tapestry of Medici City's creative community.";
+                          })()
+                        }
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => setIsChatMode(true)}
+                      className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+                    >
+                      <span className="mr-2">💬</span>
+                      {selectedArtist.isAIAgent ? 'Start AI Conversation' : 'Start Conversation'}
+                    </button>
+                    
+                    {selectedArtist.homeStudio && !selectedArtist.isAIAgent && (
+                      <button className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                        <span className="mr-2">🏛️</span>
+                        Visit {selectedArtist.homeStudio}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                // Enhanced Chat Mode
+                <div className="flex flex-col h-[60vh]">
+                  {/* Chat Messages */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                    {chatMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className="flex items-start space-x-2 max-w-[80%]">
+                          {msg.sender === 'artist' && selectedArtist.isAIAgent && selectedArtist.avatar && (
+                            <img 
+                              src={selectedArtist.avatar} 
+                              alt={selectedArtist.name}
+                              className="w-8 h-8 rounded-full object-cover border border-cyan-400"
+                            />
+                          )}
+                          <div
+                            className={`p-3 rounded-lg ${
+                              msg.sender === 'user'
+                                ? 'bg-cyan-600 text-white'
+                                : selectedArtist.isAIAgent
+                                  ? 'bg-gradient-to-r from-blue-800 to-purple-800 text-blue-100 border border-blue-400/30'
+                                  : 'bg-gray-700 text-gray-100 border border-gray-600'
+                            }`}
+                          >
+                            {msg.sender === 'artist' && selectedArtist.isAIAgent && (
+                              <div className="text-xs text-blue-300 mb-1 font-semibold">{selectedArtist.name}</div>
+                            )}
+                            <p className="text-sm">{msg.message}</p>
+                            <p className="text-xs opacity-70 mt-1">
+                              {msg.timestamp.toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Enhanced Chat Input */}
+                  <div className="border-t border-white/10 p-4">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        placeholder={selectedArtist.isAIAgent 
+                          ? `Ask ${selectedArtist.name} about art, techniques, or anything creative...`
+                          : `Message ${selectedArtist.name}...`
+                        }
+                        className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400"
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!chatInput.trim()}
+                        className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors flex items-center"
+                      >
+                        <span className="mr-1">📤</span>
+                        Send
+                      </button>
+                    </div>
+                    {selectedArtist.isAIAgent && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button 
+                          onClick={() => setChatInput("What can you teach me about your artistic style?")}
+                          className="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full transition-colors"
+                        >
+                          💭 Ask about style
+                        </button>
+                        <button 
+                          onClick={() => setChatInput("Can you analyze this artwork for me?")}
+                          className="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full transition-colors"
+                        >
+                          🔍 Analyze art
+                        </button>
+                        <button 
+                          onClick={() => setChatInput("What techniques would you recommend for beginners?")}
+                          className="text-xs bg-green-600/30 hover:bg-green-600/50 text-green-200 px-3 py-1 rounded-full transition-colors"
+                        >
+                          🎓 Learn techniques
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
