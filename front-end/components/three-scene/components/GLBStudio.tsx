@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -19,7 +19,6 @@ export function GLBStudio({
   rotation?: [number, number, number];
 }) {
   const groupRef = useRef<THREE.Group>(null);
-  const [isGLBLoaded, setIsGLBLoaded] = useState(false);
   const { activeStudio, hoveredStudio, setHoveredStudio, setActiveStudio, enterGalleryMode } = useCityStore();
   
   const isActive = activeStudio === studio.id;
@@ -27,7 +26,7 @@ export function GLBStudio({
   const showInterface = isHovered || isActive;
 
   useFrame((state) => {
-    if (groupRef.current && isGLBLoaded) {
+    if (groupRef.current) {
       // Add subtle floating animation for active/hovered studios
       if (isActive || isHovered) {
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
@@ -59,15 +58,6 @@ export function GLBStudio({
     enterGalleryMode(studio.id);
   };
 
-  const handleGLBLoad = () => {
-    setIsGLBLoaded(true);
-    console.log(`🏛️ GLB Studio loaded: ${studio.name} (${glbFile})`);
-  };
-
-  const handleGLBError = () => {
-    console.error(`❌ Failed to load GLB Studio: ${studio.name} (${glbFile})`);
-  };
-
   return (
     <group 
       ref={groupRef} 
@@ -84,18 +74,17 @@ export function GLBStudio({
         onPointerLeave={handlePointerLeave}
       />
 
-      {/* Studio Information Overlay - Only show when GLB is loaded */}
-      {showInterface && isGLBLoaded && (
+      {/* Studio Information Overlay - Always available when hovered/active */}
+      {/* Commented out studio popup as requested
+      {showInterface && (
         <Html position={[0, 8, 0]} center>
           <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl px-6 py-4 text-cyan-400 font-mono animate-in fade-in duration-200 shadow-2xl shadow-cyan-400/30 min-w-[280px]">
-            {/* Studio Header */}
             <div className="text-center mb-4">
               <h2 className="text-2xl font-bold text-white mb-1">{studio.name}</h2>
               <p className="text-sm text-cyan-300">{studio.artist}</p>
               <p className="text-xs text-purple-400">{studio.period}</p>
             </div>
             
-            {/* Studio Status */}
             <div className="text-center mb-4">
               <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
                 isActive 
@@ -106,13 +95,11 @@ export function GLBStudio({
               </div>
             </div>
 
-            {/* Gallery Info */}
             <div className="text-center text-xs text-gray-300 mb-4">
               <div>🎨 {studio.artworks?.length || 5} Artworks</div>
               <div>🤖 AI-Enhanced Experience</div>
             </div>
             
-            {/* Action Buttons */}
             <div className="space-y-2">
               <button 
                 onClick={(e) => {
@@ -135,7 +122,6 @@ export function GLBStudio({
               </button>
             </div>
 
-            {/* Quick Studio Description */}
             {isActive && (
               <div className="mt-4 pt-4 border-t border-cyan-400/30">
                 <p className="text-xs text-gray-300 leading-relaxed">
@@ -146,6 +132,7 @@ export function GLBStudio({
           </div>
         </Html>
       )}
+      */}
     </group>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial } from "@react-three/drei";
+import { Html, Float, Sparkles, RoundedBox, Sphere } from "@react-three/drei";
 import * as THREE from "three";
 import { ScaledGLB } from "./GLBScaler";
 
@@ -13,7 +13,8 @@ export function RoamingArtist({
   homeStudio, 
   initialPosition, 
   color, 
-  onArtistClick 
+  onArtistClick,
+  isFocused = false
 }: { 
   artistId: string; 
   name: string; 
@@ -22,6 +23,7 @@ export function RoamingArtist({
   initialPosition: [number, number, number]; 
   color: string;
   onArtistClick: (artist: any) => void;
+  isFocused?: boolean;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -50,8 +52,8 @@ export function RoamingArtist({
 
   useFrame((state) => {
     if (groupRef.current) {
-      // Only move if not hovered
-      if (!isHovered) {
+      // Only move if not hovered AND not focused
+      if (!isHovered && !isFocused) {
         // Update velocity more frequently for more noticeable movement
         if (Math.random() < 0.01) {
           velocity.set(
@@ -130,7 +132,7 @@ export function RoamingArtist({
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* CYBERPUNK ROBOT GLB MODEL with automatic scaling */}
+      {/* CYBERPUNK ROBOT GLB MODEL (static) with automatic scaling */}
       <ScaledGLB 
         glbFile="cyberpunk_robot.glb"
         castShadow

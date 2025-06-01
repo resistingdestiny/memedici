@@ -3,6 +3,89 @@
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
+
+// ─────── IMPORT SkeletonUtils ─────────────────────────
+// Install `three-stdlib` and import from there:
+import { SkeletonUtils } from "three-stdlib";
+
+/**
+ * Remove any THREE.Line, THREE.LineSegments, or THREE.LineLoop
+ * from a given object and its children. This strips out all "metal lines" that
+ * were exported as line primitives.
+ */
+function removeLines(rootObject: THREE.Object3D) {
+  const toRemove: THREE.Object3D[] = [];
+  
+  rootObject.traverse((child) => {
+    // Three.js identifies line-based objects with these types:
+    if (child.type === 'Line' || child.type === 'LineSegments' || child.type === 'LineLoop') {
+      toRemove.push(child);
+    }
+    
+    // Also remove any object with "line" in the name (case insensitive)
+    if (child.name && child.name.toLowerCase().includes('line')) {
+      toRemove.push(child);
+    }
+    
+    // Remove objects with wire/wireframe/edge/line materials
+    if (child instanceof THREE.Mesh && child.material) {
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((material) => {
+        if (material.name && (
+          material.name.toLowerCase().includes('wire') ||
+          material.name.toLowerCase().includes('line') ||
+          material.name.toLowerCase().includes('edge')
+        )) {
+          toRemove.push(child);
+        }
+      });
+    }
+  });
+  
+  // Remove collected line objects
+  toRemove.forEach(child => {
+    if (child.parent) {
+      child.parent.remove(child);
+      console.log(`🗑️ Removed line primitive: ${child.type} (${child.name || 'unnamed'})`);
+    }
+  });
+  
+  return toRemove.length;
+}
+
+/**
+ * Remove any typical helper objects—SkeletonHelper, CameraHelper, GridHelper, etc.
+ */
+function removeHelpers(rootObject: THREE.Object3D) {
+  const toRemove: THREE.Object3D[] = [];
+  
+  rootObject.traverse((child) => {
+    // child.isHelper is true for most built-in helper types (e.g. SkeletonHelper)
+    if ((child as any).isHelper) {
+      toRemove.push(child);
+    }
+    // Also check for common helper names from exporters
+    if (child.name && (
+      child.name.toLowerCase().includes('skeletonhelper') ||
+      child.name.toLowerCase().includes('helper') ||
+      child.name.toLowerCase().includes('gizmo') ||
+      child.name.toLowerCase().includes('armature_helper')
+    )) {
+      toRemove.push(child);
+    }
+  });
+  
+  // Remove collected helper objects
+  toRemove.forEach(child => {
+    if (child.parent) {
+      child.parent.remove(child);
+      console.log(`🗑️ Removed helper object: ${child.type} (${child.name || 'unnamed'})`);
+    }
+  });
+  
+  return toRemove.length;
+}
 
 // Target sizes for different object types
 const TARGET_SIZES = {
@@ -13,7 +96,7 @@ const TARGET_SIZES = {
   exchange: 35.0,    // Exchange building should be MUCH bigger
   hub: 35.0,         // Agent builder hub should be MUCH bigger
   cyberpunk: 25.0,   // Cyberpunk sci-fi building should be much bigger
-  office: 20.0,      // Office studio environment
+  gallery: 30.0,     // Interdimensional art gallery should be large and impressive
   default: 5.0       // Default size for unknown types
 };
 
@@ -33,8 +116,8 @@ function getObjectType(glbFile: string): keyof typeof TARGET_SIZES {
     return 'hub';
   } else if (fileName.includes('hw_4_cyberpunk_sci-fi_building')) {
     return 'cyberpunk';
-  } else if (fileName.includes('office_studio')) {
-    return 'office';
+  } else if (fileName.includes('interdimensional_art_gallery')) {
+    return 'gallery';
   } else if (fileName.includes('building') || fileName.includes('bar') || fileName.includes('ams') || 
              fileName.includes('steampunk') || fileName.includes('oriental')) {
     return 'building';
@@ -74,7 +157,33 @@ function scaleToFit(sceneOrGroup: THREE.Object3D, targetSize: number) {
   });
 }
 
-// Enhanced GLB loader with automatic scaling and loading states to prevent flashing
+// GLB Instance Cache to prevent multiple loads of the same file
+const glbInstanceCache = new Map<string, THREE.Object3D>();
+
+// Clear cache function to prevent memory leaks
+export function clearGLBCache() {
+  console.log('🧹 Clearing GLB cache to free memory');
+  glbInstanceCache.forEach((scene, key) => {
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry?.dispose();
+        if (Array.isArray(child.material)) {
+          child.material.forEach(material => material.dispose());
+        } else {
+          child.material?.dispose();
+        }
+      }
+    });
+  });
+  glbInstanceCache.clear();
+}
+
+// Get cache size for monitoring
+export function getGLBCacheSize() {
+  return glbInstanceCache.size;
+}
+
+// Enhanced GLB loader with automatic scaling - FIXED VERSION WITH WORKING CACHE
 export function ScaledGLB({ 
   glbFile, 
   position = [0, 0, 0], 
@@ -88,50 +197,250 @@ export function ScaledGLB({
   targetSizeOverride?: number;
   [key: string]: any;
 }) {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const { scene } = useGLTF(`/glb/${glbFile}`);
-  const clonedScene = scene.clone();
+  const gltfData = useGLTF(`/glb/${glbFile}`);
+  const { scene } = gltfData;
   const groupRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
-    if (clonedScene && groupRef.current) {
+    // Ensure the glTF scene is loaded before attempting to clone
+    if (!scene) {
+      console.warn(`⚠️ [${glbFile}] Scene is not yet defined; skipping animation setup.`);
+      return;
+    }
+    if (groupRef.current) {
       try {
-        // Determine target size based on object type or override
-        const objectType = getObjectType(glbFile);
-        const targetSize = targetSizeOverride || TARGET_SIZES[objectType];
+        // Check if we already have a processed version of this GLB
+        const cacheKey = `${glbFile}_${targetSizeOverride || 'default'}`;
+        let clonedScene: THREE.Object3D;
         
-        // Store filename for debugging
-        clonedScene.userData.fileName = glbFile;
+        if (glbInstanceCache.has(cacheKey)) {
+          console.log(`♻️ Reusing cached GLB: ${glbFile}`);
+          clonedScene = glbInstanceCache.get(cacheKey)!.clone();
+        } else {
+          console.log(`🆕 Processing new GLB: ${glbFile}`);
+          clonedScene = scene.clone();
+          
+          // PRESERVE EVERYTHING FOR ALL MODELS - NO MODIFICATIONS AT ALL
+          console.log(`🌟 [${glbFile}] PRESERVING EVERYTHING - no cleanup, no modifications whatsoever`);
+          
+          // Determine target size based on object type or override
+          const objectType = getObjectType(glbFile);
+          const targetSize = targetSizeOverride || TARGET_SIZES[objectType];
+          
+          // Store filename for debugging
+          clonedScene.userData.fileName = glbFile;
+          
+          // Apply automatic scaling
+          scaleToFit(clonedScene, targetSize);
+          
+          // Cache the processed scene
+          glbInstanceCache.set(cacheKey, clonedScene.clone());
+          
+          console.log(`✅ GLB processed and cached: ${glbFile}`);
+        }
         
-        // Apply automatic scaling
-        scaleToFit(clonedScene, targetSize);
+        // Clear existing children and add the new scene
+        groupRef.current.clear();
+        groupRef.current.add(clonedScene);
         
-        // Mark as loaded successfully
-        setIsLoaded(true);
-        setHasError(false);
-        
-        console.log(`✅ GLB loaded successfully: ${glbFile}`);
       } catch (error) {
         console.error(`❌ Error processing GLB: ${glbFile}`, error);
-        setHasError(true);
-        setIsLoaded(false);
       }
     }
-  }, [clonedScene, glbFile, targetSizeOverride]);
+  }, [scene, glbFile, targetSizeOverride]);
 
-  // Don't render anything until the model is properly loaded and scaled to prevent flashing
-  if (!isLoaded || hasError) {
+  // Always render the group - models will be added via useEffect
+  return (
+    <group ref={groupRef} position={position} rotation={rotation} {...props} />
+  );
+}
+
+// NEW: Animated GLB loader with proper animation handling
+export function AnimatedScaledGLB({
+  glbFile,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+  targetSizeOverride,
+  playAllAnimations = true,
+  specificAnimations = [],
+  ...props
+}: {
+  glbFile: string;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  targetSizeOverride?: number;
+  playAllAnimations?: boolean;
+  specificAnimations?: string[];
+  [key: string]: any;
+}) {
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY EARLY RETURNS
+  const { scene, animations } = useGLTF(`/glb/${glbFile}`);
+  const groupRef = useRef<THREE.Group>(null);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+
+  // Move useEffect to the top
+  useEffect(() => {
+    // Don't try to clone/animate until the GLTF is actually loaded
+    if (!scene) return;
+    
+    // Wait until the <group> is mounted
+    if (!groupRef.current) return;
+
+    // 1) Log how many scenes/animations are here
+    console.log(
+      `👉 [${glbFile}] INSPECTION: Scenes: 1, Animations: ${animations.length}`
+    );
+    animations.forEach((clip, i) => {
+      console.log(
+        `  Clip[${i}]: name="${clip.name}", duration=${clip.duration.toFixed(
+          2
+        )}s, tracks=${clip.tracks.length}`
+      );
+      // (log each track name for debugging)
+      clip.tracks.forEach((t, ti) => {
+        console.log(`    Track[${ti}]: "${t.name}" (${t.times.length} keys)`);
+      });
+    });
+
+    // 2) Clear old mixer if any
+    if (mixerRef.current) {
+      mixerRef.current.stopAllAction();
+      mixerRef.current = null;
+    }
+
+    // 3) Deep‐clone via SkeletonUtils so skinned meshes & bones copy correctly
+    console.log(`🔄 [${glbFile}] Cloning animated GLB`);
+    const clonedScene: THREE.Object3D = SkeletonUtils.clone(scene);
+    clonedScene.userData.fileName = glbFile;
+
+    // PRESERVE ABSOLUTELY EVERYTHING FOR ALL ANIMATED MODELS - NO MODIFICATIONS
+    console.log(`🌟 [${glbFile}] PRESERVING EVERYTHING for animated model - no cleanup, no modifications whatsoever`);
+    // Don't remove anything at all from any animated model - not even helpers
+
+    // 4) Auto‐scale
+    const objectType = getObjectType(glbFile);
+    const targetSize = targetSizeOverride || TARGET_SIZES[objectType];
+    scaleToFit(clonedScene, targetSize);
+
+    // 5) Ensure every SkinnedMesh has skinning=true
+    clonedScene.traverse((child) => {
+      if (child instanceof THREE.SkinnedMesh) {
+        console.log(`🦴 [${glbFile}] Found SkinnedMesh: ${child.name}`);
+        if (child.material) {
+          const mats = Array.isArray(child.material)
+            ? child.material
+            : [child.material];
+          mats.forEach((mat) => {
+            if ("skinning" in mat) {
+              (mat as any).skinning = true;
+              console.log(
+                `👍 Enabled skinning on material for ${child.name}`
+              );
+            } else {
+              console.warn(
+                `⚠️ Material for ${child.name} cannot skin. Type:`,
+                mat.constructor.name
+              );
+            }
+          });
+        }
+      }
+    });
+
+    // 6) Clone each AnimationClip so it will retarget to our new bones
+    const localClips = animations.map((clip) => clip.clone());
+
+    // 7) Create the mixer and bind each clip to clonedScene
+    if (localClips.length > 0) {
+      mixerRef.current = new THREE.AnimationMixer(clonedScene);
+
+      if (playAllAnimations) {
+        console.log(
+          `🎬 [${glbFile}] Playing ALL ${localClips.length} animations:`
+        );
+        localClips.forEach((clip, index) => {
+          console.log(`▶️ [${glbFile}] Starting clip ${index + 1}: "${clip.name}"`);
+          const action = mixerRef.current!.clipAction(clip, clonedScene);
+          action.reset();
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.clampWhenFinished = false;
+          action.play();
+          console.log(`✅ [${glbFile}] Clip "${clip.name}" started`);
+        });
+      } else if (specificAnimations.length > 0) {
+        specificAnimations.forEach((animName) => {
+          const clip = THREE.AnimationClip.findByName(localClips, animName);
+          if (clip) {
+            console.log(`▶️ [${glbFile}] Playing specific clip: "${animName}"`);
+            const action = mixerRef.current!.clipAction(clip, clonedScene);
+            action.reset();
+            action.setLoop(THREE.LoopRepeat, Infinity);
+            action.clampWhenFinished = false;
+            action.play();
+          } else {
+            console.warn(
+              `⚠️ Clip "${animName}" not found in ${glbFile}. Available: ${localClips.map(
+                (c) => c.name
+              )}`
+            );
+          }
+        });
+      }
+    } else {
+      console.log(`📝 [${glbFile}] No animation clips found.`);
+    }
+
+    // 8) Attach clonedScene under our group
+    groupRef.current.clear();
+    groupRef.current.add(clonedScene);
+
+    // 9) On unmount, stop the mixer
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+        mixerRef.current = null;
+      }
+    };
+  },
+  [
+    scene,
+    animations,
+    glbFile,
+    targetSizeOverride,
+    playAllAnimations,
+    specificAnimations,
+  ]);
+
+  // 10) Drive the mixer on each frame
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta);
+
+      // Optional debug every 5 seconds
+      if (
+        Math.floor(state.clock.elapsedTime) % 5 === 0 &&
+        Math.floor(state.clock.elapsedTime * 10) % 10 === 0
+      ) {
+        console.log(
+          `🎭 Mixer running for ${glbFile} at ${state.clock.elapsedTime.toFixed(1)}s`
+        );
+      }
+    }
+  });
+
+  // Don't try to clone/animate until the GLTF is actually loaded
+  if (!scene) {
     return null;
   }
 
+  // 11) Always render an empty <group> (the GLB will be injected via useEffect)
   return (
-    <group ref={groupRef} position={position} rotation={rotation}>
-      <primitive 
-        object={clonedScene}
-        {...props}
-      />
-    </group>
+    <group
+      ref={groupRef}
+      position={position}
+      rotation={rotation}
+      {...props}
+    />
   );
 }
 
@@ -159,9 +468,11 @@ export function preloadAllGLBFiles() {
     'cyberpunk_bar.glb',
     'cyberpunk_robot.glb',
     'robot_playground.glb',
+    'diamond_hands.glb',
+    'the_artist.glb',
     '16_mysterious_contraption.glb',
-    'office_studio (1).glb'
+    'fucursor.glb'
   ];
   
   commonFiles.forEach(preloadGLBFile);
-} 
+}

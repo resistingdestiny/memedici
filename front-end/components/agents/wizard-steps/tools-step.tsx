@@ -85,7 +85,9 @@ const PLATFORM_TOOLS = [
 interface CustomTool {
   name: string;
   description: string;
-  endpoint: string;
+  api_config?: {
+    endpoint: string;
+  };
 }
 
 export function ToolsStep({ form }: ToolsStepProps) {
@@ -93,7 +95,9 @@ export function ToolsStep({ form }: ToolsStepProps) {
   const [newCustomTool, setNewCustomTool] = useState<CustomTool>({
     name: "",
     description: "",
-    endpoint: ""
+    api_config: {
+      endpoint: ""
+    }
   });
 
   const watchedMemoryEnabled = form.watch("memory_enabled");
@@ -111,10 +115,14 @@ export function ToolsStep({ form }: ToolsStepProps) {
   };
 
   const addCustomTool = () => {
-    if (newCustomTool.name && newCustomTool.description && newCustomTool.endpoint) {
+    if (newCustomTool.name && newCustomTool.description && newCustomTool.api_config?.endpoint) {
       const current = watchedCustomTools || [];
       form.setValue("custom_tools", [...current, newCustomTool]);
-      setNewCustomTool({ name: "", description: "", endpoint: "" });
+      setNewCustomTool({ 
+        name: "", 
+        description: "", 
+        api_config: { endpoint: "" }
+      });
       setShowCustomToolModal(false);
     }
   };
@@ -277,7 +285,7 @@ export function ToolsStep({ form }: ToolsStepProps) {
                       </div>
                       <p className="text-xs text-muted-foreground">{tool.description}</p>
                       <p className="text-xs font-mono text-muted-foreground">
-                        {tool.endpoint}
+                        {tool.api_config?.endpoint}
                       </p>
                     </div>
                     <Button
@@ -341,8 +349,8 @@ export function ToolsStep({ form }: ToolsStepProps) {
               <label className="text-sm font-medium mb-2 block">API Endpoint</label>
               <Input
                 placeholder="https://api.example.com/v1/tool"
-                value={newCustomTool.endpoint}
-                onChange={(e) => setNewCustomTool(prev => ({ ...prev, endpoint: e.target.value }))}
+                value={newCustomTool.api_config?.endpoint}
+                onChange={(e) => setNewCustomTool(prev => ({ ...prev, api_config: { endpoint: e.target.value } }))}
               />
             </div>
           </div>
@@ -358,7 +366,7 @@ export function ToolsStep({ form }: ToolsStepProps) {
             <Button
               type="button"
               onClick={addCustomTool}
-              disabled={!newCustomTool.name || !newCustomTool.description || !newCustomTool.endpoint}
+              disabled={!newCustomTool.name || !newCustomTool.description || !newCustomTool.api_config?.endpoint}
             >
               Add Tool
             </Button>

@@ -16,6 +16,9 @@ export interface Studio {
     position: [number, number, number];
     rotation: [number, number, number];
   }[];
+  // Add fields for API integration
+  agent?: any; // Will hold the actual agent data
+  studioData?: any; // Will hold studio-specific data from API
 }
 
 interface CityState {
@@ -62,6 +65,8 @@ interface CityState {
   initializeStudios: () => void;
   setHoveredAgentHub: (hubId: string | null) => void;
   setHoveredMarketplace: (marketId: string | null) => void;
+  // Add new function for API-based studios
+  generateStudiosFromAgents: (agents: any[]) => void;
 }
 
 export const useCityStore = create<CityState>((set, get) => ({
@@ -146,12 +151,20 @@ export const useCityStore = create<CityState>((set, get) => ({
       return canvas.toDataURL();
     };
 
+    // Get the studios data from API - we'll implement this properly
+    // For now, we'll check if there are any existing studios or create based on agents
+    const existingStudios = get().studios;
+    if (existingStudios.length > 0) {
+      console.log('🏛️ Studios already initialized:', existingStudios.length);
+      return;
+    }
+
     // Create studios based on agent data - SPREAD OUT MUCH MORE
     const studios: Studio[] = [
       {
         id: "leonardo-studio",
-        name: "Leonardo's Workshop",
-        agentId: "leonardo",
+        name: "Leonardo's Workshop", 
+        agentId: "d43b230c-c53f-453c-9701-fc4b1949d616", // GasMask agent ID from API
         position: [-40, 0, -30], // Much further spread out
         rotation: [0, Math.PI / 4, 0],
         scale: [1.2, 1, 1.2], // Slightly larger and wider
@@ -189,7 +202,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "raphael-studio",
         name: "Raphael's Atelier",
-        agentId: "raphael",
+        agentId: "0c99f977-c501-4071-9c52-fc69b3c9a9bd", // DaoVinci agent ID from API
         position: [45, 0, -25], // Far to the right
         rotation: [0, -Math.PI / 3, 0],
         scale: [1, 1.3, 1], // Taller and more elegant
@@ -220,7 +233,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "michelangelo-studio",
         name: "Michelangelo's Forge",
-        agentId: "michelangelo",
+        agentId: "f29b4777-69ee-45e4-916a-1f865f39bdb3", // NakamotoChild agent ID from API
         position: [0, 0, 50], // Far back
         rotation: [0, Math.PI, 0],
         scale: [1.4, 1.2, 1.4], // Massive and imposing
@@ -258,7 +271,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "caravaggio-studio",
         name: "Caravaggio's Studio",
-        agentId: "caravaggio",
+        agentId: "6ffd78de-950a-42ec-9b04-d97f7bacafbe", // REKTangel agent ID from API
         position: [-35, 0, 35], // Far left back area
         rotation: [0, Math.PI / 2.5, 0],
         scale: [0.9, 1.1, 0.9], // Narrower but taller, mysterious
@@ -289,7 +302,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "da-vinci-studio",
         name: "Da Vinci's Lab",
-        agentId: "davinci",
+        agentId: "dcb3f66a-739a-4a6a-882a-c5e9bdb8bc6b", // Singuluna agent ID from API
         position: [40, 0, 30], // Far right back
         rotation: [0, -Math.PI / 1.8, 0],
         scale: [1.1, 1.4, 1.1], // Tall and innovative looking
@@ -320,7 +333,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "picasso-studio",
         name: "Picasso's Cubist Lab",
-        agentId: "picasso",
+        agentId: "d43b230c-c53f-453c-9701-fc4b1949d616", // GasMask agent ID from API (reused)
         position: [-60, 0, 0], // Far left side
         rotation: [0, Math.PI / 6, 0],
         scale: [1.3, 0.8, 1.3], // Wide and angular, cubist style
@@ -358,7 +371,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "monet-studio",
         name: "Monet's Digital Garden",
-        agentId: "monet",
+        agentId: "0c99f977-c501-4071-9c52-fc69b3c9a9bd", // DaoVinci agent ID from API (reused)
         position: [25, 0, -45], // Front right area
         rotation: [0, -Math.PI / 5, 0],
         scale: [1, 0.9, 1], // Organic, garden-like proportions
@@ -382,7 +395,7 @@ export const useCityStore = create<CityState>((set, get) => ({
       {
         id: "van-gogh-studio",
         name: "Van Gogh's Swirling Studio",
-        agentId: "vangogh",
+        agentId: "f29b4777-69ee-45e4-916a-1f865f39bdb3", // NakamotoChild agent ID from API (reused)
         position: [-25, 0, -40], // Front left area
         rotation: [0, Math.PI / 7, 0],
         scale: [1.2, 1.1, 1.2], // Expressive proportions
@@ -408,5 +421,129 @@ export const useCityStore = create<CityState>((set, get) => ({
     set({ studios });
   },
   setHoveredAgentHub: (hubId: string | null) => set({ hoveredAgentHub: hubId }),
-  setHoveredMarketplace: (marketId: string | null) => set({ hoveredMarketplace: marketId })
+  setHoveredMarketplace: (marketId: string | null) => set({ hoveredMarketplace: marketId }),
+  // Add new function for API-based studios
+  generateStudiosFromAgents: (agents: any[]) => {
+    console.log('🏛️ Generating studios from API agents:', agents.length);
+    
+    // Don't regenerate if we already have studios
+    const existingStudios = get().studios;
+    if (existingStudios.length > 0) {
+      console.log('🏛️ Studios already exist, not regenerating');
+      return;
+    }
+
+    // Helper function to create placeholder images
+    const createPlaceholderImage = (color: string) => {
+      if (typeof window === 'undefined') return '';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 512, 512);
+        // Add some texture pattern
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        for (let i = 0; i < 50; i++) {
+          ctx.fillRect(Math.random() * 512, Math.random() * 512, 4, 4);
+        }
+      }
+      return canvas.toDataURL();
+    };
+
+    // Generate studio positions in a circle around the city
+    const generateStudioPositions = (count: number) => {
+      const positions: [number, number, number][] = [];
+      const baseRadius = 80; // Distance from center
+      
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const radius = baseRadius + (Math.random() - 0.5) * 20;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        positions.push([x, 0, z]);
+      }
+      return positions;
+    };
+
+    const studioPositions = generateStudioPositions(agents.length);
+
+    // Create studios based on real agents
+    const studios: Studio[] = agents.map((agent, index) => {
+      const position = studioPositions[index] || [0, 0, 0];
+      const agentName = agent.name || agent.identity?.display_name || `Agent ${index + 1}`;
+      const studioName = agent.studio?.name || `${agentName}'s Studio`;
+      
+      // Generate color based on agent specialty or use a default
+      const getColorForSpecialty = (specialty: string[]) => {
+        const colorMap: Record<string, string> = {
+          'digital': '#4169E1',
+          'painting': '#FF6347',
+          'sculpture': '#8B4513',
+          'photography': '#32CD32',
+          'abstract': '#9932CC',
+          'portrait': '#FF69B4',
+          'landscape': '#228B22',
+          'conceptual': '#FF8C00',
+          'mixed': '#DAA520',
+          'generative': '#00CED1'
+        };
+        
+        const primarySpecialty = specialty[0]?.toLowerCase() || 'digital';
+        for (const [key, color] of Object.entries(colorMap)) {
+          if (primarySpecialty.includes(key)) {
+            return color;
+          }
+        }
+        return `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+      };
+
+      const studioColor = getColorForSpecialty(agent.specialty || ['digital']);
+
+      // Generate sample artworks for the studio
+      const artworkTitles = [
+        'Neural Canvas',
+        'Digital Dreams',
+        'AI Imagination',
+        'Synthetic Vision',
+        'Generated Beauty',
+        'Algorithmic Art',
+        'Creative Code',
+        'Virtual Masterpiece'
+      ];
+
+      const recentArtworks = Array.from({ length: Math.min(4, artworkTitles.length) }, (_, artIndex) => ({
+        id: `${agent.agent_id}-art-${artIndex}`,
+        title: artworkTitles[artIndex],
+        image: createPlaceholderImage(studioColor),
+        position: [
+          (artIndex % 2 === 0 ? -2 : 2),
+          2 + (artIndex * 0.5),
+          artIndex < 2 ? 0 : -1
+        ] as [number, number, number],
+        rotation: [0, 0, 0] as [number, number, number]
+      }));
+
+      return {
+        id: agent.agent_id,
+        name: studioName,
+        agentId: agent.agent_id,
+        position,
+        rotation: [0, (Math.random() - 0.5) * Math.PI, 0] as [number, number, number],
+        scale: [
+          1 + (Math.random() - 0.5) * 0.4,
+          1 + (Math.random() - 0.5) * 0.6,
+          1 + (Math.random() - 0.5) * 0.4
+        ] as [number, number, number],
+        recentArtworks,
+        agent, // Store the actual agent data
+        studioData: agent.studio // Store studio-specific data if available
+      };
+    });
+
+    console.log('🏛️ Generated studios:', studios.length);
+    set({ studios });
+  }
 })); 

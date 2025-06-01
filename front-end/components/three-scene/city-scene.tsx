@@ -20,9 +20,11 @@ import {
   PointerLockControls,
   useTexture,
   Box,
-  Plane
+  Plane,
+  Preload
 } from "@react-three/drei";
 import { useCityStore } from "@/lib/stores/use-city";
+import { useAgents, ChatMessage } from "@/lib/stores/use-agents";
 import * as THREE from "three";
 import { CityUI } from "./city-ui";
 // import { StudioBuilding } from "./components/StudioBuilding"; // Replaced with GLBStudio
@@ -35,7 +37,8 @@ import { AgentBuildingHub, TradingMarketplace, LoadingFallback, MysteriousContra
 import { PastelHouse } from "./components/PastelHouse";
 import { GLBStudio } from "./components/GLBStudio";
 import { ExchangeBuilding, AgentBuilderHub } from "./components/GLBBuildings";
-import { preloadAllGLBFiles } from "./components/GLBScaler";
+import { preloadAllGLBFiles, clearGLBCache, getGLBCacheSize } from "./components/GLBScaler";
+import { useSearchParams } from "next/navigation";
 
 // Module-level variable to track building clicks
 let lastBuildingClickTime = 0;
@@ -100,237 +103,299 @@ class ThreeErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError:
 export function CityScene() {
   console.log('🏛️ CityScene component starting to load...');
   
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY EARLY RETURNS
   const { 
     studios, 
     currentGalleryStudio, 
     closeAllPinnedOverlays,
-    initializeStudios
+    initializeStudios,
   } = useCityStore();
 
-  console.log('🏛️ CityScene - Studios loaded:', studios?.length);
-  console.log('🏛️ CityScene - Current gallery studio:', currentGalleryStudio);
+  const { 
+    agents, 
+    fetchAgents, 
+    chatWithAgent, 
+    chatMessages, 
+    chatLoading, 
+    addChatMessage, 
+    clearChatMessages 
+  } = useAgents();
 
-  // Initialize studios if they haven't been loaded yet
-  useEffect(() => {
-    if (studios.length === 0) {
-      console.log('🏛️ Initializing studios...');
-      initializeStudios();
-    }
-    
-    // Preload all GLB files to prevent flashing
-    console.log('🔄 Preloading GLB files to prevent flashing...');
-    preloadAllGLBFiles();
-  }, [studios.length, initializeStudios]);
+  // Add WebGL context loss state
+  const [webglContextLost, setWebglContextLost] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Add a scene ready state to prevent premature loading
+  const [sceneReady, setSceneReady] = useState(false);
 
-  // Define roaming artists data directly
-  const roamingArtists = [
-    {
-      id: "maya-chen",
-      name: "Maya Chen",
-      specialty: "Digital Painter",
-      position: [20, 0, 15] as [number, number, number],
-      color: "#ff6b6b"
-    },
-    {
-      id: "alex-rivera",
-      name: "Alex Rivera", 
-      specialty: "3D Sculptor",
-      position: [-15, 0, 25] as [number, number, number],
-      color: "#4ecdc4"
-    },
-    {
-      id: "jordan-kim",
-      name: "Jordan Kim",
-      specialty: "AI Collaborator", 
-      position: [30, 0, -20] as [number, number, number],
-      color: "#45b7d1"
-    },
-    {
-      id: "sam-torres",
-      name: "Sam Torres",
-      specialty: "Pixel Artist",
-      position: [-25, 0, -10] as [number, number, number],
-      color: "#96ceb4"
-    },
-    {
-      id: "riley-patel",
-      name: "Riley Patel",
-      specialty: "Mixed Media",
-      position: [10, 0, 35] as [number, number, number],
-      color: "#feca57"
-    },
-    {
-      id: "casey-wong",
-      name: "Casey Wong",
-      specialty: "Concept Artist",
-      position: [-35, 0, 5] as [number, number, number],
-      color: "#ff9ff3"
-    },
-    {
-      id: "avery-smith",
-      name: "Avery Smith",
-      specialty: "Animation",
-      position: [25, 0, -35] as [number, number, number],
-      color: "#54a0ff"
-    },
-    {
-      id: "taylor-brown",
-      name: "Taylor Brown",
-      specialty: "VR Designer",
-      position: [-20, 0, -30] as [number, number, number],
-      color: "#5f27cd"
-    },
-    {
-      id: "morgan-davis",
-      name: "Morgan Davis",
-      specialty: "NFT Creator",
-      position: [40, 0, 10] as [number, number, number],
-      color: "#00d2d3"
-    },
-    {
-      id: "quinn-lee",
-      name: "Quinn Lee",
-      specialty: "Generative Art",
-      position: [-10, 0, 40] as [number, number, number],
-      color: "#ff6348"
-    }
-  ];
+  // URL parameter handling for agent focus
+  const searchParams = useSearchParams();
+  const focusAgentId = searchParams.get('agent');
+  const shouldFocus = searchParams.get('focus') === 'true';
+  const [agentFocusPosition, setAgentFocusPosition] = useState<[number, number, number] | null>(null);
 
-  // Define studio artists data directly
-  const studioArtists = [
-    {
-      id: "leonardo-assistant",
-      name: "Marco Benedetti",
-      specialty: "Renaissance Techniques",
-      homeStudio: "Leonardo Studio",
-      position: [-38, 0, -28] as [number, number, number],
-      color: "#8B4513"
-    },
-    {
-      id: "raphael-assistant", 
-      name: "Sofia Angelico",
-      specialty: "Classical Harmony",
-      homeStudio: "Raphael Studio",
-      position: [47, 0, -23] as [number, number, number],
-      color: "#4169E1"
-    },
-    {
-      id: "michelangelo-assistant",
-      name: "Giovanni Marmo",
-      specialty: "Stone & Digital",
-      homeStudio: "Michelangelo Studio", 
-      position: [2, 0, 52] as [number, number, number],
-      color: "#DC143C"
-    },
-    {
-      id: "caravaggio-assistant",
-      name: "Lucia Ombra",
-      specialty: "Light & Shadow",
-      homeStudio: "Caravaggio Studio",
-      position: [-33, 0, 37] as [number, number, number],
-      color: "#8A2BE2"
-    },
-    {
-      id: "da-vinci-assistant",
-      name: "Alessandro Inventore",
-      specialty: "Innovation & Art",
-      homeStudio: "Da Vinci Studio",
-      position: [42, 0, 32] as [number, number, number],
-      color: "#D2691E"
-    },
-    {
-      id: "picasso-assistant",
-      name: "Pablo Fragmento",
-      specialty: "Cubist Revolution",
-      homeStudio: "Picasso Studio",
-      position: [-58, 0, 2] as [number, number, number],
-      color: "#696969"
-    },
-    {
-      id: "monet-assistant",
-      name: "Claude Lumière",
-      specialty: "Impressionist Light",
-      homeStudio: "Monet Studio",
-      position: [27, 0, -43] as [number, number, number],
-      color: "#98FB98"
-    },
-    {
-      id: "van-gogh-assistant",
-      name: "Vincent Spirale",
-      specialty: "Expressive Energy",
-      homeStudio: "Van Gogh Studio",
-      position: [-23, 0, -38] as [number, number, number],
-      color: "#FFD700"
-    }
-  ];
-
-  // UI State
-  const [controlsVisible, setControlsVisible] = useState(true);
-  const [showControls, setShowControls] = useState(false);
+  // UI STATES - moved to top
+  const [showMinimap, setShowMinimap] = useState(true);
+  const [showUI, setShowUI] = useState(true);
   const [lightboxData, setLightboxData] = useState<{ artwork: any; studio: any } | null>(null);
   const [selectedArtist, setSelectedArtist] = useState<any>(null);
   const [isChatMode, setIsChatMode] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{
-    id: string;
-    sender: 'user' | 'artist';
-    message: string;
-    timestamp: Date;
-  }>>([]);
   const [chatInput, setChatInput] = useState("");
+  const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
+
+  console.log('🏛️ CityScene - Studios loaded:', studios?.length);
+  console.log('🏛️ CityScene - Current gallery studio:', currentGalleryStudio);
+  console.log('🏛️ CityScene - URL params:', { focusAgentId, shouldFocus });
+
+  // Initialize studios and agents if they haven't been loaded yet
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+    if (studios.length === 0) {
+      console.log('🏛️ Initializing studios...');
+          await initializeStudios();
+    }
+
+    if (agents.length === 0) {
+      console.log('🤖 Fetching agents...');
+          await fetchAgents();
+    }
+    
+    // Preload all GLB files to prevent flashing - but only once
+    console.log('🔄 Preloading GLB files to prevent flashing...');
+    preloadAllGLBFiles();
+
+    // Check WebGL support
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.error('🚨 WebGL not supported - 3D scene may not load properly');
+    } else {
+      console.log('✅ WebGL support detected');
+    }
+
+        // Delay scene loading to prevent texture loading conflicts
+        setTimeout(() => {
+          console.log('✅ Scene initialization complete - enabling 3D scene');
+          setSceneReady(true);
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Error during scene initialization:', error);
+        // Still enable scene even if there are errors
+        setTimeout(() => setSceneReady(true), 2000);
+      }
+    };
+
+    initializeData();
+
+    // Monitor GLB cache size
+    const monitorCache = setInterval(() => {
+      const cacheSize = getGLBCacheSize();
+      console.log(`📊 GLB Cache size: ${cacheSize} models`);
+      // Only warn if cache gets extremely large (20+ models), but don't auto-clear
+      if (cacheSize > 20) {
+        console.warn('⚠️ GLB cache is very large, consider manual clearing if performance degrades');
+      }
+    }, 60000); // Check every 60 seconds instead of 30
+
+    return () => {
+      clearInterval(monitorCache);
+      // Don't automatically clear cache on unmount - let it persist for better performance
+      console.log('🏛️ CityScene unmounting, keeping GLB cache for faster reloads');
+    };
+  }, [studios.length, agents.length, initializeStudios, fetchAgents]);
+
+  // Handle WebGL context loss and restoration
+  useEffect(() => {
+    const handleContextLost = (event: Event) => {
+      console.error('🚨 WebGL context lost!');
+      event.preventDefault();
+      setWebglContextLost(true);
+    };
+
+    const handleContextRestored = (event: Event) => {
+      console.log('✅ WebGL context restored!');
+      setWebglContextLost(false);
+    };
+
+    if (canvasRef.current) {
+      canvasRef.current.addEventListener('webglcontextlost', handleContextLost);
+      canvasRef.current.addEventListener('webglcontextrestored', handleContextRestored);
+    }
+
+    return () => {
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('webglcontextlost', handleContextLost);
+        canvasRef.current.removeEventListener('webglcontextrestored', handleContextRestored);
+      }
+    };
+  }, []);
+
+  // Transform real agents from API into city artists with positions
+  const apiAgents = agents || [];
+  console.log('🤖 Using real agents from API:', apiAgents.length, 'agents loaded');
+
+  // Generate positions for real agents - spread them around the city
+  const generatePositions = (count: number) => {
+    const positions: [number, number, number][] = [];
+    const radius = 60; // Distance from center
+    
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
+      const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+      positions.push([x, 0, z]);
+    }
+    return positions;
+  };
+
+  const agentPositions = generatePositions(apiAgents.length);
+
+  // Transform API agents into roaming artists format
+  const roamingArtists = apiAgents.map((agent, index) => ({
+    id: agent.agent_id,
+    name: agent.name,
+    specialty: agent.specialty[0] || 'Digital Artist',
+    position: agentPositions[index] || [0, 0, 0],
+    color: `hsl(${(index * 137.5) % 360}, 70%, 60%)`, // Generate unique colors
+    isAIAgent: true,
+    avatar: agent.avatar,
+    description: agent.description,
+    stats: agent.stats,
+    greeting: agent.identity?.display_name 
+      ? `Hello! I'm ${agent.identity.display_name}, ${agent.description}. What would you like to create today?`
+      : `Hi! I'm ${agent.name}. Let's explore the world of ${agent.specialty[0]} together!`
+  }));
+
+  console.log('🎨 Transformed roaming artists:', roamingArtists.length);
+
+  // Handle agent focusing from URL parameters
+  useEffect(() => {
+    if (focusAgentId && shouldFocus && roamingArtists.length > 0) {
+      const targetArtist = roamingArtists.find(artist => artist.id === focusAgentId);
+      if (targetArtist) {
+        console.log('🎯 Found target artist for focus:', targetArtist.name, targetArtist.position);
+        setAgentFocusPosition(targetArtist.position);
+        
+        // Don't auto-select the artist - just position camera
+        // User should manually click to interact
+      } else {
+        console.warn('⚠️ Agent not found for focusing:', focusAgentId);
+      }
+    }
+  }, [focusAgentId, shouldFocus, roamingArtists]);
+
+  // If WebGL context is lost, show recovery screen
+  if (webglContextLost) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-black">
+        <div className="bg-black/90 backdrop-blur-xl border border-yellow-400 rounded-xl p-8 text-yellow-400 font-mono text-center shadow-lg shadow-yellow-400/25 max-w-md">
+          <div className="text-2xl font-bold mb-4">⚠️ GRAPHICS RESET</div>
+          <div className="text-lg mb-4">WebGL Context Lost</div>
+          <div className="text-sm opacity-70 mb-6">
+            The 3D graphics context was lost, usually due to GPU memory issues. This can happen with complex 3D scenes.
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 w-full"
+          >
+            🔄 Restart 3D Scene
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Handle artist interactions
   const handleArtistClick = (artist: any) => {
     console.log('🎨 Artist interaction:', artist);
     setSelectedArtist(artist);
     setIsChatMode(false);
-    setChatMessages([
-      {
-        id: Date.now().toString(),
-        sender: "artist" as const,
-        message: artist.isAIAgent && artist.greeting 
-          ? artist.greeting 
-          : `Hello! I'm ${artist.name}, a ${artist.specialty}. Welcome to Medici City! What would you like to know about art?`,
-        timestamp: new Date()
-      }
-    ]);
+    
+    // Find corresponding agent from the API data
+    const correspondingAgent = agents.find(agent => 
+      agent.name.toLowerCase().includes(artist.name.toLowerCase()) ||
+      agent.specialty.some(spec => spec.toLowerCase().includes(artist.specialty.toLowerCase()))
+    );
+    
+    if (correspondingAgent) {
+      setCurrentAgentId(correspondingAgent.agent_id);
+      console.log('🎯 Found corresponding agent:', correspondingAgent.name, correspondingAgent.agent_id);
+    } else {
+      setCurrentAgentId(null);
+      console.log('⚠️ No corresponding agent found for artist:', artist.name);
+    }
+    
+    // Clear previous chat messages
+    clearChatMessages();
+    
+    // Add initial greeting message
+    const greeting: ChatMessage = {
+      id: Date.now().toString(),
+      sender: "agent",
+      message: artist.isAIAgent && artist.greeting 
+        ? artist.greeting 
+        : `Hello! I'm ${artist.name}, a ${artist.specialty}. Welcome to Medici City! What would you like to know about art?`,
+      timestamp: new Date(),
+      agentId: correspondingAgent?.agent_id
+    };
+    
+    addChatMessage(greeting);
   };
 
-  // Handle sending chat messages
-  const handleSendMessage = () => {
+  // Handle sending chat messages with real API
+  const handleSendMessage = async () => {
     if (!chatInput.trim() || !selectedArtist) return;
 
-    const userMessage = {
-      id: Date.now().toString() + "user",
-      sender: "user" as const,
-      message: chatInput.trim(),
-      timestamp: new Date()
-    };
-
-    // Generate AI response based on artist type and specialty
-    const generateResponse = () => {
-      if (selectedArtist.type === "AI Assistant") {
-        return `As an AI curator, I can tell you about the artworks here, the history of this ${selectedArtist.isActive ? "active studio" : "gallery space"}, or help you navigate the virtual experience. What interests you most?`;
-        } else {
-        const responses = [
-          `That's a great question! As a ${selectedArtist.specialty}, I find inspiration in the intersection of traditional techniques and digital innovation.`,
-          `You know, working ${selectedArtist.homeStudio ? `at ${selectedArtist.homeStudio}` : "as an independent artist"} has really shaped my perspective on art in the digital age.`,
-          `I'd love to show you some of my techniques! Have you tried experimenting with ${selectedArtist.specialty.toLowerCase()} yourself?`,
-          `The beauty of Medici City is how we can all learn from each other. What kind of art speaks to you most?`,
-          `Technology has revolutionized how we create, but the human touch in art will always be irreplaceable. What do you think?`
-        ];
-        return responses[Math.floor(Math.random() * responses.length)];
+    // If we have a corresponding agent from the API, use real chat
+    if (currentAgentId) {
+      try {
+        console.log('🚀 Sending message to agent:', currentAgentId);
+        await chatWithAgent(currentAgentId, chatInput.trim());
+        setChatInput("");
+      } catch (error) {
+        console.error('❌ Chat error:', error);
+        // Error message is already added by the store
       }
-    };
+    } else {
+      // Fallback to mock chat for non-API artists
+      const userMessage: ChatMessage = {
+        id: Date.now().toString() + "user",
+        sender: "user",
+        message: chatInput.trim(),
+        timestamp: new Date(),
+        agentId: undefined
+      };
 
-    const artistResponse = {
-      id: Date.now().toString() + "artist",
-      sender: "artist" as const,
-      message: generateResponse(),
-      timestamp: new Date()
-    };
+      // Generate mock AI response
+      const generateResponse = () => {
+        if (selectedArtist.type === "AI Assistant") {
+          return `As an AI curator, I can tell you about the artworks here, the history of this ${selectedArtist.isActive ? "active studio" : "gallery space"}, or help you navigate the virtual experience. What interests you most?`;
+        } else {
+          const responses = [
+            `That's a great question! As a ${selectedArtist.specialty}, I find inspiration in the intersection of traditional techniques and digital innovation.`,
+            `You know, working ${selectedArtist.homeStudio ? `at ${selectedArtist.homeStudio}` : "as an independent artist"} has really shaped my perspective on art in the digital age.`,
+            `I'd love to show you some of my techniques! Have you tried experimenting with ${selectedArtist.specialty.toLowerCase()} yourself?`,
+            `The beauty of Medici City is how we can all learn from each other. What kind of art speaks to you most?`,
+            `Technology has revolutionized how we create, but the human touch in art will always be irreplaceable. What do you think?`
+          ];
+          return responses[Math.floor(Math.random() * responses.length)];
+        }
+      };
 
-    setChatMessages(prev => [...prev, userMessage, artistResponse]);
-    setChatInput("");
+      const artistResponse: ChatMessage = {
+        id: Date.now().toString() + "artist",
+        sender: "agent",
+        message: generateResponse(),
+        timestamp: new Date(),
+        agentId: undefined
+      };
+
+      addChatMessage(userMessage);
+      addChatMessage(artistResponse);
+      setChatInput("");
+    }
   };
   
   // Close pinned overlays when clicking outside - but not immediately after building clicks
@@ -365,88 +430,113 @@ export function CityScene() {
   // Find the current studio if in gallery mode
   const currentStudio = currentGalleryStudio ? studios.find(s => s.id === currentGalleryStudio) : null;
   
-  console.log('🏛️ CityScene - About to render, currentStudio:', currentStudio?.name || 'None (City mode)');
+  // Enhanced debugging for gallery mode issues
+  console.log('🏛️ CityScene - Gallery Mode Debug:');
+  console.log('  currentGalleryStudio:', currentGalleryStudio);
+  console.log('  studios.length:', studios.length);
+  console.log('  studios IDs:', studios.map(s => s.id));
+  console.log('  currentStudio found:', currentStudio?.name || 'NOT FOUND');
   
+  // Prevent gallery exit if studios haven't loaded yet but we have a gallery studio ID
+  const shouldShowGallery = currentGalleryStudio !== null;
+  
+  console.log('🏛️ CityScene - About to render, shouldShowGallery:', shouldShowGallery, 'currentStudio:', currentStudio?.name || 'None (City mode)');
+  
+  // Custom camera component for agent focusing
+  function FocusCamera({ focusPosition }: { focusPosition: [number, number, number] | null }) {
+    const { camera } = useThree();
+    
+    useEffect(() => {
+      if (focusPosition) {
+        console.log('📸 Focusing camera on position:', focusPosition);
+        // Position camera closer and at eye level for better interaction
+        const [x, y, z] = focusPosition;
+        camera.position.set(x + 3, y + 2, z + 3); // Closer to the agent
+        camera.lookAt(x, y + 1, z); // Look at the agent's center
+        camera.updateProjectionMatrix();
+      }
+    }, [focusPosition, camera]);
+    
+    return null;
+  }
+
   return (
     <div className="w-full h-screen relative">
-      {/* CLOSEABLE CONTROL HINT */}
-      {controlsVisible && (
-        <div 
-          className="absolute top-4 left-4 z-10"
-          onMouseEnter={() => setShowControls(true)}
-          onMouseLeave={() => setShowControls(false)}
-        >
-          {!showControls ? (
-            <div className="bg-black/60 backdrop-blur-sm border border-cyan-400/50 rounded-lg px-3 py-2 text-cyan-400 font-mono text-sm cursor-pointer hover:bg-black/80 transition-all flex items-center gap-2">
-              🎮 Controls
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setControlsVisible(false);
-                }}
-                className="text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded px-1 text-xs font-bold transition-all"
-                title="Close controls"
-              >
-                ✕
-              </button>
-            </div>
-          ) : (
-            <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-xl p-4 text-cyan-400 font-mono animate-in fade-in duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-lg font-bold">🎮 MEDICI CITY</div>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setControlsVisible(false);
-                  }}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded px-2 py-1 text-sm font-bold transition-all"
-                  title="Close controls"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="text-sm space-y-1">
-                <div>WASD / Arrow Keys: Move</div>
-                <div>Shift: Run</div>
-                <div>Space: Jump</div>
-                <div className="text-yellow-400 font-bold">V: Toggle First/Third Person</div>
-                <div className="text-green-400 font-bold">Mouse Wheel: Zoom</div>
-                <div className="text-green-400">+/- Keys: Keyboard Zoom</div>
-                <div className="text-pink-400 font-bold">Click Buildings to Interact!</div>
-                <div className="text-orange-400 text-xs mt-2">Studios are spread across the vast city!</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
         <Canvas
-          camera={{ position: [0, 80, 120], fov: 75 }} // Much higher and further back for wide city view
+          ref={canvasRef}
+          camera={shouldShowGallery 
+            ? { position: [0, 3, 8], fov: 60 } // Gallery mode: Positioned to watch the dancing robot, can turn to see art
+            : { position: [0, 80, 120], fov: 75 } // City mode: High and far back for wide city view
+          }
           shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
           gl={{ 
-            antialias: true, 
+            antialias: false, // Disable antialias to save memory
             toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.5,
-            outputColorSpace: THREE.SRGBColorSpace
+            toneMappingExposure: 1.0, // Reduced from 1.5 for better HDR
+            outputColorSpace: THREE.SRGBColorSpace,
+            // Add error handling and performance options
+            powerPreference: "high-performance",
+            failIfMajorPerformanceCaveat: false,
+            preserveDrawingBuffer: false,
+            stencil: false,
+            depth: true,
+            alpha: false,
+            // Add context restoration
+            logarithmicDepthBuffer: false, // Disable for better performance
           }}
           onClick={handleSceneClick}
+          onCreated={(state) => {
+            console.log('✅ Three.js Canvas created successfully');
+            const gl = state.gl.getContext();
+            console.log('🎮 WebGL Renderer info:', {
+              vendor: gl.getParameter(gl.VENDOR),
+              renderer: gl.getParameter(gl.RENDERER),
+              version: gl.getParameter(gl.VERSION),
+              maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+              maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS)
+            });
+            
+            // Set up context loss handling
+            state.gl.domElement.addEventListener('webglcontextlost', (event) => {
+              console.error('🚨 WebGL context lost during render');
+              event.preventDefault();
+              setWebglContextLost(true);
+            });
+            
+            state.gl.domElement.addEventListener('webglcontextrestored', () => {
+              console.log('✅ WebGL context restored during render');
+              setWebglContextLost(false);
+            });
+          }}
+          onError={(error) => {
+            console.error('🚨 Three.js Canvas error:', error);
+            setWebglContextLost(true);
+          }}
         >
         <Suspense fallback={<SimpleFallback />}>
           <ThreeErrorBoundary>
-            {currentStudio ? (
+            {/* Custom camera focusing for agent URLs */}
+            <FocusCamera focusPosition={agentFocusPosition} />
+            
+            {shouldShowGallery ? (
               // GALLERY MODE - Show 3D Studio Gallery
-              <StudioGallery 
-                studio={currentStudio} 
-                onLightboxOpen={(artwork, studio) => {
-                  console.log('🖼️ Lightbox triggered:', { artwork, studio });
-                  if (artwork && studio) {
-                    setLightboxData({ artwork, studio });
-                  } else {
-                    console.error('❌ Invalid lightbox data:', { artwork, studio });
-                  }
-                }}
-                onArtistClick={handleArtistClick}
-              />
+              currentStudio ? (
+                <StudioGallery 
+                  studio={currentStudio} 
+                  onLightboxOpen={(artwork, studio) => {
+                    console.log('🖼️ Lightbox triggered:', { artwork, studio });
+                    if (artwork && studio) {
+                      setLightboxData({ artwork, studio });
+                    } else {
+                      console.error('❌ Invalid lightbox data:', { artwork, studio });
+                    }
+                  }}
+                  onArtistClick={handleArtistClick}
+                />
+              ) : (
+                // Show loading state while waiting for studios to load
+                <SimpleFallback />
+              )
             ) : (
               // CITY MODE - Show main cyberpunk city
               <>
@@ -467,29 +557,18 @@ export function CityScene() {
                     'the_neko_stop-off__-_hand-painted_diorama.glb'
                   ];
                   
-                  // Spread studios in a larger area with enough room
-                  const studioPositions = [
-                    [-80, 0, -60],   // Far northwest
-                    [90, 0, -50],    // Far northeast  
-                    [0, 0, 100],     // Far south
-                    [-70, 0, 80],    // Southwest
-                    [80, 0, 70],     // Southeast
-                    [-100, 0, 0],    // Far west
-                    [60, 0, -90],    // North
-                    [-40, 0, -80]    // Northwest
-                  ];
-                  
+                  // Use the studio's actual position and rotation from API data
                   const glbFile = availableBuildings[index % availableBuildings.length];
-                  const position = studioPositions[index] || [0, 0, 0];
-                  const rotation = [0, (index * Math.PI / 4) % (Math.PI * 2), 0]; // Different rotations
+                  const position = studio.position; // Use real position from API
+                  const rotation = studio.rotation; // Use real rotation from API
                   
                   return (
                     <GLBStudio 
                       key={studio.id} 
                       studio={studio} 
                       glbFile={glbFile}
-                      position={position as [number, number, number]}
-                      rotation={rotation as [number, number, number]}
+                      position={position}
+                      rotation={rotation}
                     />
                   );
                 })}
@@ -504,11 +583,12 @@ export function CityScene() {
                     initialPosition={artist.position}
                     color={artist.color}
                     onArtistClick={handleArtistClick}
+                    isFocused={focusAgentId === artist.id && shouldFocus}
                   />
                 ))}
                 
                 {/* STUDIO ARTISTS - NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
-                {studioArtists.map((artist) => (
+                {/* studioArtists.map((artist) => (
                   <RoamingArtist
                     key={artist.id}
                     artistId={artist.id}
@@ -519,7 +599,7 @@ export function CityScene() {
                     color={artist.color}
                     onArtistClick={handleArtistClick}
                   />
-                ))}
+                )) */}
                 
                 {/* ENHANCED CENTRAL PLAZA */}
                 <MysteriousContraption />
@@ -528,15 +608,8 @@ export function CityScene() {
                 <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />
                 <AgentBuilderHub position={[120, 0, 0]} hubId="builder1" />
                 
-                {/* PASTEL HOUSES - RESIDENTIAL DISTRICT - AUTOMATIC SCALING */}
-                <PastelHouse position={[30, 0, 30]} rotation={[0, 0, 0]} />
-                <PastelHouse position={[-40, 0, 25]} rotation={[0, Math.PI / 2, 0]} />
-                <PastelHouse position={[60, 0, -20]} rotation={[0, Math.PI, 0]} />
-                <PastelHouse position={[-25, 0, -35]} rotation={[0, -Math.PI / 3, 0]} />
-                <PastelHouse position={[15, 0, 65]} rotation={[0, Math.PI / 4, 0]} />
-                <PastelHouse position={[-60, 0, -15]} rotation={[0, Math.PI / 6, 0]} />
-                <PastelHouse position={[45, 0, 50]} rotation={[0, -Math.PI / 4, 0]} />
-                <PastelHouse position={[-15, 0, 70]} rotation={[0, Math.PI * 1.5, 0]} />
+                {/* REMOVED PASTEL HOUSES TO PREVENT WEBGL CONTEXT LOSS */}
+                {/* Only studio buildings remain for better stability */}
                 
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />
@@ -889,7 +962,7 @@ export function CityScene() {
                         className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className="flex items-start space-x-2 max-w-[80%]">
-                          {msg.sender === 'artist' && selectedArtist.isAIAgent && selectedArtist.avatar && (
+                          {msg.sender === 'agent' && selectedArtist.isAIAgent && selectedArtist.avatar && (
                             <img 
                               src={selectedArtist.avatar} 
                               alt={selectedArtist.name}
@@ -900,15 +973,52 @@ export function CityScene() {
                             className={`p-3 rounded-lg ${
                               msg.sender === 'user'
                                 ? 'bg-cyan-600 text-white'
+                                : msg.sender === 'system'
+                                  ? 'bg-yellow-800 text-yellow-100 border border-yellow-400/30'
                                 : selectedArtist.isAIAgent
                                   ? 'bg-gradient-to-r from-blue-800 to-purple-800 text-blue-100 border border-blue-400/30'
                                   : 'bg-gray-700 text-gray-100 border border-gray-600'
                             }`}
                           >
-                            {msg.sender === 'artist' && selectedArtist.isAIAgent && (
+                            {msg.sender === 'agent' && selectedArtist.isAIAgent && (
                               <div className="text-xs text-blue-300 mb-1 font-semibold">{selectedArtist.name}</div>
                             )}
+                            {/* Show assets if any */}
+                            {msg.assets && Object.keys(msg.assets).length > 0 && (
+                              <div className="mb-3">
+                                {Object.entries(msg.assets).map(([assetId, assetInfo]: [string, any]) => (
+                                  <div key={assetId} className="mb-2">
+                                    {assetInfo.type === 'image' && (
+                                      <div>
+                                        <img 
+                                          src={assetInfo.url} 
+                                          alt={assetInfo.prompt} 
+                                          className="max-w-full h-auto rounded-lg mb-2"
+                                        />
+                                        <p className="text-xs opacity-70">🎨 {assetInfo.prompt}</p>
+                                      </div>
+                                    )}
+                                    {assetInfo.type === 'video' && (
+                                      <div>
+                                        <video 
+                                          src={assetInfo.url} 
+                                          controls 
+                                          className="max-w-full h-auto rounded-lg mb-2"
+                                        />
+                                        <p className="text-xs opacity-70">🎬 {assetInfo.prompt}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                             <p className="text-sm">{msg.message}</p>
+                            {/* Show tools used if any */}
+                            {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs opacity-70">🛠️ Tools: {msg.toolsUsed.join(', ')}</p>
+                              </div>
+                            )}
                             <p className="text-xs opacity-70 mt-1">
                               {msg.timestamp.toLocaleTimeString()}
                             </p>
@@ -916,6 +1026,31 @@ export function CityScene() {
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Show typing indicator when chat is loading */}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="flex items-start space-x-2 max-w-[80%]">
+                          {selectedArtist.isAIAgent && selectedArtist.avatar && (
+                            <img 
+                              src={selectedArtist.avatar} 
+                              alt={selectedArtist.name}
+                              className="w-8 h-8 rounded-full object-cover border border-cyan-400"
+                            />
+                          )}
+                          <div className="bg-gradient-to-r from-blue-800 to-purple-800 text-blue-100 border border-blue-400/30 p-3 rounded-lg">
+                            <div className="flex items-center space-x-1">
+                              <div className="text-xs text-blue-300 mb-1 font-semibold">{selectedArtist.name}</div>
+                            </div>
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-blue-300 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-blue-300 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                              <div className="w-2 h-2 bg-blue-300 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Enhanced Chat Input */}
@@ -930,34 +1065,38 @@ export function CityScene() {
                           ? `Ask ${selectedArtist.name} about art, techniques, or anything creative...`
                           : `Message ${selectedArtist.name}...`
                         }
-                        className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400"
+                        disabled={chatLoading}
+                        className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <button
                         onClick={handleSendMessage}
-                        disabled={!chatInput.trim()}
+                        disabled={!chatInput.trim() || chatLoading}
                         className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors flex items-center"
                       >
                         <span className="mr-1">📤</span>
-                        Send
+                        {chatLoading ? 'Sending...' : 'Send'}
                       </button>
                     </div>
                     {selectedArtist.isAIAgent && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         <button 
                           onClick={() => setChatInput("What can you teach me about your artistic style?")}
-                          className="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full transition-colors"
+                          disabled={chatLoading}
+                          className="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           💭 Ask about style
                         </button>
                         <button 
                           onClick={() => setChatInput("Can you analyze this artwork for me?")}
-                          className="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full transition-colors"
+                          disabled={chatLoading}
+                          className="text-xs bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           🔍 Analyze art
                         </button>
                         <button 
                           onClick={() => setChatInput("What techniques would you recommend for beginners?")}
-                          className="text-xs bg-green-600/30 hover:bg-green-600/50 text-green-200 px-3 py-1 rounded-full transition-colors"
+                          disabled={chatLoading}
+                          className="text-xs bg-green-600/30 hover:bg-green-600/50 text-green-200 px-3 py-1 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           🎓 Learn techniques
                         </button>
@@ -972,4 +1111,4 @@ export function CityScene() {
       )}
     </div>
   );
-} 
+}

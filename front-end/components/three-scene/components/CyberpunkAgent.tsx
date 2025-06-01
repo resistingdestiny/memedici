@@ -4,7 +4,8 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, Float, RoundedBox, Sphere, Sparkles, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import { ScaledGLB } from "./GLBScaler";
+import { AnimatedScaledGLB } from "./GLBScaler";
+import { getModelForAgent } from "@/lib/agent-models";
 
 // Remove Text import to avoid troika-worker issues
 // import { Text } from "@react-three/drei";
@@ -210,9 +211,10 @@ export function CyberpunkAgent({ agentId, position, isActive, onAgentClick }: {
 
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
-      {/* ROBOT PLAYGROUND GLB MODEL with automatic scaling - NO LABEL */}
-      <ScaledGLB 
+      {/* ANIMATED ROBOT PLAYGROUND GLB MODEL with automatic scaling - NO LABEL */}
+      <AnimatedScaledGLB 
         glbFile="robot_playground.glb"
+        playAllAnimations={true}
         castShadow
         receiveShadow
       />

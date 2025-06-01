@@ -121,19 +121,6 @@ export function CityUI() {
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset View
           </Button>
-          {/* DEBUG BUTTON */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              console.log('🔥 DEBUG: Forcing Agent Hub panel to show');
-              const { setPinnedAgentHub } = useCityStore.getState();
-              setPinnedAgentHub(pinnedAgentHub ? null : 'hub1');
-            }}
-            className="backdrop-blur-md bg-cyan-500/20 border-cyan-400/50 text-cyan-400 hover:bg-cyan-500/30 transition-all duration-300 shadow-lg"
-          >
-            🤖 Test Agent Panel
-          </Button>
         </div>
         
         <div className="flex gap-3">
