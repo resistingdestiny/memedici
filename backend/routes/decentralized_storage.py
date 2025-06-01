@@ -15,8 +15,11 @@ class DatasetFeedbackRequest(BaseModel):
     entry_id: str
     rating: int = Field(ge=1, le=5, description="Rating from 1-5 stars")
     flags: List[str] = Field(default_factory=list, description="Issues to flag: inappropriate, low_quality, copyright_violation")
-    comments: str = Field(default="", description="Optional feedback comments")
+    comments: str = Field(default="", description="Text comments as feedback")
     helpful: bool = Field(default=True, description="Whether the response was helpful")
+    wallet_address: str = Field(..., description="User's wallet address for token payout")
+    signed_message: str = Field(..., description="Signed message containing entry_id")
+    signature: str = Field(..., description="Wallet signature of the signed_message")
 
 class ForceUploadRequest(BaseModel):
     force: bool = Field(default=True, description="Force upload even if batch size not reached")
@@ -24,15 +27,25 @@ class ForceUploadRequest(BaseModel):
 @router.post("/feedback")
 async def submit_dataset_feedback(request: DatasetFeedbackRequest):
     """Submit user feedback for a dataset entry to earn tokens."""
-    logger.info(f"📊 Dataset feedback for entry: {request.entry_id}")
+    logger.info(f"📊 Dataset feedback for entry: {request.entry_id} from wallet: {request.wallet_address}")
     
     try:
+        message_to_verify = f"feedback:{request.entry_id}"
+        
+        if not dataset_manager.verify_wallet_signature(
+            message=message_to_verify,
+            signature=request.signature, 
+            wallet_address=request.wallet_address
+        ):
+            raise HTTPException(status_code=401, detail="Invalid wallet signature")
+        
         success = dataset_manager.add_user_feedback(
             entry_id=request.entry_id,
             rating=request.rating,
             flags=request.flags,
             comments=request.comments,
-            helpful=request.helpful
+            helpful=request.helpful,
+            wallet_address=request.wallet_address
         )
         
         if success:
@@ -40,10 +53,14 @@ async def submit_dataset_feedback(request: DatasetFeedbackRequest):
                 request.rating, request.flags, request.helpful
             )
             
+            # logger.info(f"🪙 TODO: Transfer {reward_amount} tokens to {request.wallet_address}")
+            
             return {
                 "success": True,
                 "message": "Feedback submitted successfully",
                 "token_reward": reward_amount,
+                "wallet_address": request.wallet_address,
+                "payout_pending": True,
                 "feedback": {
                     "rating": request.rating,
                     "flags": request.flags,
@@ -54,6 +71,8 @@ async def submit_dataset_feedback(request: DatasetFeedbackRequest):
         else:
             raise HTTPException(status_code=404, detail="Dataset entry not found")
             
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"❌ Error submitting feedback: {e}")
         raise HTTPException(status_code=500, detail=str(e))

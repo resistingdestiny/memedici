@@ -119,6 +119,9 @@ class AgentDB(Base):
     artwork_ids = Column(JSON, default=[])  # List of artwork IDs created by this agent
     persona_evolution_history = Column(JSON, default=[])
     
+    # Blockchain Integration
+    blockchain_seed = Column(String, nullable=True)  # Random seed from blockchain
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -171,6 +174,9 @@ class AgentConfig(BaseModel):
     artworks_created: int = 0
     artwork_ids: List[str] = []  # List of artwork IDs created by this agent
     persona_evolution_history: List[Dict[str, Any]] = []
+    
+    # Blockchain Integration
+    blockchain_seed: Optional[str] = None  # Random seed from blockchain
     
     def get_system_prompt(self) -> str:
         """Get the comprehensive system prompt for this artistic agent configuration."""
@@ -329,7 +335,10 @@ class AgentRegistry:
                     interaction_count=db_agent.interaction_count,
                     artworks_created=db_agent.artworks_created,
                     artwork_ids=db_agent.artwork_ids or [],
-                    persona_evolution_history=db_agent.persona_evolution_history or []
+                    persona_evolution_history=db_agent.persona_evolution_history or [],
+                    
+                    # Blockchain Integration
+                    blockchain_seed=db_agent.blockchain_seed
                 )
                 self.agents[db_agent.id] = config
         finally:
@@ -400,6 +409,9 @@ class AgentRegistry:
                 db_agent.artwork_ids = config.artwork_ids
                 db_agent.persona_evolution_history = config.persona_evolution_history
                 db_agent.updated_at = datetime.utcnow()
+                
+                # Blockchain Integration
+                db_agent.blockchain_seed = config.blockchain_seed
             else:
                 # Create new agent with all fields
                 db_agent = AgentDB(
@@ -437,8 +449,15 @@ class AgentRegistry:
                     interaction_count=config.interaction_count,
                     artworks_created=config.artworks_created,
                     artwork_ids=config.artwork_ids,
-                    persona_evolution_history=config.persona_evolution_history
+                    persona_evolution_history=config.persona_evolution_history,
+                    
+                    # Blockchain Integration
+                    blockchain_seed=config.blockchain_seed
                 )
+                
+                # Blockchain Integration
+                db_agent.blockchain_seed = config.blockchain_seed
+                
                 session.add(db_agent)
             session.commit()
         finally:
@@ -558,7 +577,8 @@ class AgentRegistry:
             "evolution": {
                 "interaction_count": config.interaction_count,
                 "artworks_created": config.artworks_created,
-                "evolution_history": config.persona_evolution_history[-5:] if config.persona_evolution_history else []
+                "evolution_history": config.persona_evolution_history[-5:] if config.persona_evolution_history else [],
+                "blockchain_seed": config.blockchain_seed
             },
             
             # System

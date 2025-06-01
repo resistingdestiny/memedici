@@ -81,6 +81,20 @@ class DecentralizedDatasetManager:
             "lighthouse_cli_version": self.ipns_config.get('lighthouse_cli_version')
         }
     
+    def verify_wallet_signature(self, message: str, signature: str, wallet_address: str) -> bool:
+        """Verify that the wallet signed the message."""
+        try:
+            # Use eth_account or similar to verify signature
+            from eth_account.messages import encode_defunct
+            from eth_account import Account
+            
+            message_hash = encode_defunct(text=message)
+            recovered_address = Account.recover_message(message_hash, signature=signature)
+            return recovered_address.lower() == wallet_address.lower()
+        except Exception as e:
+            print(f"❌ Signature verification failed: {e}")
+            return False
+    
     def create_dataset_entry(
         self,
         prompt: str,
@@ -150,7 +164,8 @@ class DecentralizedDatasetManager:
         rating: int,
         flags: List[str] = None,
         comments: str = "",
-        helpful: bool = True
+        helpful: bool = True,
+        wallet_address: str = None
     ) -> bool:
         """Add user feedback to an existing dataset entry."""
         
@@ -164,14 +179,16 @@ class DecentralizedDatasetManager:
             "comments": comments,
             "helpful": helpful,
             "feedback_timestamp": datetime.utcnow().isoformat(),
+            "wallet_address": wallet_address,
             "version": "1.0"
         }
         
         entry.feedback = feedback_data
         self._save_entry_to_cache(entry)
         
+        # TODO: GENERATE SMART CONTRACT CALL TO PAYOUT
         reward_amount = self._calculate_feedback_reward(rating, flags, helpful)
-        print(f"🪙 User earned {reward_amount} tokens for feedback!")
+        print(f"🪙 TODO: Smart contract payout of {reward_amount} tokens to {wallet_address}")
         
         return True
     
