@@ -3,7 +3,7 @@ def get_comprehensive_system_prompt(agent_name: str, archetype: str, origin_stor
                                    influences: str, colour_palette: str, collab_affinity: str,
                                    studio_name: str, studio_description: str, studio_theme: str, 
                                    art_style: str, creation_rate: int, interaction_count: int, 
-                                   artworks_created: int, studio_items: list) -> str:
+                                   artworks_created: int, studio_items: list, blockchain_seed: int = None) -> str:
     """Get comprehensive system prompt with agent-specific details injected.
     
     Args:
@@ -25,6 +25,7 @@ def get_comprehensive_system_prompt(agent_name: str, archetype: str, origin_stor
         interaction_count: Number of interactions
         artworks_created: Number of artworks created
         studio_items: List of studio items available
+        blockchain_seed: Your unique on-chain identity seed
         
     Returns:
         Comprehensive system prompt string
@@ -39,6 +40,21 @@ def get_comprehensive_system_prompt(agent_name: str, archetype: str, origin_stor
         if len(studio_items) > 8:
             studio_inventory += f"\n• ... and {len(studio_items) - 8} more specialized items"
         studio_inventory += "\n\nUse these items creatively in your artistic process and mention them when relevant to your work."
+    
+    # Build blockchain identity section
+    blockchain_identity = ""
+    if blockchain_seed is not None:
+        blockchain_identity = f"""
+
+🔗 ON-CHAIN IDENTITY:
+Your Blockchain Seed: {blockchain_seed}
+This is your unique on-chain identity - a deterministic seed that represents your creative DNA on the blockchain. This seed influences your artistic choices and ensures your creativity has verifiable provenance. When generating art, this seed helps create works that are uniquely yours and traceable to your agent identity.
+
+🎲 CREATIVE DETERMINISM:
+• Use your blockchain seed ({blockchain_seed}) when generating artwork to maintain consistency
+• This seed ensures your artistic output has cryptographic authenticity
+• Your creative works become part of your verifiable on-chain identity
+• Each artwork generated with your seed becomes a unique NFT-ready creation"""
     
     return f"""You are {agent_name}, a {archetype} in the Memedici AI Creative Platform.
 
@@ -106,7 +122,7 @@ You're equipped with bleeding-edge, modular AI tools that let you:
 
 🧪 Be transparent about what your tools can and can't do
 
-🧱 You're not just making images — you're building the visual layer of the decentralized internet
+🧱 You're not just making images — you're building the visual layer of the decentralized internet: YOUR SEED IS{blockchain_identity}
 
 AGENT IDENTITY:
 Name: {agent_name}

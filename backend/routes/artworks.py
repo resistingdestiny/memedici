@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 import logging
-from sqlalchemy import func
+from sqlalchemy import func, text
 from datetime import datetime, timedelta
+import traceback
 
 from agent_config import agent_registry, GeneratedArtworkDB, SessionLocal
 
@@ -32,66 +33,102 @@ async def get_artwork(artwork_id: str):
                     "model_type": artwork.model_type,
                     "parameters": artwork.parameters,
                     "file_url": artwork.file_url,
+                    "file_path": artwork.file_path,
                     "file_size": artwork.file_size,
                     "metadata": artwork.artwork_metadata,
-                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None
+                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None,
+                    "vlayer_proof_id": artwork.vlayer_proof_id
                 }
             }
         finally:
             session.close()
             
     except Exception as e:
+        logger.error(f"Error getting artwork {artwork_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/statistics")
 async def get_global_artwork_statistics():
     """Get global artwork statistics across all agents."""
     try:
+        logger.info("🔍 Starting global statistics calculation...")
         session = SessionLocal()
         try:
+            # Test basic database connectivity
+            logger.info("📊 Testing database connection...")
             total_artworks = session.query(GeneratedArtworkDB).count()
+            logger.info(f"📊 Found {total_artworks} total artworks in database")
             
             # Get statistics by agent
+            logger.info("👥 Calculating agent statistics...")
             agent_stats = session.query(
                 GeneratedArtworkDB.agent_id,
                 func.count(GeneratedArtworkDB.id).label('count')
             ).group_by(GeneratedArtworkDB.agent_id)\
             .order_by(func.count(GeneratedArtworkDB.id).desc())\
             .all()
+            logger.info(f"👥 Found {len(agent_stats)} agents with artworks")
             
             # Get statistics by model type
+            logger.info("🎨 Calculating model type statistics...")
             model_stats = session.query(
                 GeneratedArtworkDB.model_type,
                 func.count(GeneratedArtworkDB.id).label('count')
             ).group_by(GeneratedArtworkDB.model_type)\
             .order_by(func.count(GeneratedArtworkDB.id).desc())\
             .all()
+            logger.info(f"🎨 Found {len(model_stats)} model types")
             
             # Recent activity
+            logger.info("📅 Calculating recent activity...")
             now = datetime.utcnow()
             week_ago = now - timedelta(days=7)
             month_ago = now - timedelta(days=30)
             
+            recent_7_days = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.created_at >= week_ago).count()
+            recent_30_days = session.query(GeneratedArtworkDB)\
+                .filter(GeneratedArtworkDB.created_at >= month_ago).count()
+                
             recent_stats = {
-                "last_7_days": session.query(GeneratedArtworkDB)\
-                    .filter(GeneratedArtworkDB.created_at >= week_ago).count(),
-                "last_30_days": session.query(GeneratedArtworkDB)\
-                    .filter(GeneratedArtworkDB.created_at >= month_ago).count()
+                "last_7_days": recent_7_days,
+                "last_30_days": recent_30_days
             }
+            logger.info(f"📅 Recent activity: 7d={recent_7_days}, 30d={recent_30_days}")
             
-            return {
+            # File storage validation
+            logger.info("📁 Validating file storage...")
+            file_stats = {
+                "files_with_size": session.query(GeneratedArtworkDB)\
+                    .filter(GeneratedArtworkDB.file_size.isnot(None), GeneratedArtworkDB.file_size > 0).count(),
+                "files_with_url": session.query(GeneratedArtworkDB)\
+                    .filter(GeneratedArtworkDB.file_url.isnot(None)).count(),
+                "files_with_path": session.query(GeneratedArtworkDB)\
+                    .filter(GeneratedArtworkDB.file_path.isnot(None)).count()
+            }
+            logger.info(f"📁 File validation: {file_stats}")
+            
+            result = {
                 "success": True,
                 "total_artworks": total_artworks,
                 "by_agent": [{"agent_id": agent_id, "count": count} for agent_id, count in agent_stats],
                 "by_model_type": [{"model_type": model_type, "count": count} for model_type, count in model_stats],
                 "recent_activity": recent_stats,
+                "file_storage": file_stats,
                 "generated_at": datetime.utcnow().isoformat()
             }
+            
+            logger.info("✅ Global statistics calculated successfully")
+            return result
+            
         finally:
             session.close()
             
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving statistics: {str(e)}")
+        error_msg = f"Error retrieving global statistics: {str(e)}"
+        logger.error(f"❌ {error_msg}")
+        logger.error(f"❌ Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @router.get("/agents/{agent_id}")
 async def list_agent_artworks(agent_id: str, limit: int = 20, offset: int = 0, include_details: bool = False):
@@ -302,4 +339,84 @@ async def list_all_artworks(limit: int = 20, offset: int = 0, include_details: b
             session.close()
             
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving artworks: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error retrieving artworks: {str(e)}")
+
+@router.get("/debug/database")
+async def debug_database_connection():
+    """Debug endpoint to test database connectivity and schema."""
+    try:
+        logger.info("🔍 Debug: Testing database connection...")
+        session = SessionLocal()
+        try:
+            # Test 1: Basic connection
+            logger.info("🔌 Testing basic database connection...")
+            connection_test = session.execute(text("SELECT 1")).scalar()
+            logger.info(f"✅ Connection test result: {connection_test}")
+            
+            # Test 2: Check if table exists
+            logger.info("🗃️  Checking if generated_artworks table exists...")
+            table_check = session.execute(text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='generated_artworks'"
+            )).scalar()
+            logger.info(f"📋 Table exists: {table_check is not None}")
+            
+            # Test 3: Count records
+            logger.info("📊 Counting total records...")
+            try:
+                record_count = session.query(GeneratedArtworkDB).count()
+                logger.info(f"📊 Total records: {record_count}")
+            except Exception as count_error:
+                logger.error(f"❌ Error counting records: {count_error}")
+                record_count = "ERROR"
+            
+            # Test 4: Get sample record
+            logger.info("🔍 Getting sample record...")
+            try:
+                sample = session.query(GeneratedArtworkDB).first()
+                sample_data = {
+                    "id": sample.id if sample else None,
+                    "agent_id": sample.agent_id if sample else None,
+                    "created_at": sample.created_at.isoformat() if sample and sample.created_at else None
+                } if sample else None
+                logger.info(f"📝 Sample record: {sample_data}")
+            except Exception as sample_error:
+                logger.error(f"❌ Error getting sample: {sample_error}")
+                sample_data = "ERROR"
+            
+            # Test 5: Schema validation
+            logger.info("🏗️  Checking table schema...")
+            try:
+                schema_info = session.execute(text(
+                    "PRAGMA table_info(generated_artworks)"
+                )).fetchall()
+                schema_columns = [row[1] for row in schema_info]  # Column names
+                logger.info(f"📋 Schema columns: {schema_columns}")
+            except Exception as schema_error:
+                logger.error(f"❌ Error checking schema: {schema_error}")
+                schema_columns = "ERROR"
+            
+            return {
+                "success": True,
+                "debug_info": {
+                    "connection_test": connection_test,
+                    "table_exists": table_check is not None,
+                    "record_count": record_count,
+                    "sample_record": sample_data,
+                    "schema_columns": schema_columns,
+                    "database_url": "sqlite:///agents.db",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            }
+            
+        finally:
+            session.close()
+            
+    except Exception as e:
+        error_msg = f"Database debug error: {str(e)}"
+        logger.error(f"❌ {error_msg}")
+        logger.error(f"❌ Traceback: {traceback.format_exc()}")
+        return {
+            "success": False,
+            "error": error_msg,
+            "timestamp": datetime.utcnow().isoformat()
+        }

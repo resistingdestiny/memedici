@@ -202,28 +202,47 @@ class DecentralizedDatasetManager:
         if not filename:
             filename = f"dataset_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
         
+        print(f"🚀 Starting IPNS upload process for file: {filename}")
+        
         try:
             # Upload to Filecoin using Python SDK
+            print(f"📝 Creating temporary file for upload...")
             with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_file:
                 json.dump(data, temp_file, indent=2)
                 temp_file_path = temp_file.name
+            
+            print(f"📤 Uploading to Filecoin via Lighthouse SDK...")
+            print(f"   📂 Temp file: {temp_file_path}")
+            print(f"   🏷️  Dataset tag: {self.dataset_tag}")
             
             upload_result = self.lighthouse.upload(source=temp_file_path, tag=self.dataset_tag)
             
             if isinstance(upload_result, dict) and 'data' in upload_result:
                 cid = upload_result['data']['Hash']
                 file_size = upload_result['data']['Size']
+                print(f"✅ Filecoin upload successful!")
+                print(f"   📋 CID: {cid}")
+                print(f"   📏 File size: {file_size} bytes")
             else:
                 raise ValueError(f"Unexpected upload result format: {upload_result}")
             
+            print(f"🗑️  Cleaning up temporary file...")
             os.remove(temp_file_path)
             
             # Always attempt IPNS publishing - this is our primary addressing method
             if self.ipns_config:
+                print(f"🌐 IPNS configuration found, attempting publication...")
+                print(f"   🔑 IPNS Name: {self.ipns_config['ipnsName']}")
+                print(f"   🆔 IPNS ID: {self.ipns_config['ipnsId']}")
+                
                 ipns_success = self._publish_to_ipns_via_cli(cid)
-                ipns_address = f"https://gateway.lighthouse.storage/ipns/{self.ipns_config['ipnsName']}"
+                ipns_address = f"https://gateway.lighthouse.storage/ipns/{self.ipns_config['ipnsId']}"
                 
                 if ipns_success:
+                    print(f"✅ IPNS publication successful!")
+                    print(f"   🔗 IPNS Address: {ipns_address}")
+                    print(f"   📍 Primary URL: {ipns_address}")
+                    
                     # IPNS is primary - return IPNS address as the main URL
                     return {
                         "success": True,
@@ -239,6 +258,8 @@ class DecentralizedDatasetManager:
                 else:
                     # IPNS failed but we still have IPFS
                     print("⚠️  IPNS publishing failed, falling back to direct IPFS")
+                    print(f"   📍 Fallback URL: https://gateway.lighthouse.storage/ipfs/{cid}")
+                    
                     return {
                         "success": True,
                         "cid": cid,
@@ -251,8 +272,23 @@ class DecentralizedDatasetManager:
                         "addressing_method": "ipfs_fallback",
                         "warning": "IPNS publishing failed"
                     }
+            else:
+                print("⚠️  No IPNS configuration found, using direct IPFS only")
+                return {
+                    "success": True,
+                    "cid": cid,
+                    "file_size": file_size,
+                    "primary_url": f"https://gateway.lighthouse.storage/ipfs/{cid}",
+                    "ipns_address": None,
+                    "direct_ipfs_url": f"https://gateway.lighthouse.storage/ipfs/{cid}",
+                    "filename": filename,
+                    "ipns_published": False,
+                    "addressing_method": "ipfs_only",
+                    "warning": "No IPNS configuration available"
+                }
                 
         except Exception as e:
+            print(f"❌ Upload and IPNS publication failed: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
@@ -470,14 +506,27 @@ class DecentralizedDatasetManager:
 
     def _start_upload_timer(self):
         """Start a background timer for automatic uploads."""
-        threading.Timer(self.upload_delay_minutes * 60, self._perform_automatic_uploads).start()
+        timer = threading.Timer(self.upload_delay_minutes * 60, self._perform_automatic_uploads)
+        timer.daemon = True  # Don't block shutdown
+        timer.start()
+        self._current_timer = timer
 
     def _perform_automatic_uploads(self):
         """Perform automatic uploads based on the timer."""
-        pending_entries = self._get_pending_entries()
-        if pending_entries:
-            self.store_batch_to_filecoin()
+        try:
+            pending_entries = self._get_pending_entries()
+            if pending_entries:
+                self.store_batch_to_filecoin()
+        except Exception as e:
+            print(f"⚠️  Automatic upload failed: {e}")
+        
+        # Schedule next timer
         self._start_upload_timer()
+
+    def cleanup_timers(self):
+        """Cancel any running timers for clean shutdown."""
+        if hasattr(self, '_current_timer') and self._current_timer:
+            self._current_timer.cancel()
 
     def _get_time_based_pending_entries(self) -> List[DatasetEntry]:
         """Get entries that are older than upload_delay_minutes and haven't been uploaded."""

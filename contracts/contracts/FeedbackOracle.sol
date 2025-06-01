@@ -11,12 +11,17 @@ import "./FeedbackRewardToken.sol";
 
 /**
  * @title FeedbackOracle
- * @dev Oracle contract that validates feedback proofs and distributes rewards
- * Uses cryptographic signatures to verify feedback authenticity and Pyth for USD pricing
+ * @dev Multi-chain oracle contract that validates feedback proofs and distributes USD-based rewards
+ * Supports FlowTestnet, HederaTestnet, and RootStockTestnet with Pyth price feeds
  */
 contract FeedbackOracle is Ownable, ReentrancyGuard {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
+    
+    // Network identifiers
+    uint256 public constant FLOW_TESTNET_CHAIN_ID = 545;
+    uint256 public constant HEDERA_TESTNET_CHAIN_ID = 296;
+    uint256 public constant ROOTSTOCK_TESTNET_CHAIN_ID = 31;
     
     // Reward token contract
     FeedbackRewardToken public immutable rewardToken;
@@ -32,18 +37,24 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     mapping(address => uint256) public userFeedbackCount;
     mapping(address => uint256) public lastFeedbackTime;
     
+    // Network-specific configurations
+    struct NetworkConfig {
+        uint256 minFeedbackInterval;
+        uint256 maxPriceAge;
+        uint256 baseRewardUSDCents;
+        uint256 qualityBonusUSDCents;
+        bytes32 nativeTokenPriceFeedId;
+        bool isActive;
+    }
+    
+    mapping(uint256 => NetworkConfig) public networkConfigs;
+    
     // Configuration
-    uint256 public constant MIN_FEEDBACK_INTERVAL = 1 hours; // Prevent spam
     uint256 public constant MAX_BATCH_SIZE = 100;
     uint256 public qualityThreshold = 7; // Out of 10 rating scale
     
-    // USD reward amounts (in cents to avoid decimals)
-    uint256 public constant BASE_REWARD_USD_CENTS = 1000; // $10.00 in cents
-    uint256 public constant QUALITY_BONUS_USD_CENTS = 500; // $5.00 in cents
-    uint256 public constant MAX_PRICE_AGE = 300; // 5 minutes max price staleness
-    
-    // Price feed ID for the native token (must be set per network)
-    bytes32 public nativeTokenPriceFeedId;
+    // Current network config (set at deployment)
+    NetworkConfig public currentConfig;
     
     // Stats
     uint256 public totalFeedbackProcessed;
@@ -79,7 +90,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     );
     event BatchFeedbackProcessed(uint256 count, uint256 totalRewardsUSD, uint256 totalRewardsNative);
     event QualityThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
-    event PriceFeedUpdated(bytes32 oldFeedId, bytes32 newFeedId);
+    event NetworkConfigUpdated(uint256 chainId, NetworkConfig config);
     event NativeRewardSent(address indexed user, uint256 amount);
     
     // Errors
@@ -95,16 +106,70 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     error InvalidPriceFeed();
     error InsufficientContractBalance();
     error NativeTransferFailed();
+    error NetworkNotSupported();
+    error NetworkNotActive();
     
     constructor(
         address rewardToken_,
         address pythContract_,
-        bytes32 nativeTokenPriceFeedId_,
         address owner_
     ) Ownable(owner_) {
         rewardToken = FeedbackRewardToken(rewardToken_);
         pyth = IPyth(pythContract_);
-        nativeTokenPriceFeedId = nativeTokenPriceFeedId_;
+        
+        // Initialize network-specific configurations
+        _initializeNetworkConfigs();
+        
+        // Set current network config based on chain ID
+        _setCurrentNetworkConfig();
+    }
+    
+    /**
+     * @dev Initialize default configurations for supported testnets
+     */
+    function _initializeNetworkConfigs() internal {
+        // Flow Testnet configuration
+        networkConfigs[FLOW_TESTNET_CHAIN_ID] = NetworkConfig({
+            minFeedbackInterval: 1 hours,
+            maxPriceAge: 300, // 5 minutes
+            baseRewardUSDCents: 1000, // $10.00
+            qualityBonusUSDCents: 500, // $5.00
+            nativeTokenPriceFeedId: 0x2fb245b9a84554a0f15aa123cbb5f64cd263b59e9a80929a2bbb0bc98b40010b, // FLOW/USD from Pyth
+            isActive: true
+        });
+        
+        // Hedera Testnet configuration
+        networkConfigs[HEDERA_TESTNET_CHAIN_ID] = NetworkConfig({
+            minFeedbackInterval: 1 hours,
+            maxPriceAge: 300, // 5 minutes
+            baseRewardUSDCents: 1000, // $10.00
+            qualityBonusUSDCents: 500, // $5.00
+            nativeTokenPriceFeedId: 0xf2fb7c5e3f75cefc890d52be7c03af6030284137e19d30d54442aca9de250c84, // HBAR/USD from Pyth
+            isActive: true
+        });
+        
+        // Rootstock Testnet configuration (uses BTC pricing)
+        networkConfigs[ROOTSTOCK_TESTNET_CHAIN_ID] = NetworkConfig({
+            minFeedbackInterval: 1 hours,
+            maxPriceAge: 300, // 5 minutes
+            baseRewardUSDCents: 1000, // $10.00
+            qualityBonusUSDCents: 500, // $5.00
+            nativeTokenPriceFeedId: 0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43, // BTC/USD from Pyth
+            isActive: true
+        });
+    }
+    
+    /**
+     * @dev Set current network configuration based on chain ID
+     */
+    function _setCurrentNetworkConfig() internal {
+        uint256 chainId = block.chainid;
+        
+        if (!networkConfigs[chainId].isActive) {
+            revert NetworkNotSupported();
+        }
+        
+        currentConfig = networkConfigs[chainId];
     }
     
     /**
@@ -120,7 +185,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         if (proof.timestamp > block.timestamp) revert InvalidProof();
         
         // Check rate limiting
-        if (block.timestamp - lastFeedbackTime[proof.user] < MIN_FEEDBACK_INTERVAL) {
+        if (block.timestamp - lastFeedbackTime[proof.user] < currentConfig.minFeedbackInterval) {
             revert RateLimitExceeded();
         }
         
@@ -148,8 +213,9 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         // Determine if quality bonus applies
         bool qualityBonus = proof.qualityRating >= qualityThreshold;
         
-        // Calculate USD reward amount
-        uint256 usdRewardCents = BASE_REWARD_USD_CENTS + (qualityBonus ? QUALITY_BONUS_USD_CENTS : 0);
+        // Calculate USD reward amount using current network config
+        uint256 usdRewardCents = currentConfig.baseRewardUSDCents + 
+            (qualityBonus ? currentConfig.qualityBonusUSDCents : 0);
         
         // Mint ERC20 reward tokens (existing system)
         rewardToken.mintFeedbackReward(proof.user, qualityBonus);
@@ -231,7 +297,8 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
             qualityBonuses[i] = qualityBonus;
             
             // Calculate rewards
-            uint256 usdRewardCents = BASE_REWARD_USD_CENTS + (qualityBonus ? QUALITY_BONUS_USD_CENTS : 0);
+            uint256 usdRewardCents = currentConfig.baseRewardUSDCents + 
+                (qualityBonus ? currentConfig.qualityBonusUSDCents : 0);
             uint256 nativeAmount = _calculateNativeTokenAmount(nativeTokenPrice, usdRewardCents);
             
             // Send native token reward
@@ -284,7 +351,8 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         // Send native token reward
         _sendNativeReward(proof.user, nativeTokenAmount);
         
-        uint256 usdRewardCents = BASE_REWARD_USD_CENTS + (qualityBonus ? QUALITY_BONUS_USD_CENTS : 0);
+        uint256 usdRewardCents = currentConfig.baseRewardUSDCents + 
+            (qualityBonus ? currentConfig.qualityBonusUSDCents : 0);
         
         totalFeedbackProcessed++;
         totalRewardsDistributedUSD += usdRewardCents;
@@ -387,7 +455,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         uint256 nextAllowedFeedback
     ) {
         uint256 lastTime = lastFeedbackTime[user];
-        uint256 nextAllowed = lastTime + MIN_FEEDBACK_INTERVAL;
+        uint256 nextAllowed = lastTime + currentConfig.minFeedbackInterval;
         
         return (
             userFeedbackCount[user],
@@ -424,7 +492,8 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         PythStructs.Price memory nativeTokenPrice = _updatePriceFeeds(priceUpdateData);
         
         // Calculate USD reward amount
-        uint256 usdRewardCents = BASE_REWARD_USD_CENTS + (qualityBonus ? QUALITY_BONUS_USD_CENTS : 0);
+        uint256 usdRewardCents = currentConfig.baseRewardUSDCents + 
+            (qualityBonus ? currentConfig.qualityBonusUSDCents : 0);
         
         // Convert to native token amount
         nativeTokenAmount = _calculateNativeTokenAmount(nativeTokenPrice, usdRewardCents);
@@ -436,6 +505,12 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
      * @dev Update Pyth price feeds
      */
     function _updatePriceFeeds(bytes[] calldata priceUpdateData) internal returns (PythStructs.Price memory) {
+        // Special handling for Rootstock - use fixed price if Pyth data unavailable
+        if (block.chainid == ROOTSTOCK_TESTNET_CHAIN_ID) {
+            return _getRootStockPrice(priceUpdateData);
+        }
+        
+        // For Flow and Hedera, use standard Pyth price feeds
         // Calculate the fee for updating the price feeds
         uint256 updateFee = pyth.getUpdateFee(priceUpdateData);
         
@@ -446,9 +521,40 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         pyth.updatePriceFeeds{value: updateFee}(priceUpdateData);
         
         // Get the current price of the native token
-        PythStructs.Price memory price = pyth.getPriceNoOlderThan(nativeTokenPriceFeedId, MAX_PRICE_AGE);
+        PythStructs.Price memory price = pyth.getPriceNoOlderThan(currentConfig.nativeTokenPriceFeedId, currentConfig.maxPriceAge);
         
         return price;
+    }
+    
+    /**
+     * @dev Handle Rootstock price with fixed fallback
+     */
+    function _getRootStockPrice(bytes[] calldata priceUpdateData) internal returns (PythStructs.Price memory) {
+        try pyth.getPriceUnsafe(currentConfig.nativeTokenPriceFeedId) returns (PythStructs.Price memory price) {
+            // Check if the price data is valid
+            if (price.price > 0 && price.expo != 0 && price.publishTime > 0) {
+                // Valid Pyth data available, try to update if data provided
+                if (priceUpdateData.length > 0) {
+                    try pyth.updatePriceFeeds{value: msg.value}(priceUpdateData) {
+                        // Update successful, get fresh price
+                        price = pyth.getPriceNoOlderThan(currentConfig.nativeTokenPriceFeedId, currentConfig.maxPriceAge);
+                    } catch {
+                        // Update failed, use unsafe price
+                    }
+                }
+                return price;
+            }
+        } catch {
+            // Pyth call failed, use fixed price
+        }
+        
+        // Fallback to fixed BTC price: $100,000 USD with -8 exponent
+        return PythStructs.Price({
+            price: 10000000000000, // $100,000 with 8 decimal places
+            conf: 100000000, // $1,000 confidence interval
+            expo: -8,
+            publishTime: block.timestamp
+        });
     }
     
     /**
@@ -501,42 +607,6 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     }
     
     /**
-     * @dev Set the price feed ID for the native token (admin only)
-     */
-    function setPriceFeedId(bytes32 newPriceFeedId) external onlyOwner {
-        bytes32 oldFeedId = nativeTokenPriceFeedId;
-        nativeTokenPriceFeedId = newPriceFeedId;
-        emit PriceFeedUpdated(oldFeedId, newPriceFeedId);
-    }
-    
-    /**
-     * @dev Fund the contract with native tokens for rewards
-     */
-    function fundContract() external payable {
-        // Accept any amount of native tokens
-        require(msg.value > 0, "Must send native tokens");
-    }
-    
-    /**
-     * @dev Withdraw native tokens from contract (admin only)
-     */
-    function withdrawNativeTokens(uint256 amount) external onlyOwner {
-        if (address(this).balance < amount) revert InsufficientContractBalance();
-        
-        (bool success, ) = payable(owner()).call{value: amount}("");
-        if (!success) revert NativeTransferFailed();
-    }
-    
-    /**
-     * @dev Emergency withdraw all native tokens (admin only)
-     */
-    function emergencyWithdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-        (bool success, ) = payable(owner()).call{value: balance}("");
-        if (!success) revert NativeTransferFailed();
-    }
-    
-    /**
      * @dev Get current native token price from Pyth (view function)
      */
     function getCurrentNativeTokenPrice() external view returns (
@@ -545,7 +615,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         int32 expo,
         uint256 publishTime
     ) {
-        PythStructs.Price memory priceData = pyth.getPriceUnsafe(nativeTokenPriceFeedId);
+        PythStructs.Price memory priceData = pyth.getPriceUnsafe(currentConfig.nativeTokenPriceFeedId);
         return (priceData.price, priceData.conf, priceData.expo, priceData.publishTime);
     }
     
@@ -558,7 +628,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         int32 expo
     ) external view returns (uint256 usdRewardCents, uint256 nativeTokenAmount) {
         bool qualityBonus = qualityRating >= 7; // Use hardcoded threshold for view
-        usdRewardCents = BASE_REWARD_USD_CENTS + (qualityBonus ? QUALITY_BONUS_USD_CENTS : 0);
+        usdRewardCents = currentConfig.baseRewardUSDCents + (qualityBonus ? currentConfig.qualityBonusUSDCents : 0);
         
         if (nativeTokenPrice <= 0) return (usdRewardCents, 0);
         
@@ -612,5 +682,55 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         remainingFunding = nativeBalance;
         
         return (nativeBalance, totalDistributedNative, remainingFunding);
+    }
+    
+    /**
+     * @dev Update network configuration for a specific chain
+     */
+    function updateNetworkConfig(
+        uint256 chainId,
+        NetworkConfig calldata config
+    ) external onlyOwner {
+        networkConfigs[chainId] = config;
+        
+        // Update current config if it's for the current chain
+        if (chainId == block.chainid) {
+            currentConfig = config;
+        }
+        
+        emit NetworkConfigUpdated(chainId, config);
+    }
+    
+    /**
+     * @dev Get network configuration for a specific chain
+     */
+    function getNetworkConfig(uint256 chainId) external view returns (NetworkConfig memory) {
+        return networkConfigs[chainId];
+    }
+    
+    /**
+     * @dev Fund the contract with native tokens for rewards
+     */
+    function fundContract() external payable {
+        require(msg.value > 0, "Must send native tokens");
+    }
+    
+    /**
+     * @dev Withdraw native tokens from contract (admin only)
+     */
+    function withdrawNativeTokens(uint256 amount) external onlyOwner {
+        if (address(this).balance < amount) revert InsufficientContractBalance();
+        
+        (bool success, ) = payable(owner()).call{value: amount}("");
+        if (!success) revert NativeTransferFailed();
+    }
+    
+    /**
+     * @dev Emergency withdraw all native tokens (admin only)
+     */
+    function emergencyWithdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        if (!success) revert NativeTransferFailed();
     }
 } 

@@ -85,12 +85,9 @@ async def create_agent(request: CreateAgentRequest):
     try:
         config = request.config
         
-        # Require studio_id to be provided
+        # Use default studio if none provided
         if not config.studio_id:
-            raise HTTPException(
-                status_code=400, 
-                detail="studio_id is required. Please provide a valid studio_id or create a studio first."
-            )
+            config.studio_id = "singularity_sketchroom"
         
         # Verify the studio exists
         studio = agent_registry.get_studio(config.studio_id)
@@ -145,12 +142,9 @@ async def create_agent_with_upload(
         # Create AgentConfig object
         config = AgentConfig(**config_dict)
         
-        # Require studio_id to be provided
+        # Use default studio if none provided
         if not config.studio_id:
-            raise HTTPException(
-                status_code=400, 
-                detail="studio_id is required. Please provide a valid studio_id or create a studio first."
-            )
+            config.studio_id = "singularity_sketchroom"
         
         # Verify the studio exists
         studio = agent_registry.get_studio(config.studio_id)

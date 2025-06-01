@@ -53,6 +53,7 @@ class GeneratedArtworkDB(Base):
     file_url = Column(String, nullable=False)
     file_size = Column(Integer, nullable=True)
     artwork_metadata = Column(JSON, default={})  # additional metadata (renamed from metadata)
+    vlayer_proof_id = Column(String, nullable=True)  # vlayer content authenticity proof ID
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -224,7 +225,8 @@ class AgentConfig(BaseModel):
             creation_rate=self.creation_rate,
             interaction_count=self.interaction_count,
             artworks_created=self.artworks_created,
-            studio_items=studio_items
+            studio_items=studio_items,
+            blockchain_seed=self.blockchain_seed
         )
 
         return base_prompt

@@ -40,6 +40,27 @@ class AgentResponse(BaseModel):
         description="Dictionary of created assets keyed by asset ID"
     )
     
+    def model_dump(self, **kwargs):
+        """Override model_dump to ensure AssetInfo objects are properly serialized."""
+        data = super().model_dump(**kwargs)
+        
+        # Convert AssetInfo objects to dictionaries for JSON serialization
+        if "assets" in data and isinstance(data["assets"], dict):
+            serialized_assets = {}
+            for asset_id, asset_info in data["assets"].items():
+                if hasattr(asset_info, 'model_dump'):
+                    # It's a Pydantic model
+                    serialized_assets[asset_id] = asset_info.model_dump()
+                elif isinstance(asset_info, dict):
+                    # It's already a dict
+                    serialized_assets[asset_id] = asset_info
+                else:
+                    # Convert to dict if possible
+                    serialized_assets[asset_id] = asset_info.__dict__ if hasattr(asset_info, '__dict__') else asset_info
+            data["assets"] = serialized_assets
+        
+        return data
+    
     @classmethod
     def get_json_schema(cls):
         """Get the JSON schema for this model"""
@@ -132,7 +153,8 @@ class LangGraphAgentManager:
         from agent_tools import get_agent_aware_tools, custom_tool_manager
         
         # Get standard agent-aware tools (these know about the agent context)
-        enabled_tools = get_agent_aware_tools(config.id)
+        # Pass blockchain_seed to tools for deterministic generation
+        enabled_tools = get_agent_aware_tools(config.id, blockchain_seed=getattr(config, 'blockchain_seed', None))
         logger.info(f"🔧 Standard tools loaded: {[t.name for t in enabled_tools]}")
         
         # Filter based on agent's enabled tools

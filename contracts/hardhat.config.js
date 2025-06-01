@@ -5,6 +5,11 @@ require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("dotenv").config();
 
+// Pyth Oracle Contract Addresses for different networks
+// Flow Testnet: 0x2880aB155794e7179c9eE2e38200202908C17B43
+// Hedera Testnet: 0xa2aa501b19aff244d90cc15a4cf739d2725b5729  
+// Rootstock Testnet: 0x4305FB66699C3B2702D4d05CF36551390A4c69C6 (with fixed price fallback)
+//
 // Entropy Contract Addresses for different networks
 // These addresses will be used in the deployment script
 // Refer to: https://docs.pyth.network/entropy/contract-addresses
@@ -38,7 +43,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 100,
+        runs: 1,
       },
       viaIR: true,
       metadata: {

@@ -134,7 +134,7 @@
               "label": "_delegateCheckpoints",
               "offset": 0,
               "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Trace208)8700_storage)",
+              "type": "t_mapping(t_address,t_struct(Trace208)8592_storage)",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:40"
             },
@@ -142,7 +142,7 @@
               "label": "_totalCheckpoints",
               "offset": 0,
               "slot": "5",
-              "type": "t_struct(Trace208)8700_storage",
+              "type": "t_struct(Trace208)8592_storage",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:42"
             }
@@ -152,7 +152,7 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage": {
+            "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage": {
               "label": "struct Checkpoints.Checkpoint208[]",
               "numberOfBytes": "32"
             },
@@ -160,7 +160,7 @@
               "label": "mapping(address => address)",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_struct(Trace208)8700_storage)": {
+            "t_mapping(t_address,t_struct(Trace208)8592_storage)": {
               "label": "mapping(address => struct Checkpoints.Trace208)",
               "numberOfBytes": "32"
             },
@@ -172,7 +172,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Checkpoint208)8705_storage": {
+            "t_struct(Checkpoint208)8597_storage": {
               "label": "struct Checkpoints.Checkpoint208",
               "members": [
                 {
@@ -190,12 +190,12 @@
               ],
               "numberOfBytes": "32"
             },
-            "t_struct(Trace208)8700_storage": {
+            "t_struct(Trace208)8592_storage": {
               "label": "struct Checkpoints.Trace208",
               "members": [
                 {
                   "label": "_checkpoints",
-                  "type": "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage",
+                  "type": "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage",
                   "offset": 0,
                   "slot": "0"
                 }
@@ -672,7 +672,7 @@
               "label": "_delegateCheckpoints",
               "offset": 0,
               "slot": "9",
-              "type": "t_mapping(t_address,t_struct(Trace208)8700_storage)",
+              "type": "t_mapping(t_address,t_struct(Trace208)8592_storage)",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:40"
             },
@@ -680,7 +680,7 @@
               "label": "_totalCheckpoints",
               "offset": 0,
               "slot": "10",
-              "type": "t_struct(Trace208)8700_storage",
+              "type": "t_struct(Trace208)8592_storage",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:42"
             }
@@ -690,7 +690,7 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage": {
+            "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage": {
               "label": "struct Checkpoints.Checkpoint208[]",
               "numberOfBytes": "32"
             },
@@ -702,7 +702,7 @@
               "label": "mapping(address => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_struct(Trace208)8700_storage)": {
+            "t_mapping(t_address,t_struct(Trace208)8592_storage)": {
               "label": "mapping(address => struct Checkpoints.Trace208)",
               "numberOfBytes": "32"
             },
@@ -714,7 +714,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Checkpoint208)8705_storage": {
+            "t_struct(Checkpoint208)8597_storage": {
               "label": "struct Checkpoints.Checkpoint208",
               "members": [
                 {
@@ -732,12 +732,12 @@
               ],
               "numberOfBytes": "32"
             },
-            "t_struct(Trace208)8700_storage": {
+            "t_struct(Trace208)8592_storage": {
               "label": "struct Checkpoints.Trace208",
               "members": [
                 {
                   "label": "_checkpoints",
-                  "type": "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage",
+                  "type": "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage",
                   "offset": 0,
                   "slot": "0"
                 }
@@ -878,40 +878,6 @@
           "types": {},
           "layoutVersion": "1.2",
           "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@openzeppelin/contracts/utils/Pausable.sol:Pausable": {
-        "src": "@openzeppelin/contracts/utils/Pausable.sol:17",
-        "inherit": [
-          "@openzeppelin/contracts/utils/Context.sol:Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "paused()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "_paused",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_bool",
-              "contract": "Pausable",
-              "src": "@openzeppelin/contracts/utils/Pausable.sol:18"
-            }
-          ],
-          "types": {
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
           "namespaces": {}
         },
         "solcVersion": "0.8.20"
@@ -1233,133 +1199,55 @@
         },
         "solcVersion": "0.8.20"
       },
-      "@pythnetwork/pyth-sdk-solidity/IPyth.sol:IPyth": {
-        "src": "@pythnetwork/pyth-sdk-solidity/IPyth.sol:10",
-        "inherit": [
-          "@pythnetwork/pyth-sdk-solidity/IPythEvents.sol:IPythEvents"
-        ],
-        "libraries": [],
-        "methods": [
-          "getPriceUnsafe(bytes32)",
-          "getPriceNoOlderThan(bytes32,uint256)",
-          "getEmaPriceUnsafe(bytes32)",
-          "getEmaPriceNoOlderThan(bytes32,uint256)",
-          "updatePriceFeeds(bytes[])",
-          "updatePriceFeedsIfNecessary(bytes[],bytes32[],uint64[])",
-          "getUpdateFee(bytes[])",
-          "parsePriceFeedUpdates(bytes[],bytes32[],uint64,uint64)",
-          "parseTwapPriceFeedUpdates(bytes[],bytes32[])",
-          "parsePriceFeedUpdatesUnique(bytes[],bytes32[],uint64,uint64)",
-          "parsePriceFeedUpdatesWithSlots(bytes[],bytes32[],uint64,uint64)"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@pythnetwork/pyth-sdk-solidity/IPythEvents.sol:IPythEvents": {
-        "src": "@pythnetwork/pyth-sdk-solidity/IPythEvents.sol:6",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@pythnetwork/pyth-sdk-solidity/PythStructs.sol:PythStructs": {
-        "src": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol:4",
+      "contracts/AgentLaunchpadCoreV2Ultra.sol:AgentLaunchpadCoreV2Ultra": {
+        "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:12",
         "version": {
-          "withMetadata": "7671073bc0304a45d8d07ed9372b4fcf5a1febbb0cf2898d5668ebf8f8060fa2",
-          "withoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42",
-          "linkedWithoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/AgentLaunchpad.sol:AgentLaunchpad": {
-        "src": "contracts/AgentLaunchpad.sol:33",
-        "version": {
-          "withMetadata": "9f7f7a554af720da8215514d17eb7e1417cf4bb241bbd9093e82913d54e7b649",
-          "withoutMetadata": "b137807c62678cc5e27c10b94aea21008fb9882ba6b67f6f8652c7c05fce4c9d",
-          "linkedWithoutMetadata": "b137807c62678cc5e27c10b94aea21008fb9882ba6b67f6f8652c7c05fce4c9d"
+          "withMetadata": "a276396e0c5c821204916df4ae86296874d2b88bbccf51be3ad68cf8b115639c",
+          "withoutMetadata": "9efdbbf9e6bc37d7b1895f62050233fd7cbdd33847fcc0e07a051dc17614b76f",
+          "linkedWithoutMetadata": "9efdbbf9e6bc37d7b1895f62050233fd7cbdd33847fcc0e07a051dc17614b76f"
         },
         "inherit": [
-          "@openzeppelin/contracts/utils/Pausable.sol:Pausable",
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
           "@openzeppelin/contracts/access/Ownable.sol:Ownable",
           "@openzeppelin/contracts/utils/Context.sol:Context"
         ],
         "libraries": [],
         "methods": [
-          "(address,address)",
+          "(address)",
           "createAgent(string,string,string,string,string,uint256,uint256,string)",
           "contribute(uint256)",
-          "withdrawContribution(uint256)",
-          "bondAgent(uint256)",
-          "cancelAgent(uint256,string)",
-          "setTreasuryAddress(address)",
-          "setUniswapRouter(address)",
-          "setProtocolFeePercentage(uint256)",
-          "pauseLaunchpad()",
-          "unpauseLaunchpad()",
-          "getAgentInfo(uint256)",
-          "getAgentDetails(uint256)",
-          "getAgentConfigJSON(uint256)",
-          "getContribution(uint256,address)",
-          "getUserAgents(address)",
-          "getCurrentAgentId()",
-          "isFundingComplete(uint256)",
-          "getLiquidityPool(uint256)",
-          "hasSeed(uint256)",
-          "isAgentBonded(uint256)",
-          "emergencyWithdraw()",
+          "getAllBondedTokens()",
+          "getAgent(uint256)",
+          "getAgentByToken(address)",
+          "isBonded(uint256)",
+          "getLp(uint256)",
+          "setAmm(address)",
+          "setTreasury(address)",
+          "setFee(uint256)",
+          "withdraw()",
           "()"
         ],
         "linkReferences": [],
         "errors": [
           {
             "kind": "constructor",
-            "contract": "AgentLaunchpad",
-            "src": "contracts/AgentLaunchpad.sol:127"
+            "contract": "AgentLaunchpadCoreV2Ultra",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:48"
           },
           {
             "kind": "state-variable-assignment",
-            "name": "protocolFeePercentage",
-            "src": "contracts/AgentLaunchpad.sol:66"
+            "name": "fee",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:40"
           },
           {
             "kind": "state-variable-assignment",
-            "name": "defaultLiquidityPercentage",
-            "src": "contracts/AgentLaunchpad.sol:71"
+            "name": "lpPercent",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:41"
           },
           {
             "kind": "state-variable-assignment",
-            "name": "defaultTokenLPPercentage",
-            "src": "contracts/AgentLaunchpad.sol:72"
+            "name": "tokenLpPercent",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:42"
           }
         ],
         "layout": {
@@ -1381,84 +1269,92 @@
               "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
             },
             {
-              "label": "_paused",
+              "label": "_counter",
               "offset": 0,
               "slot": "2",
-              "type": "t_bool",
-              "contract": "Pausable",
-              "src": "@openzeppelin/contracts/utils/Pausable.sol:18"
-            },
-            {
-              "label": "_agentIdCounter",
-              "offset": 0,
-              "slot": "3",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:58"
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:30"
             },
             {
               "label": "agents",
               "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_uint256,t_struct(AgentConfig)10345_storage)",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:59"
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(Agent)9960_storage)",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:31"
             },
             {
               "label": "contributions",
               "offset": 0,
-              "slot": "5",
+              "slot": "4",
               "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:60"
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:32"
             },
             {
-              "label": "userAgents",
+              "label": "bondedIds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:34"
+            },
+            {
+              "label": "inProgressIds",
               "offset": 0,
               "slot": "6",
-              "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:61"
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:35"
             },
             {
-              "label": "treasuryAddress",
+              "label": "tokenToAgent",
               "offset": 0,
               "slot": "7",
-              "type": "t_address",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:64"
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:36"
             },
             {
-              "label": "uniswapRouter",
+              "label": "treasury",
               "offset": 0,
               "slot": "8",
               "type": "t_address",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:65"
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:38"
             },
             {
-              "label": "protocolFeePercentage",
+              "label": "amm",
               "offset": 0,
               "slot": "9",
-              "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:66"
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:39"
             },
             {
-              "label": "defaultLiquidityPercentage",
+              "label": "fee",
               "offset": 0,
               "slot": "10",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:71"
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:40"
             },
             {
-              "label": "defaultTokenLPPercentage",
+              "label": "lpPercent",
               "offset": 0,
               "slot": "11",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:72"
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:41"
+            },
+            {
+              "label": "tokenLpPercent",
+              "offset": 0,
+              "slot": "12",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:42"
             }
           ],
           "types": {
@@ -1474,10 +1370,6 @@
               "label": "bool",
               "numberOfBytes": "1"
             },
-            "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
-              "label": "mapping(address => uint256[])",
-              "numberOfBytes": "32"
-            },
             "t_mapping(t_address,t_uint256)": {
               "label": "mapping(address => uint256)",
               "numberOfBytes": "32"
@@ -1486,16 +1378,16 @@
               "label": "mapping(uint256 => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_uint256,t_struct(AgentConfig)10345_storage)": {
-              "label": "mapping(uint256 => struct AgentLaunchpad.AgentConfig)",
+            "t_mapping(t_uint256,t_struct(Agent)9960_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCoreV2Ultra.Agent)",
               "numberOfBytes": "32"
             },
             "t_string_storage": {
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(AgentConfig)10345_storage": {
-              "label": "struct AgentLaunchpad.AgentConfig",
+            "t_struct(Agent)9960_storage": {
+              "label": "struct AgentLaunchpadCoreV2Ultra.Agent",
               "members": [
                 {
                   "label": "name",
@@ -1516,334 +1408,67 @@
                   "slot": "2"
                 },
                 {
-                  "label": "archetype",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "3"
-                },
-                {
-                  "label": "metadataURI",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "4"
-                },
-                {
                   "label": "fundingTarget",
                   "type": "t_uint256",
                   "offset": 0,
-                  "slot": "5"
+                  "slot": "3"
                 },
                 {
                   "label": "tokenSupply",
                   "type": "t_uint256",
                   "offset": 0,
-                  "slot": "6"
-                },
-                {
-                  "label": "liquidityTokens",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "7"
-                },
-                {
-                  "label": "treasuryTokens",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "8"
+                  "slot": "4"
                 },
                 {
                   "label": "creator",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "9"
+                  "slot": "5"
                 },
                 {
                   "label": "isBonded",
                   "type": "t_bool",
                   "offset": 20,
-                  "slot": "9"
-                },
-                {
-                  "label": "isCancelled",
-                  "type": "t_bool",
-                  "offset": 21,
-                  "slot": "9"
+                  "slot": "5"
                 },
                 {
                   "label": "totalRaised",
                   "type": "t_uint256",
                   "offset": 0,
-                  "slot": "10"
-                },
-                {
-                  "label": "createdAt",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "11"
+                  "slot": "6"
                 },
                 {
                   "label": "tokenAddress",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "12"
+                  "slot": "7"
                 },
                 {
                   "label": "lpPairAddress",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "13"
-                },
-                {
-                  "label": "seed",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "14"
-                },
-                {
-                  "label": "agentConfigJSON",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "15"
-                }
-              ],
-              "numberOfBytes": "512"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/AgentLaunchpad.sol:IUniswapV2Factory": {
-        "src": "contracts/AgentLaunchpad.sol:24",
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "createPair(address,address)",
-          "getPair(address,address)"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/AgentLaunchpad.sol:IUniswapV2Router02": {
-        "src": "contracts/AgentLaunchpad.sol:10",
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "addLiquidityETH(address,uint256,uint256,uint256,address,uint256)",
-          "factory()",
-          "WETH()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/AgentLaunchpadMinimal.sol:AgentLaunchpadMinimal": {
-        "src": "contracts/AgentLaunchpadMinimal.sol:12",
-        "version": {
-          "withMetadata": "debfbf56d876657b1f44dfc71b2a616362bce22c090a8fe4a06347df3fdfb0ae",
-          "withoutMetadata": "404c49a1bb365f0967d1ed719697cf55dfafe4831ec018446b86ab8622bd9899",
-          "linkedWithoutMetadata": "404c49a1bb365f0967d1ed719697cf55dfafe4831ec018446b86ab8622bd9899"
-        },
-        "inherit": [
-          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
-          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
-          "@openzeppelin/contracts/utils/Context.sol:Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "(address)",
-          "createAgent(string,string,string,uint256,uint256,string)",
-          "contribute(uint256)",
-          "getAgentInfo(uint256)",
-          "getAgentConfigJSON(uint256)",
-          "getCurrentAgentId()",
-          "isAgentBonded(uint256)",
-          "setTreasuryAddress(address)",
-          "getContribution(uint256,address)"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "AgentLaunchpadMinimal",
-            "src": "contracts/AgentLaunchpadMinimal.sol:66"
-          },
-          {
-            "kind": "state-variable-assignment",
-            "name": "protocolFeePercentage",
-            "src": "contracts/AgentLaunchpadMinimal.sol:35"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
-            },
-            {
-              "label": "_status",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_uint256",
-              "contract": "ReentrancyGuard",
-              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
-            },
-            {
-              "label": "_agentIdCounter",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_uint256",
-              "contract": "AgentLaunchpadMinimal",
-              "src": "contracts/AgentLaunchpadMinimal.sol:29"
-            },
-            {
-              "label": "agents",
-              "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_uint256,t_struct(AgentConfig)11645_storage)",
-              "contract": "AgentLaunchpadMinimal",
-              "src": "contracts/AgentLaunchpadMinimal.sol:30"
-            },
-            {
-              "label": "contributions",
-              "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
-              "contract": "AgentLaunchpadMinimal",
-              "src": "contracts/AgentLaunchpadMinimal.sol:31"
-            },
-            {
-              "label": "treasuryAddress",
-              "offset": 0,
-              "slot": "5",
-              "type": "t_address",
-              "contract": "AgentLaunchpadMinimal",
-              "src": "contracts/AgentLaunchpadMinimal.sol:34"
-            },
-            {
-              "label": "protocolFeePercentage",
-              "offset": 0,
-              "slot": "6",
-              "type": "t_uint256",
-              "contract": "AgentLaunchpadMinimal",
-              "src": "contracts/AgentLaunchpadMinimal.sol:35"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_uint256)": {
-              "label": "mapping(address => uint256)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
-              "label": "mapping(uint256 => mapping(address => uint256))",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_uint256,t_struct(AgentConfig)11645_storage)": {
-              "label": "mapping(uint256 => struct AgentLaunchpadMinimal.AgentConfig)",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(AgentConfig)11645_storage": {
-              "label": "struct AgentLaunchpadMinimal.AgentConfig",
-              "members": [
-                {
-                  "label": "name",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "symbol",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "agentName",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "2"
-                },
-                {
-                  "label": "fundingTarget",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "3"
-                },
-                {
-                  "label": "tokenSupply",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "4"
-                },
-                {
-                  "label": "creator",
-                  "type": "t_address",
-                  "offset": 0,
-                  "slot": "5"
-                },
-                {
-                  "label": "isBonded",
-                  "type": "t_bool",
-                  "offset": 20,
-                  "slot": "5"
-                },
-                {
-                  "label": "totalRaised",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "6"
-                },
-                {
-                  "label": "tokenAddress",
-                  "type": "t_address",
-                  "offset": 0,
-                  "slot": "7"
-                },
-                {
-                  "label": "agentConfigJSON",
-                  "type": "t_string_storage",
-                  "offset": 0,
                   "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                },
+                {
+                  "label": "createdAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "10"
+                },
+                {
+                  "label": "bondedAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "11"
                 }
               ],
-              "numberOfBytes": "288"
+              "numberOfBytes": "384"
             },
             "t_uint256": {
               "label": "uint256",
@@ -1852,6 +1477,24 @@
           },
           "layoutVersion": "1.2",
           "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Ultra.sol:ISimpleAMM": {
+        "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(uint256,address,uint256,string)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
           "namespaces": {}
         },
         "solcVersion": "0.8.20"
@@ -1859,9 +1502,9 @@
       "contracts/AgentToken.sol:AgentToken": {
         "src": "contracts/AgentToken.sol:16",
         "version": {
-          "withMetadata": "dfc1cd90bee056227e732db76b47594dce1ab91debe3ae5d02040d894bf1c2e0",
-          "withoutMetadata": "dfc1cd90bee056227e732db76b47594dce1ab91debe3ae5d02040d894bf1c2e0",
-          "linkedWithoutMetadata": "dfc1cd90bee056227e732db76b47594dce1ab91debe3ae5d02040d894bf1c2e0"
+          "withMetadata": "e5734e950e67ef847b32a3a99c47630d486f508dc6ab0c01e64532eb6b57e59e",
+          "withoutMetadata": "e5734e950e67ef847b32a3a99c47630d486f508dc6ab0c01e64532eb6b57e59e",
+          "linkedWithoutMetadata": "e5734e950e67ef847b32a3a99c47630d486f508dc6ab0c01e64532eb6b57e59e"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -1987,7 +1630,7 @@
               "label": "_delegateCheckpoints",
               "offset": 0,
               "slot": "9",
-              "type": "t_mapping(t_address,t_struct(Trace208)8700_storage)",
+              "type": "t_mapping(t_address,t_struct(Trace208)8592_storage)",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:40"
             },
@@ -1995,7 +1638,7 @@
               "label": "_totalCheckpoints",
               "offset": 0,
               "slot": "10",
-              "type": "t_struct(Trace208)8700_storage",
+              "type": "t_struct(Trace208)8592_storage",
               "contract": "Votes",
               "src": "@openzeppelin/contracts/governance/utils/Votes.sol:42"
             },
@@ -2101,7 +1744,7 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage": {
+            "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage": {
               "label": "struct Checkpoints.Checkpoint208[]",
               "numberOfBytes": "32"
             },
@@ -2121,7 +1764,7 @@
               "label": "mapping(address => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_struct(Trace208)8700_storage)": {
+            "t_mapping(t_address,t_struct(Trace208)8592_storage)": {
               "label": "mapping(address => struct Checkpoints.Trace208)",
               "numberOfBytes": "32"
             },
@@ -2133,7 +1776,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Checkpoint208)8705_storage": {
+            "t_struct(Checkpoint208)8597_storage": {
               "label": "struct Checkpoints.Checkpoint208",
               "members": [
                 {
@@ -2151,12 +1794,12 @@
               ],
               "numberOfBytes": "32"
             },
-            "t_struct(Trace208)8700_storage": {
+            "t_struct(Trace208)8592_storage": {
               "label": "struct Checkpoints.Trace208",
               "members": [
                 {
                   "label": "_checkpoints",
-                  "type": "t_array(t_struct(Checkpoint208)8705_storage)dyn_storage",
+                  "type": "t_array(t_struct(Checkpoint208)8597_storage)dyn_storage",
                   "offset": 0,
                   "slot": "0"
                 }
@@ -2174,359 +1817,6 @@
             "t_uint48": {
               "label": "uint48",
               "numberOfBytes": "6"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/FeedbackOracle.sol:FeedbackOracle": {
-        "src": "contracts/FeedbackOracle.sol:17",
-        "version": {
-          "withMetadata": "f5fce4c708279e886905cc7ac56a1732d84f27c3665092e4dc8ba9c68501f243",
-          "withoutMetadata": "951b8c12565b4d7f5c0d9110bff285a141904157765e139078522dcbe949a149",
-          "linkedWithoutMetadata": "951b8c12565b4d7f5c0d9110bff285a141904157765e139078522dcbe949a149"
-        },
-        "inherit": [
-          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
-          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
-          "@openzeppelin/contracts/utils/Context.sol:Context"
-        ],
-        "libraries": [
-          "@openzeppelin/contracts/utils/cryptography/ECDSA.sol:ECDSA",
-          "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol:MessageHashUtils"
-        ],
-        "methods": [
-          "(address,address,bytes32,address)",
-          "processFeedback((address,string,uint8,uint256,bytes),bytes[])",
-          "processBatchFeedback((address[],string[],uint8[],uint256[],bytes),bytes[])",
-          "claimFeedbackReward((address,string,uint8,uint256,bytes),bytes[])",
-          "setSignerAuthorization(address,bool)",
-          "setQualityThreshold(uint256)",
-          "isFeedbackProcessed(address,string,uint256)",
-          "getUserFeedbackStats(address)",
-          "getOracleStats()",
-          "setPriceFeedId(bytes32)",
-          "fundContract()",
-          "withdrawNativeTokens(uint256)",
-          "emergencyWithdraw()",
-          "getCurrentNativeTokenPrice()",
-          "calculateRewardAmount(uint8,int64,int32)",
-          "getContractFunding()"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "FeedbackOracle",
-            "src": "contracts/FeedbackOracle.sol:99"
-          },
-          {
-            "kind": "state-variable-immutable",
-            "name": "rewardToken",
-            "src": "contracts/FeedbackOracle.sol:22"
-          },
-          {
-            "kind": "state-variable-immutable",
-            "name": "pyth",
-            "src": "contracts/FeedbackOracle.sol:25"
-          },
-          {
-            "kind": "state-variable-assignment",
-            "name": "qualityThreshold",
-            "src": "contracts/FeedbackOracle.sol:38"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
-            },
-            {
-              "label": "_status",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_uint256",
-              "contract": "ReentrancyGuard",
-              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
-            },
-            {
-              "label": "authorizedSigners",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:28"
-            },
-            {
-              "label": "processedFeedback",
-              "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_bytes32,t_bool)",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:31"
-            },
-            {
-              "label": "userFeedbackCount",
-              "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:32"
-            },
-            {
-              "label": "lastFeedbackTime",
-              "offset": 0,
-              "slot": "5",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:33"
-            },
-            {
-              "label": "qualityThreshold",
-              "offset": 0,
-              "slot": "6",
-              "type": "t_uint256",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:38"
-            },
-            {
-              "label": "nativeTokenPriceFeedId",
-              "offset": 0,
-              "slot": "7",
-              "type": "t_bytes32",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:46"
-            },
-            {
-              "label": "totalFeedbackProcessed",
-              "offset": 0,
-              "slot": "8",
-              "type": "t_uint256",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:49"
-            },
-            {
-              "label": "totalRewardsDistributedUSD",
-              "offset": 0,
-              "slot": "9",
-              "type": "t_uint256",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:50"
-            },
-            {
-              "label": "totalNativeRewardsDistributed",
-              "offset": 0,
-              "slot": "10",
-              "type": "t_uint256",
-              "contract": "FeedbackOracle",
-              "src": "contracts/FeedbackOracle.sol:51"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_bytes32": {
-              "label": "bytes32",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_uint256)": {
-              "label": "mapping(address => uint256)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_bytes32,t_bool)": {
-              "label": "mapping(bytes32 => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.2",
-          "flat": true,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "contracts/FeedbackRewardToken.sol:FeedbackRewardToken": {
-        "src": "contracts/FeedbackRewardToken.sol:13",
-        "version": {
-          "withMetadata": "ce85d1f15300ad32d2008b3641fa9e918a6abd4ca80d605b73af219825b48572",
-          "withoutMetadata": "535257f9dce3b1ae31a10921f5778ba62d7baddbd81bcc7448c8c101548de204",
-          "linkedWithoutMetadata": "535257f9dce3b1ae31a10921f5778ba62d7baddbd81bcc7448c8c101548de204"
-        },
-        "inherit": [
-          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
-          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
-          "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
-          "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC20Errors",
-          "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata",
-          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-          "@openzeppelin/contracts/utils/Context.sol:Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "(string,string,address)",
-          "mintFeedbackReward(address,bool)",
-          "batchMintRewards(address[],bool[])",
-          "setMinterAuthorization(address,bool)",
-          "emergencyMint(address,uint256)",
-          "getUserStats(address)",
-          "getGlobalStats()"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "FeedbackRewardToken",
-            "src": "contracts/FeedbackRewardToken.sol:40"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_balances",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "ERC20",
-              "src": "@openzeppelin/contracts/token/ERC20/ERC20.sol:30"
-            },
-            {
-              "label": "_allowances",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
-              "contract": "ERC20",
-              "src": "@openzeppelin/contracts/token/ERC20/ERC20.sol:32"
-            },
-            {
-              "label": "_totalSupply",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_uint256",
-              "contract": "ERC20",
-              "src": "@openzeppelin/contracts/token/ERC20/ERC20.sol:34"
-            },
-            {
-              "label": "_name",
-              "offset": 0,
-              "slot": "3",
-              "type": "t_string_storage",
-              "contract": "ERC20",
-              "src": "@openzeppelin/contracts/token/ERC20/ERC20.sol:36"
-            },
-            {
-              "label": "_symbol",
-              "offset": 0,
-              "slot": "4",
-              "type": "t_string_storage",
-              "contract": "ERC20",
-              "src": "@openzeppelin/contracts/token/ERC20/ERC20.sol:37"
-            },
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "5",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
-            },
-            {
-              "label": "_status",
-              "offset": 0,
-              "slot": "6",
-              "type": "t_uint256",
-              "contract": "ReentrancyGuard",
-              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
-            },
-            {
-              "label": "authorizedMinters",
-              "offset": 0,
-              "slot": "7",
-              "type": "t_mapping(t_address,t_bool)",
-              "contract": "FeedbackRewardToken",
-              "src": "contracts/FeedbackRewardToken.sol:16"
-            },
-            {
-              "label": "totalFeedbackRewards",
-              "offset": 0,
-              "slot": "8",
-              "type": "t_uint256",
-              "contract": "FeedbackRewardToken",
-              "src": "contracts/FeedbackRewardToken.sol:24"
-            },
-            {
-              "label": "totalQualityBonuses",
-              "offset": 0,
-              "slot": "9",
-              "type": "t_uint256",
-              "contract": "FeedbackRewardToken",
-              "src": "contracts/FeedbackRewardToken.sol:25"
-            },
-            {
-              "label": "userFeedbackCount",
-              "offset": 0,
-              "slot": "10",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "FeedbackRewardToken",
-              "src": "contracts/FeedbackRewardToken.sol:26"
-            },
-            {
-              "label": "userTotalRewards",
-              "offset": 0,
-              "slot": "11",
-              "type": "t_mapping(t_address,t_uint256)",
-              "contract": "FeedbackRewardToken",
-              "src": "contracts/FeedbackRewardToken.sol:27"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
-              "label": "mapping(address => mapping(address => uint256))",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_uint256)": {
-              "label": "mapping(address => uint256)",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
             }
           },
           "layoutVersion": "1.2",
@@ -3768,98 +3058,6 @@
         },
         "solcVersion": "0.8.20"
       },
-      "@pythnetwork/entropy-sdk-solidity/EntropyEvents.sol:EntropyEvents": {
-        "src": "@pythnetwork/entropy-sdk-solidity/EntropyEvents.sol:6",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@pythnetwork/entropy-sdk-solidity/EntropyStructs.sol:EntropyStructs": {
-        "src": "@pythnetwork/entropy-sdk-solidity/EntropyStructs.sol:5",
-        "version": {
-          "withMetadata": "7671073bc0304a45d8d07ed9372b4fcf5a1febbb0cf2898d5668ebf8f8060fa2",
-          "withoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42",
-          "linkedWithoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@pythnetwork/entropy-sdk-solidity/IEntropy.sol:IEntropy": {
-        "src": "@pythnetwork/entropy-sdk-solidity/IEntropy.sol:6",
-        "inherit": [
-          "@pythnetwork/entropy-sdk-solidity/EntropyEvents.sol:EntropyEvents"
-        ],
-        "libraries": [],
-        "methods": [
-          "register(uint128,bytes32,bytes,uint64,bytes)",
-          "withdraw(uint128)",
-          "withdrawAsFeeManager(address,uint128)",
-          "request(address,bytes32,bool)",
-          "requestWithCallback(address,bytes32)",
-          "reveal(address,uint64,bytes32,bytes32)",
-          "revealWithCallback(address,uint64,bytes32,bytes32)",
-          "getProviderInfo(address)",
-          "getDefaultProvider()",
-          "getRequest(address,uint64)",
-          "getFee(address)",
-          "getAccruedPythFees()",
-          "setProviderFee(uint128)",
-          "setProviderFeeAsFeeManager(address,uint128)",
-          "setProviderUri(bytes)",
-          "setFeeManager(address)",
-          "constructUserCommitment(bytes32)",
-          "combineRandomValues(bytes32,bytes32,bytes32)"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
-      "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol:IEntropyConsumer": {
-        "src": "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol:4",
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "_entropyCallback(uint64,address,bytes32)"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.2",
-          "flat": false,
-          "namespaces": {}
-        },
-        "solcVersion": "0.8.20"
-      },
       "@pythnetwork/pyth-sdk-solidity/IPyth.sol:IPyth": {
         "src": "@pythnetwork/pyth-sdk-solidity/IPyth.sol:10",
         "inherit": [
@@ -3928,14 +3126,547 @@
         "solcVersion": "0.8.20"
       },
       "contracts/AgentLaunchpad.sol:AgentLaunchpad": {
-        "src": "contracts/AgentLaunchpad.sol:35",
+        "src": "contracts/AgentLaunchpad.sol:32",
         "version": {
-          "withMetadata": "c89d749b4d73f932d4169e7e4cdd9a2e8c3eadaed5c157ff7c0d31cc2e22e235",
-          "withoutMetadata": "1fa012ab693ff942866042541e3a5ac60415c21852619e051e1068772e6f6b4f",
-          "linkedWithoutMetadata": "1fa012ab693ff942866042541e3a5ac60415c21852619e051e1068772e6f6b4f"
+          "withMetadata": "da95dc51af2f5a97317cc1f76e3a451b4f2295fe5e45c265e2d0dfb62d9f5d60",
+          "withoutMetadata": "3a79961dece7eaa000c9d0010cb832ae1b4a37f9e0e8172a49376026df669df9",
+          "linkedWithoutMetadata": "3a79961dece7eaa000c9d0010cb832ae1b4a37f9e0e8172a49376026df669df9"
         },
         "inherit": [
-          "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol:IEntropyConsumer",
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address,address)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "bondAgent(uint256)",
+          "setTreasuryAddress(address)",
+          "setProtocolFeePercentage(uint256)",
+          "getAgentInfo(uint256)",
+          "getAgentConfigJSON(uint256)",
+          "getContribution(uint256,address)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "getLiquidityPool(uint256)",
+          "emergencyWithdraw()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpad",
+            "src": "contracts/AgentLaunchpad.sol:96"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "protocolFeePercentage",
+            "src": "contracts/AgentLaunchpad.sol:57"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultLiquidityPercentage",
+            "src": "contracts/AgentLaunchpad.sol:62"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultTokenLPPercentage",
+            "src": "contracts/AgentLaunchpad.sol:63"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_agentIdCounter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:50"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)10328_storage)",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:51"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:52"
+            },
+            {
+              "label": "treasuryAddress",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_address",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:55"
+            },
+            {
+              "label": "uniswapRouter",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_address",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:56"
+            },
+            {
+              "label": "protocolFeePercentage",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:57"
+            },
+            {
+              "label": "defaultLiquidityPercentage",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:62"
+            },
+            {
+              "label": "defaultTokenLPPercentage",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpad",
+              "src": "contracts/AgentLaunchpad.sol:63"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(AgentConfig)10328_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpad.AgentConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AgentConfig)10328_storage": {
+              "label": "struct AgentLaunchpad.AgentConfig",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "lpPairAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                }
+              ],
+              "numberOfBytes": "320"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpad.sol:IUniswapV2Factory": {
+        "src": "contracts/AgentLaunchpad.sol:23",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPair(address,address)",
+          "getPair(address,address)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpad.sol:IUniswapV2Router02": {
+        "src": "contracts/AgentLaunchpad.sol:9",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "addLiquidityETH(address,uint256,uint256,uint256,address,uint256)",
+          "factory()",
+          "WETH()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCore.sol:AgentLaunchpadCore": {
+        "src": "contracts/AgentLaunchpadCore.sol:24",
+        "version": {
+          "withMetadata": "7119bfd1ae3beef894419c6434ee3d007cc204f00933e102685ee49b232af09e",
+          "withoutMetadata": "6fba7aa1f8bc54112ee50554be0cfbcf761c3fd8be0a1d4649e1106461574a83",
+          "linkedWithoutMetadata": "6fba7aa1f8bc54112ee50554be0cfbcf761c3fd8be0a1d4649e1106461574a83"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "bondAgent(uint256)",
+          "setLiquidityManager(address)",
+          "setTreasuryAddress(address)",
+          "setProtocolFeePercentage(uint256)",
+          "setLiquidityPercentage(uint256)",
+          "getAgentInfo(uint256)",
+          "getAgentConfigJSON(uint256)",
+          "getContribution(uint256,address)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "getLiquidityPool(uint256)",
+          "emergencyWithdraw()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpadCore",
+            "src": "contracts/AgentLaunchpadCore.sol:89"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "protocolFeePercentage",
+            "src": "contracts/AgentLaunchpadCore.sol:49"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultLiquidityPercentage",
+            "src": "contracts/AgentLaunchpadCore.sol:54"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_agentIdCounter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:42"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)11259_storage)",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:43"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:44"
+            },
+            {
+              "label": "treasuryAddress",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:47"
+            },
+            {
+              "label": "liquidityManager",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:48"
+            },
+            {
+              "label": "protocolFeePercentage",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:49"
+            },
+            {
+              "label": "defaultLiquidityPercentage",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCore",
+              "src": "contracts/AgentLaunchpadCore.sol:54"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(AgentConfig)11259_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCore.AgentConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AgentConfig)11259_storage": {
+              "label": "struct AgentLaunchpadCore.AgentConfig",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "lpPairAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                }
+              ],
+              "numberOfBytes": "320"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCore.sol:IAgentLiquidityManager": {
+        "src": "contracts/AgentLaunchpadCore.sol:9",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(address,uint256,address)",
+          "getLPPair(address)",
+          "hasLiquidityPool(address)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2.sol:AgentLaunchpadCoreV2": {
+        "src": "contracts/AgentLaunchpadCoreV2.sol:26",
+        "version": {
+          "withMetadata": "16634f3e6146225191d3f9853dad9e19aab46463ed931f0d00695c6c62fe6464",
+          "withoutMetadata": "1b2be6842b3f7ed17250e78c2ad363c48289bfc58355ea633e6254cf0a46faed",
+          "linkedWithoutMetadata": "1b2be6842b3f7ed17250e78c2ad363c48289bfc58355ea633e6254cf0a46faed"
+        },
+        "inherit": [
           "@openzeppelin/contracts/utils/Pausable.sol:Pausable",
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
           "@openzeppelin/contracts/access/Ownable.sol:Ownable",
@@ -3943,52 +3674,55 @@
         ],
         "libraries": [],
         "methods": [
-          "(address,address,address)",
+          "(address)",
           "createAgent(string,string,string,string,string,uint256,uint256,string)",
           "contribute(uint256)",
-          "withdrawContribution(uint256)",
           "bondAgent(uint256)",
-          "cancelAgent(uint256,string)",
-          "getLiquidityPool(uint256)",
-          "setTreasuryAddress(address)",
-          "setUniswapRouter(address)",
-          "setProtocolFeePercentage(uint256)",
-          "pauseLaunchpad()",
-          "unpauseLaunchpad()",
+          "getAllBondedTokens()",
+          "getBondedTokensPaginated(uint256,uint256)",
+          "getInProgressAgents()",
+          "getInProgressAgentsPaginated(uint256,uint256)",
+          "getAgentsByCreator(address)",
+          "getAgentByTokenAddress(address)",
+          "getTotalCounts()",
+          "getAgentsByTimeRange(uint256,uint256,bool)",
           "getAgentInfo(uint256)",
-          "getContribution(uint256,address)",
-          "getTotalRaised(uint256)",
-          "isAgentBonded(uint256)",
-          "getCurrentAgentId()",
-          "getUserAgents(address)",
-          "getAgentSeed(uint256)",
-          "hasSeed(uint256)",
-          "getEntropyAddress()",
           "getAgentConfigJSON(uint256)",
+          "getContribution(uint256,address)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "getLiquidityPool(uint256)",
+          "setLiquidityManager(address)",
+          "setTreasuryAddress(address)",
+          "setProtocolFeePercentage(uint256)",
+          "setLiquidityPercentage(uint256)",
+          "setTokenLPPercentage(uint256)",
+          "pause()",
+          "unpause()",
           "emergencyWithdraw()",
-          "contractBalance()"
+          "()"
         ],
         "linkReferences": [],
         "errors": [
           {
             "kind": "constructor",
-            "contract": "AgentLaunchpad",
-            "src": "contracts/AgentLaunchpad.sol:141"
+            "contract": "AgentLaunchpadCoreV2",
+            "src": "contracts/AgentLaunchpadCoreV2.sol:116"
           },
           {
             "kind": "state-variable-assignment",
             "name": "protocolFeePercentage",
-            "src": "contracts/AgentLaunchpad.sol:69"
+            "src": "contracts/AgentLaunchpadCoreV2.sol:64"
           },
           {
             "kind": "state-variable-assignment",
             "name": "defaultLiquidityPercentage",
-            "src": "contracts/AgentLaunchpad.sol:74"
+            "src": "contracts/AgentLaunchpadCoreV2.sol:69"
           },
           {
             "kind": "state-variable-assignment",
             "name": "defaultTokenLPPercentage",
-            "src": "contracts/AgentLaunchpad.sol:75"
+            "src": "contracts/AgentLaunchpadCoreV2.sol:70"
           }
         ],
         "layout": {
@@ -4022,96 +3756,104 @@
               "offset": 0,
               "slot": "3",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:60"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:48"
             },
             {
               "label": "agents",
               "offset": 0,
               "slot": "4",
-              "type": "t_mapping(t_uint256,t_struct(AgentConfig)10681_storage)",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:61"
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)12120_storage)",
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:49"
             },
             {
               "label": "contributions",
               "offset": 0,
               "slot": "5",
               "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:62"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:50"
             },
             {
-              "label": "userAgents",
+              "label": "allAgentIds",
               "offset": 0,
               "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:53"
+            },
+            {
+              "label": "bondedAgentIds",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:54"
+            },
+            {
+              "label": "inProgressAgentIds",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:55"
+            },
+            {
+              "label": "agentsByCreator",
+              "offset": 0,
+              "slot": "9",
               "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:63"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:58"
+            },
+            {
+              "label": "tokenToAgentId",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:59"
             },
             {
               "label": "treasuryAddress",
               "offset": 0,
-              "slot": "7",
+              "slot": "11",
               "type": "t_address",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:66"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:62"
             },
             {
-              "label": "uniswapRouter",
+              "label": "liquidityManager",
               "offset": 0,
-              "slot": "8",
+              "slot": "12",
               "type": "t_address",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:67"
-            },
-            {
-              "label": "entropy",
-              "offset": 0,
-              "slot": "9",
-              "type": "t_contract(IEntropy)10294",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:68"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:63"
             },
             {
               "label": "protocolFeePercentage",
               "offset": 0,
-              "slot": "10",
+              "slot": "13",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:69"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:64"
             },
             {
               "label": "defaultLiquidityPercentage",
               "offset": 0,
-              "slot": "11",
+              "slot": "14",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:74"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:69"
             },
             {
               "label": "defaultTokenLPPercentage",
               "offset": 0,
-              "slot": "12",
+              "slot": "15",
               "type": "t_uint256",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:75"
-            },
-            {
-              "label": "entropyRequestToAgentId",
-              "offset": 0,
-              "slot": "13",
-              "type": "t_mapping(t_uint64,t_uint256)",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:78"
-            },
-            {
-              "label": "_currentSequenceNumber",
-              "offset": 0,
-              "slot": "14",
-              "type": "t_uint64",
-              "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:79"
+              "contract": "AgentLaunchpadCoreV2",
+              "src": "contracts/AgentLaunchpadCoreV2.sol:70"
             }
           ],
           "types": {
@@ -4127,10 +3869,6 @@
               "label": "bool",
               "numberOfBytes": "1"
             },
-            "t_contract(IEntropy)10294": {
-              "label": "contract IEntropy",
-              "numberOfBytes": "20"
-            },
             "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
               "label": "mapping(address => uint256[])",
               "numberOfBytes": "32"
@@ -4143,20 +3881,16 @@
               "label": "mapping(uint256 => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_uint256,t_struct(AgentConfig)10681_storage)": {
-              "label": "mapping(uint256 => struct AgentLaunchpad.AgentConfig)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_uint64,t_uint256)": {
-              "label": "mapping(uint64 => uint256)",
+            "t_mapping(t_uint256,t_struct(AgentConfig)12120_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCoreV2.AgentConfig)",
               "numberOfBytes": "32"
             },
             "t_string_storage": {
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(AgentConfig)10681_storage": {
-              "label": "struct AgentLaunchpad.AgentConfig",
+            "t_struct(AgentConfig)12120_storage": {
+              "label": "struct AgentLaunchpadCoreV2.AgentConfig",
               "members": [
                 {
                   "label": "name",
@@ -4201,81 +3935,59 @@
                   "slot": "6"
                 },
                 {
-                  "label": "liquidityTokens",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "7"
-                },
-                {
-                  "label": "treasuryTokens",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "8"
-                },
-                {
                   "label": "creator",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "9"
+                  "slot": "7"
                 },
                 {
                   "label": "isBonded",
                   "type": "t_bool",
                   "offset": 20,
-                  "slot": "9"
-                },
-                {
-                  "label": "isCancelled",
-                  "type": "t_bool",
-                  "offset": 21,
-                  "slot": "9"
+                  "slot": "7"
                 },
                 {
                   "label": "totalRaised",
                   "type": "t_uint256",
                   "offset": 0,
-                  "slot": "10"
-                },
-                {
-                  "label": "createdAt",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "11"
+                  "slot": "8"
                 },
                 {
                   "label": "tokenAddress",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "12"
+                  "slot": "9"
                 },
                 {
                   "label": "lpPairAddress",
                   "type": "t_address",
                   "offset": 0,
-                  "slot": "13"
-                },
-                {
-                  "label": "seed",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "14"
+                  "slot": "10"
                 },
                 {
                   "label": "agentConfigJSON",
                   "type": "t_string_storage",
                   "offset": 0,
-                  "slot": "15"
+                  "slot": "11"
+                },
+                {
+                  "label": "createdAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "12"
+                },
+                {
+                  "label": "bondedAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "13"
                 }
               ],
-              "numberOfBytes": "512"
+              "numberOfBytes": "448"
             },
             "t_uint256": {
               "label": "uint256",
               "numberOfBytes": "32"
-            },
-            "t_uint64": {
-              "label": "uint64",
-              "numberOfBytes": "8"
             }
           },
           "layoutVersion": "1.2",
@@ -4284,8 +3996,1237 @@
         },
         "solcVersion": "0.8.20"
       },
-      "contracts/AgentLaunchpad.sol:IUniswapV2Factory": {
-        "src": "contracts/AgentLaunchpad.sol:26",
+      "contracts/AgentLaunchpadCoreV2.sol:ISimpleAMM": {
+        "src": "contracts/AgentLaunchpadCoreV2.sol:10",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(uint256,address,uint256,string)",
+          "getLiquidityPool(uint256)",
+          "isAuthorized(address)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Minimal.sol:AgentLaunchpadCoreV2Minimal": {
+        "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:12",
+        "version": {
+          "withMetadata": "362542ac4d5af7a5f7593ca6a3ad4cc80a15d02b6e0c73a58c1878152e1cd2d0",
+          "withoutMetadata": "20857a22d53088b93f2da7b9929509970a8027e69d47dae985f42730164db23d",
+          "linkedWithoutMetadata": "20857a22d53088b93f2da7b9929509970a8027e69d47dae985f42730164db23d"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "getAllBondedTokens()",
+          "getInProgressAgents()",
+          "getAgentByTokenAddress(address)",
+          "getTotalCounts()",
+          "getAgentInfo(uint256)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "getLiquidityPool(uint256)",
+          "setLiquidityManager(address)",
+          "setTreasuryAddress(address)",
+          "setProtocolFeePercentage(uint256)",
+          "emergencyWithdraw()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpadCoreV2Minimal",
+            "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:46"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "protocolFeePercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:37"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultLiquidityPercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:39"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultTokenLPPercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:40"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_agentIdCounter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:28"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)14047_storage)",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:29"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:30"
+            },
+            {
+              "label": "bondedAgentIds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:31"
+            },
+            {
+              "label": "inProgressAgentIds",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:32"
+            },
+            {
+              "label": "tokenToAgentId",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:33"
+            },
+            {
+              "label": "treasuryAddress",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:35"
+            },
+            {
+              "label": "liquidityManager",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:36"
+            },
+            {
+              "label": "protocolFeePercentage",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:37"
+            },
+            {
+              "label": "defaultLiquidityPercentage",
+              "offset": 0,
+              "slot": "11",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:39"
+            },
+            {
+              "label": "defaultTokenLPPercentage",
+              "offset": 0,
+              "slot": "12",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Minimal",
+              "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:40"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_uint256)dyn_storage": {
+              "label": "uint256[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(AgentConfig)14047_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCoreV2Minimal.AgentConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AgentConfig)14047_storage": {
+              "label": "struct AgentLaunchpadCoreV2Minimal.AgentConfig",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "lpPairAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                }
+              ],
+              "numberOfBytes": "320"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Minimal.sol:ISimpleAMM": {
+        "src": "contracts/AgentLaunchpadCoreV2Minimal.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(uint256,address,uint256,string)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Optimized.sol:AgentLaunchpadCoreV2Optimized": {
+        "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:12",
+        "version": {
+          "withMetadata": "2eb3b3036f3cce06f7f2aa7126e06f4c55edb5aea5b1eb57cafe7a461ae91cf9",
+          "withoutMetadata": "c83834b5c87ca08a5a35f7306366978d312f75a2b68d7f4f75438925003d476c",
+          "linkedWithoutMetadata": "c83834b5c87ca08a5a35f7306366978d312f75a2b68d7f4f75438925003d476c"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "getAllBondedTokens()",
+          "getInProgressAgents()",
+          "getAgentByTokenAddress(address)",
+          "getTotalCounts()",
+          "getAgentInfo(uint256)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "getLiquidityPool(uint256)",
+          "setLiquidityManager(address)",
+          "setTreasuryAddress(address)",
+          "setProtocolFeePercentage(uint256)",
+          "emergencyWithdraw()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpadCoreV2Optimized",
+            "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:52"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "protocolFeePercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:43"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultLiquidityPercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:45"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultTokenLPPercentage",
+            "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:46"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_agentIdCounter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:30"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)15068_storage)",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:31"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:32"
+            },
+            {
+              "label": "bondedAgentIds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:35"
+            },
+            {
+              "label": "inProgressAgentIds",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:36"
+            },
+            {
+              "label": "tokenToAgentId",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:39"
+            },
+            {
+              "label": "treasuryAddress",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:41"
+            },
+            {
+              "label": "liquidityManager",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:42"
+            },
+            {
+              "label": "protocolFeePercentage",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:43"
+            },
+            {
+              "label": "defaultLiquidityPercentage",
+              "offset": 0,
+              "slot": "11",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:45"
+            },
+            {
+              "label": "defaultTokenLPPercentage",
+              "offset": 0,
+              "slot": "12",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Optimized",
+              "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:46"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_uint256)dyn_storage": {
+              "label": "uint256[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(AgentConfig)15068_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCoreV2Optimized.AgentConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AgentConfig)15068_storage": {
+              "label": "struct AgentLaunchpadCoreV2Optimized.AgentConfig",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "lpPairAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                },
+                {
+                  "label": "createdAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "10"
+                },
+                {
+                  "label": "bondedAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "11"
+                }
+              ],
+              "numberOfBytes": "384"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Optimized.sol:ISimpleAMM": {
+        "src": "contracts/AgentLaunchpadCoreV2Optimized.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(uint256,address,uint256,string)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Ultra.sol:AgentLaunchpadCoreV2Ultra": {
+        "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:12",
+        "version": {
+          "withMetadata": "155ffb1f01a3074121b0fed8582f71d61d011946a373824268df79b2f8f1ed40",
+          "withoutMetadata": "0be24c056c6be778f8cbf8f201690d0e2fa30d9ed063fd3c4223d16f1327c5d6",
+          "linkedWithoutMetadata": "0be24c056c6be778f8cbf8f201690d0e2fa30d9ed063fd3c4223d16f1327c5d6"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "getAllBondedTokens()",
+          "getInProgressAgents()",
+          "getAgentByToken(address)",
+          "isBonded(uint256)",
+          "getLp(uint256)",
+          "setAmm(address)",
+          "setTreasury(address)",
+          "setFee(uint256)",
+          "withdraw()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpadCoreV2Ultra",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:48"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "fee",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:40"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "lpPercent",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:41"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "tokenLpPercent",
+            "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:42"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_counter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:30"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(Agent)16129_storage)",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:31"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:32"
+            },
+            {
+              "label": "bondedIds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:34"
+            },
+            {
+              "label": "inProgressIds",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:35"
+            },
+            {
+              "label": "tokenToAgent",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:36"
+            },
+            {
+              "label": "treasury",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:38"
+            },
+            {
+              "label": "amm",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_address",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:39"
+            },
+            {
+              "label": "fee",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:40"
+            },
+            {
+              "label": "lpPercent",
+              "offset": 0,
+              "slot": "11",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:41"
+            },
+            {
+              "label": "tokenLpPercent",
+              "offset": 0,
+              "slot": "12",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadCoreV2Ultra",
+              "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:42"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_uint256)dyn_storage": {
+              "label": "uint256[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(Agent)16129_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadCoreV2Ultra.Agent)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Agent)16129_storage": {
+              "label": "struct AgentLaunchpadCoreV2Ultra.Agent",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "lpPairAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "8"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "9"
+                },
+                {
+                  "label": "createdAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "10"
+                },
+                {
+                  "label": "bondedAt",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "11"
+                }
+              ],
+              "numberOfBytes": "384"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadCoreV2Ultra.sol:ISimpleAMM": {
+        "src": "contracts/AgentLaunchpadCoreV2Ultra.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createLiquidityPool(uint256,address,uint256,string)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLaunchpadMinimal.sol:AgentLaunchpadMinimal": {
+        "src": "contracts/AgentLaunchpadMinimal.sol:12",
+        "version": {
+          "withMetadata": "5af4c66fb55a98558a780ede3b26aa3193647ae5df4452586742ae4af3f45ca6",
+          "withoutMetadata": "afd452b3d2f1b44c302e1bbd8bd6ec28e03718986305d435d7dfca0760ce7e61",
+          "linkedWithoutMetadata": "afd452b3d2f1b44c302e1bbd8bd6ec28e03718986305d435d7dfca0760ce7e61"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createAgent(string,string,string,uint256,uint256,string)",
+          "contribute(uint256)",
+          "getAgentInfo(uint256)",
+          "getAgentConfigJSON(uint256)",
+          "getCurrentAgentId()",
+          "isAgentBonded(uint256)",
+          "setTreasuryAddress(address)",
+          "getContribution(uint256,address)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLaunchpadMinimal",
+            "src": "contracts/AgentLaunchpadMinimal.sol:66"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "protocolFeePercentage",
+            "src": "contracts/AgentLaunchpadMinimal.sol:35"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "_agentIdCounter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadMinimal",
+              "src": "contracts/AgentLaunchpadMinimal.sol:29"
+            },
+            {
+              "label": "agents",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)17051_storage)",
+              "contract": "AgentLaunchpadMinimal",
+              "src": "contracts/AgentLaunchpadMinimal.sol:30"
+            },
+            {
+              "label": "contributions",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+              "contract": "AgentLaunchpadMinimal",
+              "src": "contracts/AgentLaunchpadMinimal.sol:31"
+            },
+            {
+              "label": "treasuryAddress",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_address",
+              "contract": "AgentLaunchpadMinimal",
+              "src": "contracts/AgentLaunchpadMinimal.sol:34"
+            },
+            {
+              "label": "protocolFeePercentage",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_uint256",
+              "contract": "AgentLaunchpadMinimal",
+              "src": "contracts/AgentLaunchpadMinimal.sol:35"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(uint256 => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(AgentConfig)17051_storage)": {
+              "label": "mapping(uint256 => struct AgentLaunchpadMinimal.AgentConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AgentConfig)17051_storage": {
+              "label": "struct AgentLaunchpadMinimal.AgentConfig",
+              "members": [
+                {
+                  "label": "name",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "symbol",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "agentName",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "fundingTarget",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "tokenSupply",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "creator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "isBonded",
+                  "type": "t_bool",
+                  "offset": 20,
+                  "slot": "5"
+                },
+                {
+                  "label": "totalRaised",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "tokenAddress",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "7"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "8"
+                }
+              ],
+              "numberOfBytes": "288"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLiquidityManager.sol:AgentLiquidityManager": {
+        "src": "contracts/AgentLiquidityManager.sol:32",
+        "version": {
+          "withMetadata": "95b82cdd6aa6cdfaa8bf827ffd2123d123be22e2885441eec96e90541d6d208f",
+          "withoutMetadata": "a8ae6fd63f25b2c6f3f41d75d7b182e3b42aada551cc952f2d65fc25772ba3b8",
+          "linkedWithoutMetadata": "a8ae6fd63f25b2c6f3f41d75d7b182e3b42aada551cc952f2d65fc25772ba3b8"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(address)",
+          "createLiquidityPool(address,uint256,address)",
+          "getLPPair(address)",
+          "hasLiquidityPool(address)",
+          "setAuthorizedCaller(address,bool)",
+          "setUniswapRouter(address)",
+          "setTokenLPPercentage(uint256)",
+          "emergencyWithdraw()",
+          "emergencyTokenWithdraw(address,uint256)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AgentLiquidityManager",
+            "src": "contracts/AgentLiquidityManager.sol:67"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "defaultTokenLPPercentage",
+            "src": "contracts/AgentLiquidityManager.sol:36"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "uniswapRouter",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_address",
+              "contract": "AgentLiquidityManager",
+              "src": "contracts/AgentLiquidityManager.sol:35"
+            },
+            {
+              "label": "defaultTokenLPPercentage",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_uint256",
+              "contract": "AgentLiquidityManager",
+              "src": "contracts/AgentLiquidityManager.sol:36"
+            },
+            {
+              "label": "tokenToPair",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_address,t_address)",
+              "contract": "AgentLiquidityManager",
+              "src": "contracts/AgentLiquidityManager.sol:40"
+            },
+            {
+              "label": "authorizedCallers",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_bool)",
+              "contract": "AgentLiquidityManager",
+              "src": "contracts/AgentLiquidityManager.sol:41"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_address)": {
+              "label": "mapping(address => address)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/AgentLiquidityManager.sol:IUniswapV2Factory": {
+        "src": "contracts/AgentLiquidityManager.sol:23",
         "inherit": [],
         "libraries": [],
         "methods": [
@@ -4303,8 +5244,8 @@
         },
         "solcVersion": "0.8.20"
       },
-      "contracts/AgentLaunchpad.sol:IUniswapV2Router02": {
-        "src": "contracts/AgentLaunchpad.sol:12",
+      "contracts/AgentLiquidityManager.sol:IUniswapV2Router02": {
+        "src": "contracts/AgentLiquidityManager.sol:9",
         "inherit": [],
         "libraries": [],
         "methods": [
@@ -4326,9 +5267,9 @@
       "contracts/AgentToken.sol:AgentToken": {
         "src": "contracts/AgentToken.sol:16",
         "version": {
-          "withMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf",
-          "withoutMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf",
-          "linkedWithoutMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf"
+          "withMetadata": "00325e2161feb63fbf5c716579cb5fecfc7236c096bdf9001e5088a8a66009ba",
+          "withoutMetadata": "00325e2161feb63fbf5c716579cb5fecfc7236c096bdf9001e5088a8a66009ba",
+          "linkedWithoutMetadata": "00325e2161feb63fbf5c716579cb5fecfc7236c096bdf9001e5088a8a66009ba"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -4652,9 +5593,9 @@
       "contracts/FeedbackOracle.sol:FeedbackOracle": {
         "src": "contracts/FeedbackOracle.sol:17",
         "version": {
-          "withMetadata": "8b0a76374669242ee3980e7ba289fb4406a661044e584fa6e3d210d2047a2559",
-          "withoutMetadata": "f1b9c12e30552110fa9642a4d9b7a95945556011d0e5ed13b68be40f2ad6f26e",
-          "linkedWithoutMetadata": "f1b9c12e30552110fa9642a4d9b7a95945556011d0e5ed13b68be40f2ad6f26e"
+          "withMetadata": "4fe430ab622bf37d9e7dfb0428e0d034cd071f02755d0a90416a3789af9f0136",
+          "withoutMetadata": "c08270c1fce9bc8a6196202ba68986ad30a4d0ccc5f22396ba9ef7fa5c0b454d",
+          "linkedWithoutMetadata": "c08270c1fce9bc8a6196202ba68986ad30a4d0ccc5f22396ba9ef7fa5c0b454d"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -4836,9 +5777,9 @@
       "contracts/FeedbackRewardToken.sol:FeedbackRewardToken": {
         "src": "contracts/FeedbackRewardToken.sol:13",
         "version": {
-          "withMetadata": "b7e6db077139de3d1e42819fdbcc1051dbd4b7af101228fc61dae0b7871c53e7",
-          "withoutMetadata": "939620ed806702b5c4d634c02320d434a43560a47643a13c9879d3c3857b25dd",
-          "linkedWithoutMetadata": "939620ed806702b5c4d634c02320d434a43560a47643a13c9879d3c3857b25dd"
+          "withMetadata": "a566bd405b8bbc66671a47514226726f4cbbfbcd36af40d7c96fe7f5c165e062",
+          "withoutMetadata": "f82b8af45586966fc379703321813227c7233aae05349a8a5d0d154422274da1",
+          "linkedWithoutMetadata": "f82b8af45586966fc379703321813227c7233aae05349a8a5d0d154422274da1"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -4978,6 +5919,262 @@
             "t_mapping(t_address,t_bool)": {
               "label": "mapping(address => bool)",
               "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(address => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/SimpleAMM.sol:SimpleAMM": {
+        "src": "contracts/SimpleAMM.sol:174",
+        "version": {
+          "withMetadata": "c670ef443a895dd69926bd1d679cd0cbca637c953535982bc26b7c1ad162fb9f",
+          "withoutMetadata": "73bcb4f4281c13613ea5532e89729ed278b97867340774db5788efe6649f9a8c",
+          "linkedWithoutMetadata": "73bcb4f4281c13613ea5532e89729ed278b97867340774db5788efe6649f9a8c"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "()",
+          "createLiquidityPool(uint256,address,uint256,string)",
+          "addLiquidity(uint256,uint256,uint256,uint256,address,uint256)",
+          "swapETHForTokens(uint256,uint256,address,uint256)",
+          "swapTokensForETH(uint256,uint256,uint256,address,uint256)",
+          "getLiquidityPool(uint256)",
+          "isAuthorized(address)",
+          "getAllPairs()",
+          "allPairsLength()",
+          "quote(uint256,uint256,uint256)",
+          "getAmountOut(uint256,uint256,uint256)",
+          "getAmountIn(uint256,uint256,uint256)",
+          "getReserves(uint256)",
+          "setAuthorization(address,bool)",
+          "emergencyWithdraw(address,uint256)",
+          "emergencyTokenWithdraw(address,address,uint256)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "SimpleAMM",
+            "src": "contracts/SimpleAMM.sol:216"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:40"
+            },
+            {
+              "label": "agentPairs",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_mapping(t_uint256,t_address)",
+              "contract": "SimpleAMM",
+              "src": "contracts/SimpleAMM.sol:177"
+            },
+            {
+              "label": "pairToAgent",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "SimpleAMM",
+              "src": "contracts/SimpleAMM.sol:178"
+            },
+            {
+              "label": "authorizedCallers",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_address,t_bool)",
+              "contract": "SimpleAMM",
+              "src": "contracts/SimpleAMM.sol:179"
+            },
+            {
+              "label": "allPairs",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "SimpleAMM",
+              "src": "contracts/SimpleAMM.sol:181"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_address)": {
+              "label": "mapping(uint256 => address)",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.20"
+      },
+      "contracts/SimpleAMM.sol:SimplePair": {
+        "src": "contracts/SimpleAMM.sol:13",
+        "version": {
+          "withMetadata": "14367b0e24623f984b94d545cdc75a7426f2ef7962845e5563109a83a903f288",
+          "withoutMetadata": "6cacac09e7c1913b52495004d9e08c776e329307ce4a5d52dc8459b2214d3e05",
+          "linkedWithoutMetadata": "6cacac09e7c1913b52495004d9e08c776e329307ce4a5d52dc8459b2214d3e05"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "()",
+          "initialize(address,string,string)",
+          "mint(address)",
+          "burn(address)",
+          "swap(uint256,uint256,address)",
+          "getReserves()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "SimplePair",
+            "src": "contracts/SimpleAMM.sol:48"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "name",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_string_storage",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:14"
+            },
+            {
+              "label": "symbol",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:15"
+            },
+            {
+              "label": "totalSupply",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:18"
+            },
+            {
+              "label": "balanceOf",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:19"
+            },
+            {
+              "label": "allowance",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:20"
+            },
+            {
+              "label": "token",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_address",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:22"
+            },
+            {
+              "label": "factory",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_address",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:23"
+            },
+            {
+              "label": "reserve0",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_uint256",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:25"
+            },
+            {
+              "label": "reserve1",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_uint256",
+              "contract": "SimplePair",
+              "src": "contracts/SimpleAMM.sol:26"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
             },
             "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
               "label": "mapping(address => mapping(address => uint256))",
