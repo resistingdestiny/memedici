@@ -10,7 +10,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -57,7 +57,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -105,7 +105,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -148,7 +148,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -189,7 +189,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -230,7 +230,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -276,7 +276,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -323,7 +323,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -368,7 +368,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -409,7 +409,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -450,7 +450,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -493,7 +493,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -536,7 +536,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -577,7 +577,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -622,7 +622,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -663,7 +663,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -706,7 +706,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -747,7 +747,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -790,7 +790,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -826,47 +826,6 @@
         "Strings"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol": {
-      "lastModificationDate": 1748740168311,
-      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
-      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 5000
-          },
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none"
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "evmVersion": "paris"
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SafeCast"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
       "lastModificationDate": 1748740168265,
       "contentHash": "5ec781e33d3a9ac91ffdc83d94420412",
@@ -876,7 +835,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -911,6 +870,47 @@
         "Math"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol": {
+      "lastModificationDate": 1748740168311,
+      "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "evmVersion": "paris"
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SafeCast"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
       "lastModificationDate": 1748740168316,
       "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
@@ -920,7 +920,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -963,7 +963,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1004,7 +1004,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1045,7 +1045,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1095,7 +1095,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1138,7 +1138,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1182,7 +1182,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1226,7 +1226,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1267,7 +1267,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1308,7 +1308,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1355,7 +1355,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1390,7 +1390,7 @@
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCoreV2.sol": {
-      "lastModificationDate": 1748751437325,
+      "lastModificationDate": 1748751808209,
       "contentHash": "98aa6b06e470fbef008c18665465c299",
       "sourceName": "contracts/AgentLaunchpadCoreV2.sol",
       "solcConfig": {
@@ -1398,7 +1398,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1445,7 +1445,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1490,7 +1490,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1530,6 +1530,47 @@
         "FeedbackOracle"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/PythStructs.sol": {
+      "lastModificationDate": 1748740168322,
+      "contentHash": "f43da46300095c422885907eb6f25052",
+      "sourceName": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "evmVersion": "paris"
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "PythStructs"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/IPyth.sol": {
       "lastModificationDate": 1748740168317,
       "contentHash": "84d8e759412e224a8795554132b53af4",
@@ -1539,7 +1580,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1574,47 +1615,6 @@
         "IPyth"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/PythStructs.sol": {
-      "lastModificationDate": 1748740168322,
-      "contentHash": "f43da46300095c422885907eb6f25052",
-      "sourceName": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 5000
-          },
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none"
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "evmVersion": "paris"
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "PythStructs"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/IPythEvents.sol": {
       "lastModificationDate": 1748740168318,
       "contentHash": "706e4e13d1848923ce42834f849033e1",
@@ -1624,7 +1624,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1665,7 +1665,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1712,7 +1712,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1748,16 +1748,16 @@
         "AgentLaunchpadMinimal"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCore.sol": {
-      "lastModificationDate": 1748748768901,
-      "contentHash": "9f721cf530da43d66e43f6606e60f373",
-      "sourceName": "contracts/AgentLaunchpadCore.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCoreV2Ultra.sol": {
+      "lastModificationDate": 1748752763830,
+      "contentHash": "faaab1eefc850b352b60d6570ed5589f",
+      "sourceName": "contracts/AgentLaunchpadCoreV2Ultra.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1790,12 +1790,58 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "AgentLaunchpadCore",
-        "IAgentLiquidityManager"
+        "AgentLaunchpadCoreV2Ultra",
+        "ISimpleAMM"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCoreV2Optimized.sol": {
+      "lastModificationDate": 1748751884119,
+      "contentHash": "64945c75c9424ce24f70a8da4e8388a4",
+      "sourceName": "contracts/AgentLaunchpadCoreV2Optimized.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "evmVersion": "paris"
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "./AgentToken.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AgentLaunchpadCoreV2Optimized",
+        "ISimpleAMM"
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCoreV2Minimal.sol": {
-      "lastModificationDate": 1748751662586,
+      "lastModificationDate": 1748751831346,
       "contentHash": "aa034007707e5d5fbd4daf8c3dc94e69",
       "sourceName": "contracts/AgentLaunchpadCoreV2Minimal.sol",
       "solcConfig": {
@@ -1803,7 +1849,7 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1840,16 +1886,16 @@
         "ISimpleAMM"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCoreV2Optimized.sol": {
-      "lastModificationDate": 1748751871991,
-      "contentHash": "64945c75c9424ce24f70a8da4e8388a4",
-      "sourceName": "contracts/AgentLaunchpadCoreV2Optimized.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadCore.sol": {
+      "lastModificationDate": 1748748768901,
+      "contentHash": "9f721cf530da43d66e43f6606e60f373",
+      "sourceName": "contracts/AgentLaunchpadCore.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 5000
+            "runs": 1
           },
           "viaIR": true,
           "metadata": {
@@ -1882,8 +1928,8 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "AgentLaunchpadCoreV2Optimized",
-        "ISimpleAMM"
+        "AgentLaunchpadCore",
+        "IAgentLiquidityManager"
       ]
     }
   }

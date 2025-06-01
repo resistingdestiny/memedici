@@ -104,14 +104,18 @@ async def force_dataset_upload(request: ForceUploadRequest):
     logger.info(f"🚀 Manual dataset upload requested (force={request.force})")
     
     try:
+        # Get entries based on force flag
         if request.force:
-            # Force upload: get all pending entries
+            logger.info("📋 Force upload: Getting ALL pending entries")
             pending_entries = dataset_manager._get_pending_entries()
         else:
-            # Time-based upload: get entries older than upload_delay_minutes
+            logger.info("⏰ Time-based upload: Getting entries older than upload delay")
             pending_entries = dataset_manager._get_time_based_pending_entries()
         
+        logger.info(f"📊 Found {len(pending_entries)} entries to upload")
+        
         if not pending_entries:
+            logger.warning("⚠️  No entries available for upload")
             return {
                 "success": False,
                 "message": "No entries to upload or batch size not reached",
@@ -119,6 +123,7 @@ async def force_dataset_upload(request: ForceUploadRequest):
             }
         
         # Create dataset batch
+        logger.info("📦 Creating dataset batch for upload")
         dataset_batch = {
             "dataset_info": {
                 "dataset_name": "memedici_ai_training_data",
@@ -134,11 +139,18 @@ async def force_dataset_upload(request: ForceUploadRequest):
             "entries": [asdict(entry) for entry in pending_entries]
         }
         
-        # Upload directly using IPNS method
+        # Always upload via IPNS method
         filename = f"dataset_batch_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{len(pending_entries)}entries.json"
+        logger.info(f"🌐 Uploading to IPNS with filename: {filename}")
+        
         result = dataset_manager.upload_and_publish_to_ipns(dataset_batch, filename)
         
-        if result["success"]:
+        if result.get("success"):
+            logger.info(f"✅ Upload successful! CID: {result.get('cid')}")
+            logger.info(f"🔗 Primary URL: {result.get('primary_url')}")
+            logger.info(f"📊 IPNS Published: {result.get('ipns_published')}")
+            logger.info(f"📏 File size: {result.get('file_size')} bytes")
+            
             # Mark entries as uploaded
             file_cid = result["cid"]
             for entry in pending_entries:
@@ -151,19 +163,41 @@ async def force_dataset_upload(request: ForceUploadRequest):
                 entry.metadata['upload_trigger'] = "force" if request.force else "time_based"
                 dataset_manager._mark_entry_uploaded(entry.id)
             
+            logger.info(f"📝 Marked {len(pending_entries)} entries as uploaded")
+            
+            # Save batch info
+            dataset_manager._save_batch_info(
+                cid=file_cid,
+                entry_count=len(pending_entries),
+                entries=pending_entries,
+                file_size=result.get("file_size"),
+                filename=filename,
+                primary_url=result.get("primary_url"),
+                ipns_address=result.get("ipns_address"),
+                ipns_published=result.get("ipns_published", False),
+                addressing_method=result.get("addressing_method")
+            )
+            
+            stats = dataset_manager.get_dataset_stats()
+            
             return {
                 "success": True,
-                "message": "Dataset batch uploaded successfully",
-                "filecoin_cid": result.get("cid"),
+                "message": "Dataset batch uploaded successfully via IPNS",
+                "filecoin_cid": file_cid,
                 "primary_url": result.get("primary_url"),
                 "ipns_address": result.get("ipns_address"),
-                "gateway_url": f"https://gateway.lighthouse.storage/ipfs/{result.get('cid')}",
+                "direct_ipfs_url": result.get("direct_ipfs_url"),
+                "gateway_url": f"https://gateway.lighthouse.storage/ipfs/{file_cid}",
                 "dataset_tag": dataset_manager.dataset_tag,
+                "upload_trigger": "force" if request.force else "time_based",
                 "ipns_published": result.get("ipns_published", False),
                 "addressing_method": result.get("addressing_method"),
-                "entries_uploaded": len(pending_entries)
+                "entries_uploaded": len(pending_entries),
+                "file_size": result.get("file_size"),
+                "stats": stats
             }
         else:
+            logger.error(f"❌ Upload failed: {result.get('error')}")
             return {
                 "success": False,
                 "message": "IPNS upload failed",
@@ -172,6 +206,182 @@ async def force_dataset_upload(request: ForceUploadRequest):
             
     except Exception as e:
         logger.error(f"❌ Error uploading dataset: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload/force")
+async def force_upload_all_entries():
+    """Force upload ALL pending entries regardless of time conditions or batch size."""
+    logger.info("🚀 FORCE upload requested - uploading ALL pending entries")
+    
+    try:
+        # Get all pending entries
+        logger.info("📋 Getting ALL pending entries for force upload")
+        pending_entries = dataset_manager._get_pending_entries()
+        
+        logger.info(f"📊 Found {len(pending_entries)} entries for force upload")
+        
+        if not pending_entries:
+            logger.warning("⚠️  No entries available for force upload")
+            return {
+                "success": False,
+                "message": "No entries available for upload",
+                "stats": dataset_manager.get_dataset_stats()
+            }
+        
+        # Create dataset batch
+        logger.info("📦 Creating dataset batch for force upload")
+        dataset_batch = {
+            "dataset_info": {
+                "dataset_name": "memedici_ai_training_data",
+                "version": "1.0",
+                "description": "Decentralized AI training dataset from MemeDici platform (FORCE UPLOAD)",
+                "license": "Creative Commons Attribution 4.0",
+                "created_by": "MemeDici DAO",
+                "batch_timestamp": datetime.utcnow().isoformat(),
+                "total_entries": len(pending_entries),
+                "schema_version": "1.0",
+                "upload_trigger": "force_all"
+            },
+            "entries": [asdict(entry) for entry in pending_entries]
+        }
+        
+        # Always upload via IPNS method
+        filename = f"dataset_force_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{len(pending_entries)}entries.json"
+        logger.info(f"🌐 Force uploading to IPNS with filename: {filename}")
+        
+        result = dataset_manager.upload_and_publish_to_ipns(dataset_batch, filename)
+        
+        if result.get("success"):
+            logger.info(f"✅ Force upload successful! CID: {result.get('cid')}")
+            logger.info(f"🔗 Primary URL: {result.get('primary_url')}")
+            logger.info(f"📊 IPNS Published: {result.get('ipns_published')}")
+            logger.info(f"📏 File size: {result.get('file_size')} bytes")
+            
+            # Mark entries as uploaded
+            file_cid = result["cid"]
+            for entry in pending_entries:
+                entry.metadata['filecoin_cid'] = file_cid
+                entry.metadata['primary_url'] = result.get("primary_url")
+                entry.metadata['ipns_address'] = result.get("ipns_address")
+                entry.metadata['ipns_published'] = result.get("ipns_published", False)
+                entry.metadata['addressing_method'] = result.get("addressing_method")
+                entry.metadata['batch_upload_timestamp'] = datetime.utcnow().isoformat()
+                entry.metadata['upload_trigger'] = "force_all"
+                dataset_manager._mark_entry_uploaded(entry.id)
+            
+            logger.info(f"📝 Marked {len(pending_entries)} entries as uploaded (force)")
+            
+            # Save batch info
+            dataset_manager._save_batch_info(
+                cid=file_cid,
+                entry_count=len(pending_entries),
+                entries=pending_entries,
+                file_size=result.get("file_size"),
+                filename=filename,
+                primary_url=result.get("primary_url"),
+                ipns_address=result.get("ipns_address"),
+                ipns_published=result.get("ipns_published", False),
+                addressing_method=result.get("addressing_method")
+            )
+            
+            stats = dataset_manager.get_dataset_stats()
+            
+            return {
+                "success": True,
+                "message": "Force upload completed - all pending entries uploaded via IPNS",
+                "filecoin_cid": file_cid,
+                "primary_url": result.get("primary_url"),
+                "ipns_address": result.get("ipns_address"),
+                "direct_ipfs_url": result.get("direct_ipfs_url"),
+                "gateway_url": f"https://gateway.lighthouse.storage/ipfs/{file_cid}",
+                "dataset_tag": dataset_manager.dataset_tag,
+                "upload_trigger": "force_all",
+                "ipns_published": result.get("ipns_published", False),
+                "addressing_method": result.get("addressing_method"),
+                "entries_uploaded": len(pending_entries),
+                "file_size": result.get("file_size"),
+                "stats": stats
+            }
+        else:
+            logger.error(f"❌ Force upload failed: {result.get('error')}")
+            return {
+                "success": False,
+                "message": "Force upload failed",
+                "error": result.get("error")
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Error in force upload: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/entries")
+async def get_current_dataset_entries():
+    """Get current dataset entries for inspection before upload."""
+    logger.info("📋 Retrieving current dataset entries")
+    
+    try:
+        # Get all pending entries
+        pending_entries = dataset_manager._get_pending_entries()
+        
+        # Get time-based pending entries
+        time_based_pending = dataset_manager._get_time_based_pending_entries()
+        
+        # Format entries for viewing
+        formatted_entries = []
+        for entry in pending_entries:
+            formatted_entry = {
+                "id": entry.id,
+                "timestamp": entry.timestamp,
+                "session_id": entry.session_id,
+                "input": {
+                    "prompt": entry.input.get("prompt", "")[:200] + "..." if len(entry.input.get("prompt", "")) > 200 else entry.input.get("prompt", ""),
+                    "agent_id": entry.input.get("agent_id"),
+                    "agent_name": entry.input.get("agent_name"),
+                    "interaction_type": entry.input.get("interaction_type")
+                },
+                "output": {
+                    "success": entry.output.get("success"),
+                    "artworks_created": entry.output.get("artworks_created", 0),
+                    "tools_used": entry.output.get("tools_used", []),
+                    "generation_time_ms": entry.output.get("generation_time_ms", 0),
+                    "response_preview": entry.output.get("response", "")[:100] + "..." if len(entry.output.get("response", "")) > 100 else entry.output.get("response", "")
+                },
+                "feedback": entry.feedback if entry.feedback else None,
+                "metadata": {
+                    "content_hash": entry.metadata.get("content_hash"),
+                    "platform": entry.metadata.get("platform"),
+                    "filecoin_cid": entry.metadata.get("filecoin_cid"),
+                    "upload_status": "uploaded" if entry.metadata.get("filecoin_cid") else "pending"
+                },
+                "time_based_ready": entry in time_based_pending
+            }
+            formatted_entries.append(formatted_entry)
+        
+        # Sort by timestamp (newest first)
+        formatted_entries.sort(key=lambda x: x["timestamp"], reverse=True)
+        
+        stats = dataset_manager.get_dataset_stats()
+        
+        return {
+            "success": True,
+            "total_entries": len(formatted_entries),
+            "time_based_ready_count": len(time_based_pending),
+            "entries": formatted_entries,
+            "upload_settings": {
+                "upload_delay_minutes": dataset_manager.upload_delay_minutes,
+                "time_based_ready": len(time_based_pending),
+                "strategy": "time_based_with_immediate_feedback"
+            },
+            "stats_summary": {
+                "total_entries": stats["total_entries"],
+                "uploaded_entries": stats["uploaded_entries"],
+                "pending_entries": stats["pending_entries"],
+                "avg_rating": stats["avg_rating"]
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error retrieving dataset entries: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/storage")
