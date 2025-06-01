@@ -24,11 +24,12 @@
 [context.branch-deploy]
   command = "npm run clean && npm run build"
 
-# SPA redirect for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# SPA redirects now handled by _redirects file in public directory
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
+#   force = false
 
 # Headers for security and performance
 [[headers]]
