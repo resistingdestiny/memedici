@@ -108,7 +108,7 @@ export function CityScene() {
     studios, 
     currentGalleryStudio, 
     closeAllPinnedOverlays,
-    loadStudiosFromAPI,
+    initializeStudios,
   } = useCityStore();
 
   const { 
@@ -153,7 +153,7 @@ export function CityScene() {
       try {
     if (studios.length === 0) {
       console.log('🏛️ Initializing studios...');
-          await loadStudiosFromAPI();
+          await initializeStudios();
     }
 
     if (agents.length === 0) {
@@ -204,7 +204,7 @@ export function CityScene() {
       // Don't automatically clear cache on unmount - let it persist for better performance
       console.log('🏛️ CityScene unmounting, keeping GLB cache for faster reloads');
     };
-  }, [studios.length, agents.length, loadStudiosFromAPI, fetchAgents]);
+  }, [studios.length, agents.length, initializeStudios, fetchAgents]);
 
   // Handle WebGL context loss and restoration
   useEffect(() => {
