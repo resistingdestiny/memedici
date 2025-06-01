@@ -232,4 +232,74 @@ async def get_agent_recent_artworks(agent_id: str, days: int = 7):
             session.close()
             
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving recent artworks: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error retrieving recent artworks: {str(e)}")
+
+@router.get("/")
+async def list_all_artworks(limit: int = 20, offset: int = 0, include_details: bool = False):
+    """List all artworks across all agents with pagination."""
+    try:
+        session = SessionLocal()
+        try:
+            artworks = session.query(GeneratedArtworkDB)\
+                .order_by(GeneratedArtworkDB.created_at.desc())\
+                .offset(offset)\
+                .limit(limit)\
+                .all()
+            
+            total_count = session.query(GeneratedArtworkDB).count()
+            
+            artwork_list = []
+            for artwork in artworks:
+                # Get agent info for each artwork
+                try:
+                    agent_info = agent_registry.get_agent_info(artwork.agent_id)
+                except:
+                    agent_info = {}
+                
+                artwork_data = {
+                    "id": artwork.id,
+                    "agent_id": artwork.agent_id,
+                    "agent_name": agent_info.get("identity", {}).get("display_name", artwork.agent_id),
+                    "artwork_type": artwork.artwork_type,
+                    "prompt": artwork.prompt[:100] + "..." if len(artwork.prompt) > 100 else artwork.prompt,
+                    "model_name": artwork.model_name,
+                    "model_type": artwork.model_type,
+                    "file_url": artwork.file_url,
+                    "file_size": artwork.file_size,
+                    "created_at": artwork.created_at.isoformat() if artwork.created_at else None
+                }
+                
+                # Include full details if requested
+                if include_details:
+                    artwork_data.update({
+                        "full_prompt": artwork.prompt,
+                        "negative_prompt": artwork.negative_prompt,
+                        "parameters": artwork.parameters,
+                        "metadata": artwork.artwork_metadata,
+                        "file_path": artwork.file_path,
+                        "agent_info": {
+                            "display_name": agent_info.get("identity", {}).get("display_name", artwork.agent_id),
+                            "studio_name": agent_info.get("studio", {}).get("name", "Unknown Studio"),
+                            "art_style": agent_info.get("studio", {}).get("art_style", "Unknown Style"),
+                            "avatar_url": agent_info.get("identity", {}).get("avatar_url", None)
+                        }
+                    })
+                
+                artwork_list.append(artwork_data)
+            
+            return {
+                "success": True,
+                "artworks": artwork_list,
+                "pagination": {
+                    "limit": limit,
+                    "offset": offset,
+                    "has_more": total_count > offset + limit,
+                    "total_pages": (total_count + limit - 1) // limit,
+                    "total_count": total_count
+                }
+            }
+        finally:
+            session.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving artworks: {str(e)}") 
