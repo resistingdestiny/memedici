@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./AgentToken.sol";
 
 // Uniswap V2 Interfaces
@@ -28,29 +27,22 @@ interface IUniswapV2Factory {
 
 /**
  * @title AgentLaunchpad
- * @dev Launchpad for creating and funding AI creative agents with automatic LP deployment
+ * @dev Launchpad for creating and funding AI creative agents
  */
-contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
+contract AgentLaunchpad is Ownable, ReentrancyGuard {
     
     // Agent Configuration Structure
     struct AgentConfig {
         string name;
         string symbol;
         string agentName;
-        string archetype;
-        string metadataURI;
         uint256 fundingTarget;
         uint256 tokenSupply;
-        uint256 liquidityTokens;
-        uint256 treasuryTokens;
         address creator;
         bool isBonded;
-        bool isCancelled;
         uint256 totalRaised;
-        uint256 createdAt;
         address tokenAddress;
         address lpPairAddress;
-        uint256 seed;
         string agentConfigJSON;
     }
     
@@ -58,7 +50,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
     uint256 private _agentIdCounter;
     mapping(uint256 => AgentConfig) public agents;
     mapping(uint256 => mapping(address => uint256)) public contributions;
-    mapping(address => uint256[]) public userAgents;
     
     // Protocol Configuration
     address public treasuryAddress;
@@ -77,7 +68,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         address indexed creator,
         address tokenAddress,
         string agentName,
-        uint256 fundingTarget,
         string agentConfigJSON
     );
     
@@ -88,39 +78,18 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         uint256 totalRaised
     );
     
-    event ContributionWithdrawn(
-        uint256 indexed agentId,
-        address indexed contributor,
-        uint256 amount
-    );
-    
     event AgentBonded(
         uint256 indexed agentId,
         address indexed tokenAddress,
         address indexed lpPairAddress,
-        uint256 liquidityAdded,
-        uint256 seed,
         string agentConfigJSON
-    );
-    
-    event AgentCancelled(uint256 indexed agentId, string reason);
-    
-    event LiquidityProvided(
-        uint256 indexed agentId,
-        address indexed lpTokenAddress,
-        uint256 tokenAmount,
-        uint256 ethAmount
     );
     
     // Errors
     error AgentNotFound();
     error AgentAlreadyBonded();
-    error AgentCancelledError();
     error FundingTargetNotMet();
     error FundingTargetExceeded();
-    error NoContribution();
-    error WithdrawalNotAllowed();
-    error InvalidFeePercentage();
     error InvalidAddress();
     error TransferFailed();
     
@@ -148,19 +117,14 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         uint256 fundingTarget,
         uint256 tokenSupply,
         string calldata agentConfigJSON
-    ) external whenNotPaused returns (uint256 agentId) {
+    ) external returns (uint256 agentId) {
         require(fundingTarget > 0, "Invalid funding target");
         require(tokenSupply > 0, "Invalid token supply");
         require(bytes(name).length > 0, "Invalid name");
         require(bytes(symbol).length > 0, "Invalid symbol");
         require(bytes(agentConfigJSON).length > 0, "Invalid agent config JSON");
         
-        agentId = _agentIdCounter;
-        _agentIdCounter++;
-        
-        // Calculate token allocations
-        uint256 liquidityTokens = (tokenSupply * defaultTokenLPPercentage) / BASIS_POINTS;
-        uint256 treasuryTokens = tokenSupply - liquidityTokens;
+        agentId = _agentIdCounter++;
         
         // Deploy agent token contract
         AgentToken agentToken = new AgentToken(
@@ -179,36 +143,26 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
             name: name,
             symbol: symbol,
             agentName: agentName,
-            archetype: archetype,
-            metadataURI: metadataURI,
             fundingTarget: fundingTarget,
             tokenSupply: tokenSupply,
-            liquidityTokens: liquidityTokens,
-            treasuryTokens: treasuryTokens,
             creator: msg.sender,
             isBonded: false,
-            isCancelled: false,
             totalRaised: 0,
-            createdAt: block.timestamp,
             tokenAddress: address(agentToken),
             lpPairAddress: address(0),
-            seed: 0,
             agentConfigJSON: agentConfigJSON
         });
         
-        userAgents[msg.sender].push(agentId);
-        
-        emit AgentCreated(agentId, msg.sender, address(agentToken), agentName, fundingTarget, agentConfigJSON);
+        emit AgentCreated(agentId, msg.sender, address(agentToken), agentName, agentConfigJSON);
     }
     
     /**
      * @dev Contribute ETH to an agent's funding campaign
      */
-    function contribute(uint256 agentId) external payable nonReentrant whenNotPaused {
+    function contribute(uint256 agentId) external payable nonReentrant {
         AgentConfig storage agent = agents[agentId];
         if (agent.creator == address(0)) revert AgentNotFound();
         if (agent.isBonded) revert AgentAlreadyBonded();
-        if (agent.isCancelled) revert AgentCancelledError();
         
         require(msg.value > 0, "Must contribute more than 0");
         
@@ -228,26 +182,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Withdraw contribution (only allowed before bonding)
-     */
-    function withdrawContribution(uint256 agentId) external nonReentrant {
-        AgentConfig storage agent = agents[agentId];
-        if (agent.creator == address(0)) revert AgentNotFound();
-        if (agent.isBonded) revert WithdrawalNotAllowed();
-        
-        uint256 contributionAmount = contributions[agentId][msg.sender];
-        if (contributionAmount == 0) revert NoContribution();
-        
-        contributions[agentId][msg.sender] = 0;
-        agent.totalRaised -= contributionAmount;
-        
-        (bool success, ) = payable(msg.sender).call{value: contributionAmount}("");
-        if (!success) revert TransferFailed();
-        
-        emit ContributionWithdrawn(agentId, msg.sender, contributionAmount);
-    }
-    
-    /**
      * @dev Manually bond an agent (only if funding target is met)
      */
     function bondAgent(uint256 agentId) external nonReentrant {
@@ -255,7 +189,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         if (agent.creator == address(0)) revert AgentNotFound();
         if (agent.totalRaised < agent.fundingTarget) revert FundingTargetNotMet();
         if (agent.isBonded) revert AgentAlreadyBonded();
-        if (agent.isCancelled) revert AgentCancelledError();
         
         _bondAgent(agentId);
     }
@@ -273,9 +206,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         
         // Mark as bonded
         agent.isBonded = true;
-        
-        // Generate simple seed (block-based for now)
-        agent.seed = uint256(keccak256(abi.encode(agentId, block.timestamp, block.prevrandao)));
         
         // Send protocol fee to treasury
         if (protocolFee > 0) {
@@ -297,10 +227,13 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         }
         
         // Transfer treasury tokens to treasury
-        AgentToken agentToken = AgentToken(agent.tokenAddress);
-        agentToken.transfer(treasuryAddress, agent.treasuryTokens);
+        uint256 liquidityTokens = (agent.tokenSupply * defaultTokenLPPercentage) / BASIS_POINTS;
+        uint256 treasuryTokens = agent.tokenSupply - liquidityTokens;
         
-        emit AgentBonded(agentId, agent.tokenAddress, lpPair, liquidityETH, agent.seed, agent.agentConfigJSON);
+        AgentToken agentToken = AgentToken(agent.tokenAddress);
+        agentToken.transfer(treasuryAddress, treasuryTokens);
+        
+        emit AgentBonded(agentId, agent.tokenAddress, lpPair, agent.agentConfigJSON);
     }
     
     /**
@@ -319,56 +252,56 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
             lpPair = factory.createPair(agent.tokenAddress, weth);
         }
         
+        // Calculate liquidity tokens
+        uint256 liquidityTokens = (agent.tokenSupply * defaultTokenLPPercentage) / BASIS_POINTS;
+        
         // Approve router to spend tokens
-        agentToken.approve(uniswapRouter, agent.liquidityTokens);
+        agentToken.approve(uniswapRouter, liquidityTokens);
         
         // Add liquidity
         IUniswapV2Router02(uniswapRouter).addLiquidityETH{value: ethAmount}(
             agent.tokenAddress,
-            agent.liquidityTokens,
-            agent.liquidityTokens,
+            liquidityTokens,
+            liquidityTokens,
             ethAmount,
             address(this),
             block.timestamp + 300
         );
         
-        emit LiquidityProvided(agentId, lpPair, agent.liquidityTokens, ethAmount);
-        
         return lpPair;
     }
     
+    // Admin Functions
+    
     /**
-     * @dev Cancel an unbonded agent (admin only)
+     * @dev Set treasury address
      */
-    function cancelAgent(uint256 agentId, string calldata reason) external onlyOwner {
-        AgentConfig storage agent = agents[agentId];
-        if (agent.creator == address(0)) revert AgentNotFound();
-        if (agent.isBonded) revert AgentAlreadyBonded();
-        
-        agent.isCancelled = true;
-        
-        emit AgentCancelled(agentId, reason);
+    function setTreasuryAddress(address _treasuryAddress) external onlyOwner {
+        if (_treasuryAddress == address(0)) revert InvalidAddress();
+        treasuryAddress = _treasuryAddress;
+    }
+    
+    /**
+     * @dev Set protocol fee percentage
+     */
+    function setProtocolFeePercentage(uint256 _feePercentage) external onlyOwner {
+        require(_feePercentage <= MAX_FEE, "Fee too high");
+        protocolFeePercentage = _feePercentage;
     }
     
     // View Functions
     
     /**
-     * @dev Get comprehensive agent information including JSON config
+     * @dev Get agent basic information
      */
     function getAgentInfo(uint256 agentId) external view returns (
         string memory name,
-        string memory symbol,
         string memory agentName,
-        string memory archetype,
-        string memory metadataURI,
         uint256 fundingTarget,
         uint256 totalRaised,
         bool isBonded,
-        bool isCancelled,
         address creator,
         address tokenAddress,
-        address lpPairAddress,
-        uint256 seed,
         string memory agentConfigJSON
     ) {
         AgentConfig storage agent = agents[agentId];
@@ -376,41 +309,30 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
         
         return (
             agent.name,
-            agent.symbol,
             agent.agentName,
-            agent.archetype,
-            agent.metadataURI,
             agent.fundingTarget,
             agent.totalRaised,
             agent.isBonded,
-            agent.isCancelled,
             agent.creator,
             agent.tokenAddress,
-            agent.lpPairAddress,
-            agent.seed,
             agent.agentConfigJSON
         );
     }
     
     /**
-     * @dev Get user's contribution to an agent
+     * @dev Get agent config JSON
      */
-    function getContribution(uint256 agentId, address user) external view returns (uint256) {
-        return contributions[agentId][user];
+    function getAgentConfigJSON(uint256 agentId) external view returns (string memory) {
+        AgentConfig storage agent = agents[agentId];
+        if (agent.creator == address(0)) revert AgentNotFound();
+        return agent.agentConfigJSON;
     }
     
     /**
-     * @dev Get total raised for an agent
+     * @dev Get user's contribution for an agent
      */
-    function getTotalRaised(uint256 agentId) external view returns (uint256) {
-        return agents[agentId].totalRaised;
-    }
-    
-    /**
-     * @dev Check if agent is bonded
-     */
-    function isAgentBonded(uint256 agentId) external view returns (bool) {
-        return agents[agentId].isBonded;
+    function getContribution(uint256 agentId, address contributor) external view returns (uint256) {
+        return contributions[agentId][contributor];
     }
     
     /**
@@ -421,50 +343,28 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Get agents created by a user
+     * @dev Check if agent is bonded
      */
-    function getUserAgents(address user) external view returns (uint256[] memory) {
-        return userAgents[user];
+    function isAgentBonded(uint256 agentId) external view returns (bool) {
+        return agents[agentId].isBonded;
     }
     
     /**
-     * @dev Get agent seed (returns 0 if not yet generated)
+     * @dev Get liquidity pool address for an agent
      */
-    function getAgentSeed(uint256 agentId) external view returns (uint256) {
-        return agents[agentId].seed;
+    function getLiquidityPool(uint256 agentId) external view returns (address) {
+        return agents[agentId].lpPairAddress;
     }
     
     /**
-     * @dev Check if agent has a generated seed
-     */
-    function hasSeed(uint256 agentId) external view returns (bool) {
-        return agents[agentId].seed != 0;
-    }
-    
-    /**
-     * @dev Get agent configuration JSON only
-     */
-    function getAgentConfigJSON(uint256 agentId) external view returns (string memory) {
-        AgentConfig storage agent = agents[agentId];
-        if (agent.creator == address(0)) revert AgentNotFound();
-        return agent.agentConfigJSON;
-    }
-    
-    // Emergency Functions
-    
-    /**
-     * @dev Emergency withdrawal (only for unclaimed refunds)
+     * @dev Emergency function to recover ETH (admin only)
      */
     function emergencyWithdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-        (bool success, ) = payable(owner()).call{value: balance}("");
-        if (!success) revert TransferFailed();
+        payable(owner()).transfer(address(this).balance);
     }
     
     /**
-     * @dev Get contract balance
+     * @dev Receive function to allow ETH deposits
      */
-    function contractBalance() external view returns (uint256) {
-        return address(this).balance;
-    }
+    receive() external payable {}
 } 
