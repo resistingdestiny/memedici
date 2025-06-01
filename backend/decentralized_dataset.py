@@ -470,14 +470,27 @@ class DecentralizedDatasetManager:
 
     def _start_upload_timer(self):
         """Start a background timer for automatic uploads."""
-        threading.Timer(self.upload_delay_minutes * 60, self._perform_automatic_uploads).start()
+        timer = threading.Timer(self.upload_delay_minutes * 60, self._perform_automatic_uploads)
+        timer.daemon = True  # Don't block shutdown
+        timer.start()
+        self._current_timer = timer
 
     def _perform_automatic_uploads(self):
         """Perform automatic uploads based on the timer."""
-        pending_entries = self._get_pending_entries()
-        if pending_entries:
-            self.store_batch_to_filecoin()
+        try:
+            pending_entries = self._get_pending_entries()
+            if pending_entries:
+                self.store_batch_to_filecoin()
+        except Exception as e:
+            print(f"⚠️  Automatic upload failed: {e}")
+        
+        # Schedule next timer
         self._start_upload_timer()
+
+    def cleanup_timers(self):
+        """Cancel any running timers for clean shutdown."""
+        if hasattr(self, '_current_timer') and self._current_timer:
+            self._current_timer.cancel()
 
     def _get_time_based_pending_entries(self) -> List[DatasetEntry]:
         """Get entries that are older than upload_delay_minutes and haven't been uploaded."""

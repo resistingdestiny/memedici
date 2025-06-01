@@ -226,7 +226,7 @@ async def get_filecoin_storage_stats():
             "dataset_overview": {
                 "total_entries": dataset_stats["total_entries"],
                 "pending_entries": dataset_stats["pending_entries"],
-                "batch_settings": dataset_stats["batch_settings"]
+                "upload_settings": dataset_stats["upload_settings"]
             },
             "ipns_integration": ipns_info,
             "storage_overview": {

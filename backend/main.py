@@ -37,6 +37,7 @@ from routes.agents import router as agents_router
 from routes.studios import router as studios_router
 from routes.tools import router as tools_router
 from routes.artworks import router as artworks_router
+from routes.vlayer_routes import router as vlayer_router
 
 app = FastAPI(title="Memedici", version="2.0.0")
 
@@ -56,6 +57,7 @@ app.include_router(agents_router)
 app.include_router(studios_router)
 app.include_router(tools_router)
 app.include_router(artworks_router)
+app.include_router(vlayer_router)
 
 # Serve static files (for our HTML test interface)
 app.mount("/static", StaticFiles(directory="static"), name="static")
