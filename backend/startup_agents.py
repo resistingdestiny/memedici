@@ -4,9 +4,11 @@ Startup script to ensure crypto artist agents and studios are loaded into the da
 """
 import json
 import os
+import uuid
 import logging
 from pathlib import Path
-from agent_config import agent_registry, AgentConfig, Studio, StudioItem
+from datetime import datetime
+from agent_config import agent_registry, AgentConfig, Studio, StudioItem, GeneratedArtworkDB, SessionLocal
 
 logger = logging.getLogger('StartupAgents')
 
@@ -121,7 +123,10 @@ def load_agents_from_file():
                 # Blockchain Integration
                 blockchain_seed=agent_data.get("blockchain_seed")
             )
-            agents.append((agent_data["id"], config))
+            
+            # Include initial artworks data for database population
+            initial_artworks = agent_data.get("initial_artworks", [])
+            agents.append((agent_data["id"], config, initial_artworks))
         
         logger.info(f"🎭 Loaded {len(agents)} agent configurations from {agents_file}")
         return agents
@@ -154,11 +159,12 @@ def ensure_crypto_artists_loaded():
         
         logger.info(f"🎨 Studio loading complete: {studios_created} new studios created")
         
-        # Then, load and create all agents
+        # Then, load and create all agents with their artworks
         agents = load_agents_from_file()
         agents_created = 0
+        total_artworks_created = 0
         
-        for agent_id, config in agents:
+        for agent_id, config, initial_artworks in agents:
             try:
                 # Check if agent already exists
                 existing_config = agent_registry.get_agent_config(agent_id)
@@ -178,19 +184,50 @@ def ensure_crypto_artists_loaded():
                         studio = agent_registry.get_studio(config.studio_id)
                         studio_name = studio.name if studio else f"Studio {config.studio_id}"
                     logger.info(f"🔄 Updated agent: {config.display_name} ({agent_id}) -> {studio_name}")
+                
+                # Create artwork records for this agent
+                if initial_artworks:
+                    logger.info(f"🎨 Processing {len(initial_artworks)} initial artworks for {config.display_name}...")
+                    artwork_count = create_artwork_records(agent_id, initial_artworks)
+                    total_artworks_created += artwork_count
+                    
+                    # Update agent's artwork IDs list
+                    if artwork_count > 0:
+                        artwork_ids = []
+                        for artwork_data in initial_artworks:
+                            filename = artwork_data.get("filename", "")
+                            if filename:
+                                artwork_id = filename.replace("artwork_", "").replace(".png", "").replace(".mp4", "")
+                                if len(artwork_id) >= 8:
+                                    artwork_ids.append(artwork_id)
+                        
+                        if artwork_ids:
+                            config.artwork_ids = artwork_ids
+                            agent_registry.create_agent(agent_id, config)
+                            logger.info(f"🔗 Updated agent {agent_id} with {len(artwork_ids)} artwork IDs")
+                    
             except Exception as e:
                 logger.error(f"❌ Error creating agent {agent_id}: {e}")
         
         logger.info(f"🎭 Agent loading complete: {agents_created} new agents created")
+        logger.info(f"🖼️  Artwork loading complete: {total_artworks_created} artwork records created")
         
         # Summary
         total_studios = len(agent_registry.list_studios())
         total_agents = len(agent_registry.list_agents())
         
+        # Count total artworks in database
+        session = SessionLocal()
+        try:
+            total_artworks_db = session.query(GeneratedArtworkDB).count()
+        finally:
+            session.close()
+        
         logger.info("=" * 60)
         logger.info(f"🎉 Startup sequence complete!")
         logger.info(f"🎨 Total studios in database: {total_studios}")
         logger.info(f"🎭 Total agents in database: {total_agents}")
+        logger.info(f"🖼️  Total artworks in database: {total_artworks_db}")
         
         # Show studio assignments
         for studio_id in agent_registry.list_studios():
@@ -207,6 +244,111 @@ def ensure_crypto_artists_loaded():
         import traceback
         traceback.print_exc()
         raise
+
+def generate_full_url(filename: str, base_url: str = "https://memedici-backend.onrender.com") -> str:
+    """Generate a full URL for a static file."""
+    return f"{base_url}/static/artworks/{filename}"
+
+def create_artwork_records(agent_id: str, initial_artworks: list):
+    """Create database records for initial artworks."""
+    if not initial_artworks:
+        return 0
+    
+    session = SessionLocal()
+    created_count = 0
+    
+    try:
+        # Get base directory for file path validation
+        static_dir = Path(__file__).parent / "static" / "artworks"
+        
+        for artwork_data in initial_artworks:
+            filename = artwork_data.get("filename")
+            prompt = artwork_data.get("prompt", "")
+            created_at_str = artwork_data.get("created_at")
+            
+            if not filename or not prompt:
+                logger.warning(f"⚠️  Skipping invalid artwork data: {artwork_data}")
+                continue
+            
+            # Generate artwork ID from filename
+            artwork_id = filename.replace("artwork_", "").replace(".png", "").replace(".mp4", "")
+            if len(artwork_id) < 8:
+                artwork_id = str(uuid.uuid4())[:8]
+            
+            # Check if artwork already exists
+            existing = session.query(GeneratedArtworkDB).filter(GeneratedArtworkDB.id == artwork_id).first()
+            if existing:
+                logger.info(f"📍 Artwork already exists: {filename}")
+                continue
+            
+            # Validate file exists
+            file_path = static_dir / filename
+            if not file_path.exists():
+                logger.warning(f"⚠️  File not found: {file_path}")
+                continue
+            
+            # Determine artwork type
+            artwork_type = "video" if filename.endswith(".mp4") else "image"
+            
+            # Get file size
+            file_size = file_path.stat().st_size
+            
+            # Generate file URL
+            file_url = generate_full_url(filename)
+            
+            # Parse created_at timestamp
+            try:
+                created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+            except:
+                # Fallback to parsing from filename timestamp
+                try:
+                    timestamp_part = filename.split('_')[1] + "_" + filename.split('_')[2]
+                    created_at = datetime.strptime(timestamp_part, "%Y%m%d_%H%M%S")
+                except:
+                    created_at = datetime.utcnow()
+            
+            # Determine model info based on agent and artwork type
+            model_name = "historical_model"
+            model_type = "historical"
+            
+            # Create artwork record
+            db_artwork = GeneratedArtworkDB(
+                id=artwork_id,
+                agent_id=agent_id,
+                artwork_type=artwork_type,
+                prompt=prompt,
+                negative_prompt="",
+                model_name=model_name,
+                model_type=model_type,
+                parameters={
+                    "historical_import": True,
+                    "original_filename": filename
+                },
+                file_path=str(file_path.relative_to(Path(__file__).parent)),
+                file_url=file_url,
+                file_size=file_size,
+                artwork_metadata={
+                    "imported_from_startup": True,
+                    "original_created_at": created_at_str,
+                    "import_timestamp": datetime.utcnow().isoformat()
+                },
+                created_at=created_at
+            )
+            
+            session.add(db_artwork)
+            created_count += 1
+            logger.info(f"✅ Created artwork record: {filename} -> {artwork_id}")
+        
+        session.commit()
+        logger.info(f"💾 Created {created_count} artwork records for agent {agent_id}")
+        return created_count
+        
+    except Exception as e:
+        logger.error(f"❌ Error creating artwork records for agent {agent_id}: {e}")
+        session.rollback()
+        return 0
+    finally:
+        session.close()
 
 if __name__ == "__main__":
     ensure_crypto_artists_loaded() 

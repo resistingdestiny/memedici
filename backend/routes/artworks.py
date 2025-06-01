@@ -349,4 +349,58 @@ async def debug_database_connection():
             "success": False,
             "error": error_msg,
             "timestamp": datetime.utcnow().isoformat()
+        }
+
+@router.get("/debug/files")
+async def list_artwork_files():
+    """List all files in the static/artworks directory."""
+    try:
+        import os
+        from pathlib import Path
+        
+        static_artworks_path = Path("static/artworks")
+        
+        if not static_artworks_path.exists():
+            return {
+                "success": False,
+                "error": "static/artworks directory does not exist",
+                "path": str(static_artworks_path.absolute())
+            }
+        
+        # List all files in the directory
+        files = []
+        total_size = 0
+        
+        for file_path in static_artworks_path.iterdir():
+            if file_path.is_file():
+                stat = file_path.stat()
+                files.append({
+                    "filename": file_path.name,
+                    "size": stat.st_size,
+                    "size_mb": round(stat.st_size / (1024 * 1024), 2),
+                    "created": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "extension": file_path.suffix
+                })
+                total_size += stat.st_size
+        
+        # Sort by creation time (newest first)
+        files.sort(key=lambda x: x["created"], reverse=True)
+        
+        return {
+            "success": True,
+            "directory": str(static_artworks_path.absolute()),
+            "total_files": len(files),
+            "total_size_bytes": total_size,
+            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "files": files,
+            "file_types": {ext: len([f for f in files if f["extension"] == ext]) for ext in set(f["extension"] for f in files) if ext}
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error listing artwork files: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
         } 
