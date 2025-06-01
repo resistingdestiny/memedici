@@ -108,7 +108,7 @@ export function CityScene() {
     studios, 
     currentGalleryStudio, 
     closeAllPinnedOverlays,
-    initializeStudios,
+    loadStudiosFromAPI,
   } = useCityStore();
 
   const { 
@@ -153,7 +153,7 @@ export function CityScene() {
       try {
     if (studios.length === 0) {
       console.log('🏛️ Initializing studios...');
-          await initializeStudios();
+          await loadStudiosFromAPI();
     }
 
     if (agents.length === 0) {
@@ -204,7 +204,7 @@ export function CityScene() {
       // Don't automatically clear cache on unmount - let it persist for better performance
       console.log('🏛️ CityScene unmounting, keeping GLB cache for faster reloads');
     };
-  }, [studios.length, agents.length, initializeStudios, fetchAgents]);
+  }, [studios.length, agents.length, loadStudiosFromAPI, fetchAgents]);
 
   // Handle WebGL context loss and restoration
   useEffect(() => {
@@ -236,7 +236,19 @@ export function CityScene() {
   const apiAgents = agents || [];
   console.log('🤖 Using real agents from API:', apiAgents.length, 'agents loaded');
 
-  // Generate positions for real agents - spread them around the city
+  // Separate agents into assigned (to studios) and unassigned (roaming)
+  const assignedAgentIds = new Set(
+    studios.flatMap(studio => studio.assigned_agents)
+  );
+  
+  const unassignedAgents = apiAgents.filter(agent => 
+    !assignedAgentIds.has(agent.agent_id || agent.id)
+  );
+  
+  console.log('👥 Assigned agents:', assignedAgentIds.size);
+  console.log('🌍 Unassigned (roaming) agents:', unassignedAgents.length);
+
+  // Generate positions for unassigned agents - spread them around the city
   const generatePositions = (count: number) => {
     const positions: [number, number, number][] = [];
     const radius = 60; // Distance from center
@@ -250,10 +262,10 @@ export function CityScene() {
     return positions;
   };
 
-  const agentPositions = generatePositions(apiAgents.length);
+  const agentPositions = generatePositions(unassignedAgents.length);
 
-  // Transform API agents into roaming artists format
-  const roamingArtists = apiAgents.map((agent, index) => ({
+  // Transform API unassigned agents into roaming artists format
+  const roamingArtists = unassignedAgents.map((agent, index) => ({
     id: agent.agent_id,
     name: agent.name,
     specialty: agent.specialty[0] || 'Digital Artist',
@@ -548,16 +560,16 @@ export function CityScene() {
                 
                 {/* GLB STUDIOS - SPREAD OUT WITH AUTOMATIC SCALING */}
                 {studios.map((studio, index) => {
-                  // Map studios to available GLB files (excluding ams_s2, cyberpunk_bar, and missing files)
+                  // Available GLB files for studios - EXCLUDING exchange and agent builder buildings
                   const studioTypes = [
-                    'hw_4_cyberpunk_sci-fi_building.glb',
-                    'oriental_building.glb', 
-                    'mushroom_house.glb',
-                    'pastel_house.glb',
-                    'cyberpunk_bar.glb',
-                    'ams_s2.glb',
-                    'the_neko_stop-off__-_hand-painted_diorama.glb',
-                    'cyberpunk_robot.glb'
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/hw_4_cyberpunk_sci-fi_building.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/oriental_building.glb', 
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/mushroom_house.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/pastel_house.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/cyberpunk_bar.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/ams_s2.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/the_neko_stop-off__-_hand-painted_diorama.glb',
+                    'https://github.com/resistingdestiny/memedici/releases/download/files/cyberpunk_robot.glb'
                   ];
                   
                   // Use the studio's actual position and rotation from API data
@@ -576,7 +588,7 @@ export function CityScene() {
                   );
                 })}
                 
-                {/* ROAMING ARTISTS - GLIDING AROUND THE MAIN CITY 🎨👥 */}
+                {/* ROAMING ARTISTS - UNASSIGNED AGENTS GLIDING AROUND THE MAIN CITY 🎨👥 */}
                 {roamingArtists.map((artist) => (
                   <RoamingArtist
                     key={artist.id}
@@ -590,19 +602,62 @@ export function CityScene() {
                   />
                 ))}
                 
-                {/* STUDIO ARTISTS - NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
-                {/* studioArtists.map((artist) => (
-                  <RoamingArtist
-                    key={artist.id}
-                    artistId={artist.id}
-                    name={artist.name}
-                    specialty={artist.specialty}
-                    homeStudio={artist.homeStudio}
-                    initialPosition={artist.position}
-                    color={artist.color}
-                    onArtistClick={handleArtistClick}
-                  />
-                )) */}
+                {/* STUDIO ARTISTS - ASSIGNED AGENTS NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
+                {studios
+                  .filter(studio => studio.agent) // Only studios with assigned agents
+                  .map((studio) => (
+                    <RoamingArtist
+                      key={`studio-artist-${studio.agent!.agent_id || studio.agent!.id}`}
+                      artistId={studio.agent!.agent_id || studio.agent!.id}
+                      name={studio.agent!.name || studio.studioData.name}
+                      specialty={studio.agent!.specialty?.[0] || studio.studioData.art_style}
+                      homeStudio={studio.studioData.name}
+                      initialPosition={[
+                        studio.position[0] + (Math.random() - 0.5) * 10,
+                        studio.position[1] + 0.5,
+                        studio.position[2] + (Math.random() - 0.5) * 10
+                      ] as [number, number, number]}
+                      color="#00ffff" // Cyan color for studio artists
+                      onArtistClick={handleArtistClick}
+                      isFocused={focusAgentId === (studio.agent!.agent_id || studio.agent!.id) && shouldFocus}
+                    />
+                  ))
+                }
+
+                {/* EMPTY PLATFORM INDICATORS FOR STUDIOS WITHOUT AGENTS */}
+                {studios
+                  .filter(studio => !studio.agent) // Only studios without assigned agents
+                  .map((studio) => (
+                    <group key={`empty-${studio.id}`} position={studio.position}>
+                      {/* Empty platform visual indicator */}
+                      <mesh position={[0, 0.1, 0]}>
+                        <cylinderGeometry args={[3, 3, 0.2, 16]} />
+                        <meshLambertMaterial 
+                          color="#444444" 
+                          transparent 
+                          opacity={0.6} 
+                        />
+                      </mesh>
+                      
+                      {/* Floating text indicating available studio */}
+                      <Html position={[0, 2, 0]} center>
+                        <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-600 rounded-lg px-3 py-2 text-gray-300 text-center text-sm pointer-events-none">
+                          <div className="font-bold">{studio.studioData.name}</div>
+                          <div className="text-xs opacity-70">Available Studio</div>
+                          <div className="text-xs text-blue-400">{studio.studioData.theme}</div>
+                        </div>
+                      </Html>
+                      
+                      {/* Subtle ambient lighting for empty platforms */}
+                      <pointLight
+                        position={[0, 3, 0]}
+                        intensity={0.5}
+                        color="#4488ff"
+                        distance={10}
+                      />
+                    </group>
+                  ))
+                }
                 
                 {/* ENHANCED CENTRAL PLAZA */}
                 <MysteriousContraption />
@@ -610,9 +665,6 @@ export function CityScene() {
                 {/* NEW GLB FACILITIES - AUTOMATIC SCALING */}
                 <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />
                 <AgentBuilderHub position={[120, 0, 0]} hubId="builder1" />
-                
-                {/* REMOVED PASTEL HOUSES TO PREVENT WEBGL CONTEXT LOSS */}
-                {/* Only studio buildings remain for better stability */}
                 
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />
