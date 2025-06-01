@@ -335,6 +335,10 @@ export const useAgents = create<AgentsState>((set, get) => ({
         colour_palette: [],
         creation_rate: 4,
         collab_affinity: [],
+        
+        // Studio ID - REQUIRED FIELD
+        studio_id: `${data.name?.toLowerCase().replace(/\s+/g, '_') || `agent_${Date.now()}`}_studio`,
+        
         agent_type: "creative_artist",
         model_name: "gpt-3.5-turbo",
         temperature: 0.7,

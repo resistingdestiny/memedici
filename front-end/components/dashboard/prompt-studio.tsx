@@ -17,9 +17,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { sendPrompt } from "@/lib/stubs";
+import { chatWithAgent, type ChatResponse } from "@/lib/api";
 import { type Agent } from "@/lib/stubs";
-import { type ChatResponse } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 
 const promptSchema = z.object({
@@ -91,15 +90,17 @@ export function PromptStudio({ agent }: PromptStudioProps) {
     setGeneratedArtworks(undefined);
     
     try {
-      const result = await sendPrompt(agent.id, data.promptText);
+      // Use the real API chat endpoint with agent ID
+      const result = await chatWithAgent(agent.id, data.promptText);
       
-      if (result.success) {
+      if (result.success && result.response) {
         setIsSuccess(true);
-        setResponse(result.response || "Prompt sent successfully!");
+        setResponse(result.response);
         
         // Set generated artworks if any
         if (result.assets && Object.keys(result.assets).length > 0) {
           setGeneratedArtworks(result.assets);
+          console.log('🎨 Generated artworks:', result.assets);
         }
         
         // Reset form
@@ -114,9 +115,10 @@ export function PromptStudio({ agent }: PromptStudioProps) {
       } else {
         setErrorMessage(result.error || "Failed to send prompt. Please try again.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending prompt:", error);
-      setErrorMessage("Failed to send prompt. Please try again.");
+      const errorMsg = error?.response?.data?.detail || error?.message || "Failed to send prompt. Please try again.";
+      setErrorMessage(errorMsg);
     } finally {
       setIsSubmitting(false);
     }

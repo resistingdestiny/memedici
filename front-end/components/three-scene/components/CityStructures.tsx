@@ -47,7 +47,7 @@ export function MysteriousContraption() {
       {/* MYSTERIOUS CONTRAPTION GLB MODEL with automatic scaling */}
       <AnimatedScaledGLB 
         glbFile="https://siliconroads.com/16_mysterious_contraption.glb"
-        targetSizeOverride={20}
+        targetSizeOverride={40}
         playAllAnimations={true}
         castShadow
         receiveShadow
@@ -115,6 +115,12 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
           console.log('  Current hubId:', hubId);
           console.log('  Will set pinnedAgentHub to:', isPinned ? null : hubId);
           setPinnedAgentHub(isPinned ? null : hubId);
+          
+          // Clear hover state when unpinning to ensure clean state
+          if (isPinned) {
+            setHoveredAgentHub(null);
+          }
+          
           console.log('  ✅ setPinnedAgentHub called successfully');
           
           // Clear interaction flag after a delay
@@ -124,15 +130,25 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();
-          console.log('🔥 AGENT HUB HOVERED! Setting hover state');
-          console.log('  Setting hoveredAgentHub to:', hubId);
-          setHoveredAgentHub(hubId);
+          // Only set hover state if not already pinned
+          if (!isPinned) {
+            console.log('🔥 AGENT HUB HOVERED! Setting hover state');
+            console.log('  Setting hoveredAgentHub to:', hubId);
+            setHoveredAgentHub(hubId);
+          } else {
+            console.log('🔥 AGENT HUB HOVERED! But already pinned, ignoring hover');
+          }
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredAgentHub to: null');
-          setHoveredAgentHub(null);
+          // Only clear hover state if not pinned
+          if (!isPinned) {
+            console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
+            console.log('  Setting hoveredAgentHub to: null');
+            setHoveredAgentHub(null);
+          } else {
+            console.log('🔥 AGENT HUB UNHOVERED! But pinned, keeping modal open');
+          }
         }}
       >
         <meshStandardMaterial
@@ -238,6 +254,12 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
           console.log('  Current marketId:', marketId);
           console.log('  Will set pinnedMarketplace to:', isPinned ? null : marketId);
           setPinnedMarketplace(isPinned ? null : marketId);
+          
+          // Clear hover state when unpinning to ensure clean state
+          if (isPinned) {
+            setHoveredMarketplace(null);
+          }
+          
           console.log('  ✅ setPinnedMarketplace called successfully');
           
           // Clear interaction flag after a delay
@@ -247,15 +269,25 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();
-          console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
-          console.log('  Setting hoveredMarketplace to:', marketId);
-          setHoveredMarketplace(marketId);
+          // Only set hover state if not already pinned
+          if (!isPinned) {
+            console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
+            console.log('  Setting hoveredMarketplace to:', marketId);
+            setHoveredMarketplace(marketId);
+          } else {
+            console.log('🔥 MARKETPLACE HOVERED! But already pinned, ignoring hover');
+          }
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredMarketplace to: null');
-          setHoveredMarketplace(null);
+          // Only clear hover state if not pinned
+          if (!isPinned) {
+            console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
+            console.log('  Setting hoveredMarketplace to: null');
+            setHoveredMarketplace(null);
+          } else {
+            console.log('🔥 MARKETPLACE UNHOVERED! But pinned, keeping modal open');
+          }
         }}
       >
         <cylinderGeometry args={[25, 25, 3, 16]} />

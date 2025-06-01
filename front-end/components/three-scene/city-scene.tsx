@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { 
   OrbitControls, 
@@ -147,6 +147,21 @@ export function CityScene() {
   console.log('🏛️ CityScene - Current gallery studio:', currentGalleryStudio);
   console.log('🏛️ CityScene - URL params:', { focusAgentId, shouldFocus });
 
+  // Debug building positions for collision detection
+  useEffect(() => {
+    if (studios.length > 0) {
+      console.log('🏗️ Building Collision Detection Setup:');
+      console.log('  🏢 Agent Builder Hub: [120, 0, 0] (radius: 70)');
+      console.log('  🏬 Exchange Building: [0, 0, 140] (radius: 80)');
+      console.log('  🏛️ Central Plaza: [0, 0, 0] (radius: 50)');
+      console.log('  🎨 Studios:');
+      studios.forEach((studio, i) => {
+        console.log(`    ${i + 1}. ${studio.name}: [${studio.position[0].toFixed(1)}, ${studio.position[1]}, ${studio.position[2].toFixed(1)}] (radius: 50)`);
+      });
+      console.log('✅ All buildings have collision detection enabled');
+    }
+  }, [studios]);
+
   // Initialize studios and agents if they haven't been loaded yet
   useEffect(() => {
     const initializeData = async () => {
@@ -241,46 +256,132 @@ export function CityScene() {
     studios.flatMap(studio => (studio as any).assigned_agents || [])
   );
   
-  const unassignedAgents = apiAgents.filter(agent => 
-    !assignedAgentIds.has(agent.agent_id || agent.id)
-  );
+  // Show ALL agents as roaming artists - every agent walks around the city
+  const allAgentsForRoaming = apiAgents; // Include all agents, not just unassigned
   
-  console.log('👥 Assigned agents:', assignedAgentIds.size);
-  console.log('🌍 Unassigned (roaming) agents:', unassignedAgents.length);
+  console.log('👥 Assigned agents (also near studios):', assignedAgentIds.size);
+  console.log('🌍 All roaming agents (entire population):', allAgentsForRoaming.length);
 
-  // Generate positions for unassigned agents - spread them around the city
+  // Generate positions for ALL agents - spread them around the city
   const generatePositions = (count: number) => {
     const positions: [number, number, number][] = [];
-    const radius = 60; // Distance from center
+    const radius = 180; // Distance from center - increased from 60 to match new building spacing
+    
+    // Building avoidance zones - agents should spawn away from these
+    const buildingZones = [
+      { pos: [120, 0, 0], radius: 70, name: "Agent Builder Hub" },
+      { pos: [0, 0, 140], radius: 80, name: "Exchange Building" },
+      { pos: [0, 0, 0], radius: 50, name: "Central Plaza" },
+      // Add studio positions to avoidance zones
+      ...studios.map(studio => ({
+        pos: studio.position,
+        radius: 60, // Avoid getting too close to studios
+        name: studio.name
+      }))
+    ];
     
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
-      const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
-      positions.push([x, 0, z]);
+      let attempts = 0;
+      let validPosition = false;
+      
+      while (!validPosition && attempts < 30) {
+        const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5; // Add some randomness
+        const agentRadius = radius + (Math.random() - 0.5) * 100; // Increased variation from 60 to 100
+        const x = Math.cos(angle) * agentRadius + (Math.random() - 0.5) * 40;
+        const z = Math.sin(angle) * agentRadius + (Math.random() - 0.5) * 40;
+        
+        const testPosition: [number, number, number] = [x, 0, z];
+        
+        // Check if position is too close to any building
+        let tooCloseToBuilding = false;
+        for (const building of buildingZones) {
+          const distance = Math.sqrt(
+            Math.pow(x - building.pos[0], 2) + 
+            Math.pow(z - building.pos[2], 2)
+          );
+          if (distance < building.radius) {
+            tooCloseToBuilding = true;
+            break;
+          }
+        }
+        
+        // Check if too close to other agents
+        let tooCloseToOtherAgent = false;
+        for (const existingPos of positions) {
+          const distance = Math.sqrt(
+            Math.pow(x - existingPos[0], 2) + 
+            Math.pow(z - existingPos[2], 2)
+          );
+          if (distance < 30) { // Minimum distance between agents
+            tooCloseToOtherAgent = true;
+            break;
+          }
+        }
+        
+        if (!tooCloseToBuilding && !tooCloseToOtherAgent) {
+          positions.push(testPosition);
+          validPosition = true;
+          console.log(`✅ Agent ${i + 1} positioned at safe distance from buildings`);
+        } else {
+          attempts++;
+          if (attempts % 10 === 0) {
+            console.log(`⚠️ Agent ${i + 1} positioning attempt ${attempts}/30 - avoiding buildings`);
+          }
+        }
+      }
+      
+      // If we couldn't find a safe position, place agent far away
+      if (!validPosition) {
+        const fallbackAngle = (i / count) * Math.PI * 2;
+        const fallbackRadius = radius * 2; // Much further out
+        const fallbackX = Math.cos(fallbackAngle) * fallbackRadius;
+        const fallbackZ = Math.sin(fallbackAngle) * fallbackRadius;
+        positions.push([fallbackX, 0, fallbackZ]);
+        console.warn(`⚠️ Agent ${i + 1} placed at fallback position (far from buildings)`);
+      }
     }
+    
+    console.log(`✅ Generated ${positions.length} agent positions with building avoidance`);
     return positions;
   };
 
-  const agentPositions = generatePositions(unassignedAgents.length);
+  const agentPositions = useMemo(() => generatePositions(allAgentsForRoaming.length), [allAgentsForRoaming.length]);
 
-  // Transform API unassigned agents into roaming artists format
-  const roamingArtists = unassignedAgents.map((agent, index) => ({
-    id: agent.agent_id,
-    name: agent.name,
-    specialty: agent.specialty[0] || 'Digital Artist',
-    position: agentPositions[index] || [0, 0, 0],
-    color: `hsl(${(index * 137.5) % 360}, 70%, 60%)`, // Generate unique colors
-    isAIAgent: true,
-    avatar: agent.avatar,
-    description: agent.description,
-    stats: agent.stats,
-    greeting: agent.identity?.display_name 
-      ? `Hello! I'm ${agent.identity.display_name}, ${agent.description}. What would you like to create today?`
-      : `Hi! I'm ${agent.name}. Let's explore the world of ${agent.specialty[0]} together!`
-  }));
+  // Transform ALL API agents into roaming artists format - every agent walks around the city
+  const roamingArtists = useMemo(() => {
+    // Available GLB files for roaming artists
+    const roamingArtistModels = [
+      'https://siliconroads.com/cyberpunk_robot.glb',
+      'https://siliconroads.com/destiny_-_ghost_follower_giveaway.glb',
+      'https://siliconroads.com/genshin_destiny2_paimon_ghost.glb',
+      'https://siliconroads.com/ghost_ship.glb'
+    ];
+
+    return allAgentsForRoaming.map((agent, index) => {
+      // Use agent ID as seed for consistent random assignment
+      const seed = agent.agent_id ? agent.agent_id.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : index;
+      const modelIndex = seed % roamingArtistModels.length;
+      
+      return {
+        id: agent.agent_id,
+        name: agent.name,
+        specialty: agent.specialty[0] || 'Digital Artist',
+        position: agentPositions[index] || [0, 0, 0],
+        color: `hsl(${(index * 137.5) % 360}, 70%, 60%)`, // Generate unique colors
+        isAIAgent: true,
+        avatar: agent.avatar,
+        description: agent.description,
+        stats: agent.stats,
+        glbFile: roamingArtistModels[modelIndex], // Randomly assigned GLB model
+        greeting: agent.identity?.display_name 
+          ? `Hello! I'm ${agent.identity.display_name}, ${agent.description}. What would you like to create today?`
+          : `Hi! I'm ${agent.name}. Let's explore the world of ${agent.specialty[0]} together!`
+      };
+    });
+  }, [allAgentsForRoaming, agentPositions]);
 
   console.log('🎨 Transformed roaming artists:', roamingArtists.length);
+  console.log('✨ EVERY agent is now walking around the city! Assigned agents also appear near their studios.');
 
   // Handle agent focusing from URL parameters
   useEffect(() => {
@@ -322,45 +423,63 @@ export function CityScene() {
   // Handle artist interactions
   const handleArtistClick = (artist: any) => {
     console.log('🎨 Artist interaction:', artist);
-    setSelectedArtist(artist);
-    setIsChatMode(false);
     
-    // Find corresponding agent from the API data
+    // Check if this is the same artist that's already selected
+    const isSameArtist = selectedArtist && selectedArtist.id === artist.id;
+    
+    setSelectedArtist(artist);
+    
+    // Only reset chat mode if it's a different artist, preserve chat mode for same artist
+    if (!isSameArtist) {
+      setIsChatMode(false);
+    }
+    
+    // Find corresponding agent from the API data - improved matching
     const correspondingAgent = agents.find(agent => 
+      // Direct ID match (primary)
+      agent.agent_id === artist.id ||
+      agent.id === artist.id ||
+      // Name match (fallback) - exact match first, then partial
+      agent.name === artist.name ||
+      agent.name.toLowerCase() === artist.name.toLowerCase() ||
       agent.name.toLowerCase().includes(artist.name.toLowerCase()) ||
-      agent.specialty.some(spec => spec.toLowerCase().includes(artist.specialty.toLowerCase()))
+      artist.name.toLowerCase().includes(agent.name.toLowerCase())
     );
     
     if (correspondingAgent) {
-      setCurrentAgentId(correspondingAgent.agent_id);
-      console.log('🎯 Found corresponding agent:', correspondingAgent.name, correspondingAgent.agent_id);
+      setCurrentAgentId(correspondingAgent.agent_id || correspondingAgent.id);
+      console.log('🎯 Found corresponding agent:', correspondingAgent.name, correspondingAgent.agent_id || correspondingAgent.id);
     } else {
-      setCurrentAgentId(null);
-      console.log('⚠️ No corresponding agent found for artist:', artist.name);
+      // Instead of setting null, try to use the artist's ID directly
+      setCurrentAgentId(artist.id);
+      console.log('⚠️ No exact agent match found for artist:', artist.name, 'using artist ID:', artist.id);
     }
     
-    // Clear previous chat messages
-    clearChatMessages();
-    
-    // Add initial greeting message
-    const greeting: ChatMessage = {
-      id: Date.now().toString(),
-      sender: "agent",
-      message: artist.isAIAgent && artist.greeting 
-        ? artist.greeting 
-        : `Hello! I'm ${artist.name}, a ${artist.specialty}. Welcome to Medici City! What would you like to know about art?`,
-      timestamp: new Date(),
-      agentId: correspondingAgent?.agent_id
-    };
-    
-    addChatMessage(greeting);
+    // Only clear previous chat messages and add greeting if it's a different artist
+    if (!isSameArtist) {
+      // Clear previous chat messages
+      clearChatMessages();
+      
+      // Add initial greeting message - using real agent data
+      const greeting: ChatMessage = {
+        id: Date.now().toString(),
+        sender: "agent",
+        message: artist.isAIAgent && artist.greeting 
+          ? artist.greeting 
+          : `Hello! I'm ${artist.name}, a ${artist.specialty}. Welcome to Medici City! What would you like to know about art?`,
+        timestamp: new Date(),
+        agentId: correspondingAgent?.agent_id || correspondingAgent?.id || artist.id
+      };
+      
+      addChatMessage(greeting);
+    }
   };
 
-  // Handle sending chat messages with real API
+  // Handle sending chat messages with real API only
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !selectedArtist) return;
 
-    // If we have a corresponding agent from the API, use real chat
+    // Always use the real API - no more fallback to mock responses
     if (currentAgentId) {
       try {
         console.log('🚀 Sending message to agent:', currentAgentId);
@@ -368,44 +487,28 @@ export function CityScene() {
         setChatInput("");
       } catch (error) {
         console.error('❌ Chat error:', error);
-        // Error message is already added by the store
+        // Add a user-friendly error message to chat
+        const errorMessage: ChatMessage = {
+          id: Date.now().toString() + "error",
+          sender: "system",
+          message: `I'm having trouble connecting right now. Please try again in a moment. (Error: ${error instanceof Error ? error.message : 'Unknown error'})`,
+          timestamp: new Date(),
+          agentId: currentAgentId
+        };
+        addChatMessage(errorMessage);
+        setChatInput("");
       }
     } else {
-      // Fallback to mock chat for non-API artists
-      const userMessage: ChatMessage = {
-        id: Date.now().toString() + "user",
-        sender: "user",
-        message: chatInput.trim(),
+      // No agent ID available - show error instead of mock response
+      console.error('❌ No agent ID available for chat');
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString() + "no-agent",
+        sender: "system", 
+        message: "Sorry, I can't connect to this agent right now. Please try selecting a different agent or refresh the page.",
         timestamp: new Date(),
         agentId: undefined
       };
-
-      // Generate mock AI response
-      const generateResponse = () => {
-        if (selectedArtist.type === "AI Assistant") {
-          return `As an AI curator, I can tell you about the artworks here, the history of this ${selectedArtist.isActive ? "active studio" : "gallery space"}, or help you navigate the virtual experience. What interests you most?`;
-        } else {
-          const responses = [
-            `That's a great question! As a ${selectedArtist.specialty}, I find inspiration in the intersection of traditional techniques and digital innovation.`,
-            `You know, working ${selectedArtist.homeStudio ? `at ${selectedArtist.homeStudio}` : "as an independent artist"} has really shaped my perspective on art in the digital age.`,
-            `I'd love to show you some of my techniques! Have you tried experimenting with ${selectedArtist.specialty.toLowerCase()} yourself?`,
-            `The beauty of Medici City is how we can all learn from each other. What kind of art speaks to you most?`,
-            `Technology has revolutionized how we create, but the human touch in art will always be irreplaceable. What do you think?`
-          ];
-          return responses[Math.floor(Math.random() * responses.length)];
-        }
-      };
-
-      const artistResponse: ChatMessage = {
-        id: Date.now().toString() + "artist",
-        sender: "agent",
-        message: generateResponse(),
-        timestamp: new Date(),
-        agentId: undefined
-      };
-
-      addChatMessage(userMessage);
-      addChatMessage(artistResponse);
+      addChatMessage(errorMessage);
       setChatInput("");
     }
   };
@@ -562,18 +665,40 @@ export function CityScene() {
                 {studios.map((studio, index) => {
                   // Available GLB files for studios - EXCLUDING exchange and agent builder buildings
                   const studioTypes = [
-                    'https://siliconroads.com/hw_4_cyberpunk_sci-fi_building.glb',
                     'https://siliconroads.com/oriental_building.glb', 
                     'https://siliconroads.com/mushroom_house.glb',
                     'https://siliconroads.com/pastel_house.glb',
-                    'https://siliconroads.com/cyberpunk_bar.glb',
-                    'https://siliconroads.com/ams_s2.glb',
-                    'https://siliconroads.com/the_neko_stop-off__-_hand-painted_diorama.glb',
                     'https://siliconroads.com/cyberpunk_robot.glb'
+                    // NOTE: Excluded cyberpunk_bar.glb (Agent Builder), ams_s2.glb (Exchange), and neko diorama (Gallery Floating Island)
+                    // These are now dedicated facilities with specific functionality
                   ];
                   
-                  // Use the studio's actual position and rotation from API data
-                  const glbFile = studioTypes[index % studioTypes.length];
+                  // Determine GLB file based on studio theme/style for better matching
+                  let glbFile;
+                  const theme = studio.studioData.theme?.toLowerCase() || '';
+                  const artStyle = studio.studioData.art_style?.toLowerCase() || '';
+                  
+                  if (theme.includes('cyberpunk') || artStyle.includes('digital') || artStyle.includes('cyberpunk')) {
+                    // Assign cyberpunk building to cyberpunk-themed studios
+                    glbFile = 'https://siliconroads.com/hw_4_cyberpunk_sci-fi_building.glb';
+                    console.log(`🏙️ Assigning cyberpunk building to studio: ${studio.name}`);
+                  } else if (theme.includes('oriental') || theme.includes('eastern') || artStyle.includes('traditional')) {
+                    glbFile = 'https://siliconroads.com/oriental_building.glb';
+                  } else if (theme.includes('modern') || theme.includes('contemporary')) {
+                    glbFile = 'https://siliconroads.com/pastel_house.glb';
+                  } else if (theme.includes('fantasy') || theme.includes('whimsical')) {
+                    glbFile = 'https://siliconroads.com/mushroom_house.glb';
+                  } else {
+                    // Fallback to cycling through available types (excluding cyberpunk and neko)
+                    const fallbackTypes = [
+                      'https://siliconroads.com/oriental_building.glb', 
+                      'https://siliconroads.com/mushroom_house.glb',
+                      'https://siliconroads.com/pastel_house.glb',
+                      'https://siliconroads.com/cyberpunk_robot.glb'
+                    ];
+                    glbFile = fallbackTypes[index % fallbackTypes.length];
+                  }
+                  
                   const position = studio.position; // Use real position from API
                   const rotation = studio.rotation; // Use real rotation from API
                   
@@ -588,7 +713,7 @@ export function CityScene() {
                   );
                 })}
                 
-                {/* ROAMING ARTISTS - UNASSIGNED AGENTS GLIDING AROUND THE MAIN CITY 🎨👥 */}
+                {/* ROAMING ARTISTS - ALL AGENTS WALKING AROUND THE MAIN CITY 🎨👥 */}
                 {roamingArtists.map((artist) => (
                   <RoamingArtist
                     key={artist.id}
@@ -597,31 +722,48 @@ export function CityScene() {
                     specialty={artist.specialty}
                     initialPosition={artist.position}
                     color={artist.color}
+                    glbFile={artist.glbFile}
                     onArtistClick={handleArtistClick}
                     isFocused={focusAgentId === artist.id && shouldFocus}
                   />
                 ))}
                 
-                {/* STUDIO ARTISTS - ASSIGNED AGENTS NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
+                {/* STUDIO ARTISTS - ASSIGNED AGENTS ALSO NEAR THEIR RESPECTIVE STUDIOS 🏛️👨‍🎨 */}
                 {studios
                   .filter(studio => studio.agent) // Only studios with assigned agents
-                  .map((studio) => (
-                    <RoamingArtist
-                      key={`studio-artist-${studio.agent!.agent_id || studio.agent!.id}`}
-                      artistId={studio.agent!.agent_id || studio.agent!.id}
-                      name={studio.agent!.name || studio.studioData.name}
-                      specialty={studio.agent!.specialty?.[0] || studio.studioData.art_style}
-                      homeStudio={studio.studioData.name}
-                      initialPosition={[
-                        studio.position[0] + (Math.random() - 0.5) * 10,
-                        studio.position[1] + 0.5,
-                        studio.position[2] + (Math.random() - 0.5) * 10
-                      ] as [number, number, number]}
-                      color="#00ffff" // Cyan color for studio artists
-                      onArtistClick={handleArtistClick}
-                      isFocused={focusAgentId === (studio.agent!.agent_id || studio.agent!.id) && shouldFocus}
-                    />
-                  ))
+                  .map((studio, index) => {
+                    // Available GLB files for studio artists (can be same as roaming or different)
+                    const studioArtistModels = [
+                      'https://siliconroads.com/cyberpunk_robot.glb',
+                      'https://siliconroads.com/destiny_-_ghost_follower_giveaway.glb',
+                      'https://siliconroads.com/genshin_destiny2_paimon_ghost.glb',
+                      'https://siliconroads.com/ghost_ship.glb'
+                    ];
+                    
+                    // Use studio agent ID as seed for consistent assignment
+                    const agentId = studio.agent!.agent_id || studio.agent!.id;
+                    const seed = agentId ? agentId.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : index;
+                    const modelIndex = seed % studioArtistModels.length;
+                    
+                    return (
+                      <RoamingArtist
+                        key={`studio-artist-${agentId}`}
+                        artistId={agentId}
+                        name={studio.agent!.name || studio.studioData.name}
+                        specialty={studio.agent!.specialty?.[0] || studio.studioData.art_style}
+                        homeStudio={studio.studioData.name}
+                        initialPosition={[
+                          studio.position[0] + (Math.random() - 0.5) * 10,
+                          studio.position[1] + 0.5,
+                          studio.position[2] + (Math.random() - 0.5) * 10
+                        ] as [number, number, number]}
+                        color="#00ffff" // Cyan color for studio artists
+                        glbFile={studioArtistModels[modelIndex]}
+                        onArtistClick={handleArtistClick}
+                        isFocused={focusAgentId === agentId && shouldFocus}
+                      />
+                    );
+                  })
                 }
 
                 {/* EMPTY PLATFORM INDICATORS FOR STUDIOS WITHOUT AGENTS */}
@@ -662,9 +804,40 @@ export function CityScene() {
                 {/* ENHANCED CENTRAL PLAZA */}
                 <MysteriousContraption />
                 
-                {/* NEW GLB FACILITIES - AUTOMATIC SCALING */}
+                {/* NEW GLB FACILITIES - AUTOMATIC SCALING WITH COLLISION PREVENTION */}
                 <ExchangeBuilding position={[0, 0, 140]} marketId="exchange1" />
                 <AgentBuilderHub position={[120, 0, 0]} hubId="builder1" />
+                
+                {/* VISUAL DEBUG: Building avoidance zones (only in development) */}
+                {process.env.NODE_ENV === 'development' && (
+                  <>
+                    {/* Agent Builder Hub zone */}
+                    <mesh position={[120, 0.1, 0]} visible={false}>
+                      <cylinderGeometry args={[70, 70, 0.2, 32]} />
+                      <meshBasicMaterial color="#ff0000" transparent opacity={0.1} />
+                    </mesh>
+                    
+                    {/* Exchange Building zone */}
+                    <mesh position={[0, 0.1, 140]} visible={false}>
+                      <cylinderGeometry args={[80, 80, 0.2, 32]} />
+                      <meshBasicMaterial color="#ff0000" transparent opacity={0.1} />
+                    </mesh>
+                    
+                    {/* Central Plaza zone */}
+                    <mesh position={[0, 0.1, 0]} visible={false}>
+                      <cylinderGeometry args={[50, 50, 0.2, 32]} />
+                      <meshBasicMaterial color="#ff0000" transparent opacity={0.1} />
+                    </mesh>
+                    
+                    {/* Studio avoidance zones */}
+                    {studios.map((studio) => (
+                      <mesh key={`debug-${studio.id}`} position={[studio.position[0], 0.1, studio.position[2]]} visible={false}>
+                        <cylinderGeometry args={[50, 50, 0.2, 32]} />
+                        <meshBasicMaterial color="#ffff00" transparent opacity={0.1} />
+                      </mesh>
+                    ))}
+                  </>
+                )}
                 
                 {/* ENHANCED MOVEMENT CONTROLLER */}
                 <MovementController />
@@ -694,21 +867,21 @@ export function CityScene() {
           </button>
           
           {/* Container for image and info side by side */}
-          <div className="w-full max-w-[95vw] flex items-center justify-center gap-8">
+          <div className="w-full max-w-[98vw] flex items-center justify-center gap-8">
             {/* Full-size image - Left side */}
             <div className="flex-shrink-0">
               {lightboxData.artwork.image && (
                 <img 
                   src={lightboxData.artwork.image} 
                   alt={lightboxData.artwork.title || 'Artwork'}
-                  className="max-w-[60vw] max-h-[80vh] object-contain rounded-lg shadow-2xl border-4 border-cyan-400 shadow-cyan-400/50"
+                  className="max-w-[65vw] max-h-[85vh] object-contain rounded-lg shadow-2xl border-4 border-cyan-400 shadow-cyan-400/50"
                   onClick={(e) => e.stopPropagation()}
                 />
               )}
             </div>
             
             {/* Image info - Right side */}
-            <div className="flex-shrink-0 max-w-[30vw] text-left bg-black/90 backdrop-blur-xl rounded-2xl px-8 py-8 border-2 border-cyan-400/70 shadow-lg shadow-cyan-400/30">
+            <div className="flex-shrink-0 max-w-[32vw] text-left bg-black/90 backdrop-blur-xl rounded-2xl px-8 py-8 border-2 border-cyan-400/70 shadow-lg shadow-cyan-400/30">
               <h2 className="text-4xl font-bold text-white mb-4">{lightboxData.artwork.title || 'Untitled Artwork'}</h2>
               <p className="text-cyan-400 text-xl mb-3">Studio: {lightboxData.studio.name || 'Unknown Studio'}</p>
               <p className="text-purple-400 text-lg mt-4 font-medium">Neural Art Exhibition - MEDICI CITY</p>
@@ -744,7 +917,7 @@ export function CityScene() {
           onClick={() => setSelectedArtist(null)}
         >
           <div 
-            className="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl max-w-4xl w-full mx-4 shadow-2xl shadow-cyan-400/25 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col"
+            className="bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl max-w-5xl w-full mx-4 shadow-2xl shadow-cyan-400/25 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Enhanced Header for AI Agents */}

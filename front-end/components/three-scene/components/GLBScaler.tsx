@@ -89,13 +89,13 @@ function removeHelpers(rootObject: THREE.Object3D) {
 
 // Target sizes for different object types
 const TARGET_SIZES = {
-  building: 15.0,    // Buildings should be around 15 units (much larger studios)
+  building: 45.0,    // Buildings should be around 45 units (3x larger for oriental buildings)
   robot: 2.5,        // Robots should be around 2.5 units in their largest dimension
-  house: 12.0,       // Houses should be around 12 units (larger than buildings for residential feel)
+  house: 48.0,       // Houses should be around 48 units (4x bigger than original - doubled from 24.0)
   contraption: 25.0, // Mysterious contraption should be large and imposing
-  exchange: 35.0,    // Exchange building should be MUCH bigger
-  hub: 35.0,         // Agent builder hub should be MUCH bigger
-  cyberpunk: 25.0,   // Cyberpunk sci-fi building should be much bigger
+  exchange: 105.0,   // Exchange building should be 3x bigger (was 35.0, now 105.0)
+  hub: 70.0,         // Agent builder hub should be MUCH bigger (doubled from 35.0)
+  cyberpunk: 225.0,  // Cyberpunk sci-fi building should be 9x bigger than original (was 75.0, now 225.0)
   gallery: 30.0,     // Interdimensional art gallery should be large and impressive
   default: 5.0       // Default size for unknown types
 };
@@ -144,16 +144,30 @@ function scaleToFit(sceneOrGroup: THREE.Object3D, targetSize: number) {
   sceneOrGroup.scale.setScalar(scaleFactor);
 
   // 5) Re-center on the origin so the bottom sits at y=0
+  // Recalculate bounding box after scaling
   const bboxScaled = new THREE.Box3().setFromObject(sceneOrGroup);
   const minY = bboxScaled.min.y;
-  sceneOrGroup.position.y -= minY; // pull the model down so its lowest point is y=0
+  
+  // Special handling for the neko building and other diorama models
+  const fileName = sceneOrGroup.userData.fileName || '';
+  let yOffset = -minY; // Default: pull the model down so its lowest point is y=0
+  
+  if (fileName.toLowerCase().includes('neko') || fileName.toLowerCase().includes('diorama')) {
+    // For diorama models like neko, ensure they sit firmly on ground
+    yOffset = -minY - 1; // Push them down a bit more to ensure ground contact
+    console.log(`🏠 [${fileName}] Applied special ground positioning for diorama model`);
+  }
+  
+  sceneOrGroup.position.y = yOffset;
 
-  console.log(`📏 Auto-scaled ${sceneOrGroup.userData.fileName || 'GLB'}:`, {
+  console.log(`📏 Auto-scaled ${fileName || 'GLB'}:`, {
     originalSize: { x: size.x, y: size.y, z: size.z },
     maxDimension: maxDim,
     targetSize,
     scaleFactor,
-    finalScale: sceneOrGroup.scale.x
+    finalScale: sceneOrGroup.scale.x,
+    minY: minY,
+    yOffset: yOffset
   });
 }
 
@@ -477,7 +491,11 @@ export function preloadAllGLBFiles() {
     'diamond_hands.glb',
     'the_artist.glb',
     '16_mysterious_contraption.glb',
-    'fucursor.glb'
+    'fucursor.glb',
+    // New roaming artist models
+    'destiny_-_ghost_follower_giveaway.glb',
+    'genshin_destiny2_paimon_ghost.glb',
+    'ghost_ship.glb'
   ];
   
   commonFiles.forEach(preloadGLBFile);

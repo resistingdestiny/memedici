@@ -323,6 +323,111 @@ function StudioPageContent() {
     return unassigned;
   };
 
+  // Randomize function for testing
+  const randomizeStudioForm = () => {
+    // Predefined lists for random selection
+    const studioNames = [
+      "Ethereal Canvas",
+      "Digital Dreams Studio",
+      "Chromatic Laboratory",
+      "Synthesis Workshop",
+      "Temporal Art Space",
+      "Quantum Creative Hub",
+      "Neon Atelier",
+      "Virtual Gallery",
+      "Pixel Paradise",
+      "Future Craft Studio"
+    ];
+
+    const themes = [
+      "cyberpunk",
+      "minimalist",
+      "baroque",
+      "futuristic",
+      "organic",
+      "industrial",
+      "zen",
+      "surreal",
+      "classical",
+      "abstract"
+    ];
+
+    const artStyles = [
+      "digital painting",
+      "3D modeling",
+      "generative art",
+      "photo manipulation",
+      "vector illustration",
+      "mixed media",
+      "procedural art",
+      "AI-assisted art",
+      "interactive media",
+      "holographic art"
+    ];
+
+    const descriptions = [
+      "A cutting-edge creative space where technology meets artistic vision",
+      "Where imagination transcends the boundaries of traditional art",
+      "Exploring the intersection of human creativity and artificial intelligence",
+      "A sanctuary for digital artists pushing the limits of visual expression",
+      "Crafting tomorrow's masterpieces with today's technology",
+      "Where pixels become poetry and code becomes canvas",
+      "An experimental playground for revolutionary art forms",
+      "Bridging the gap between traditional techniques and digital innovation",
+      "Creating immersive experiences that challenge perception",
+      "A collaborative space for visionary artists and AI"
+    ];
+
+    const studioItemCategories = [
+      "equipment", "software", "lighting", "furniture", "inspiration", "materials", "tools"
+    ];
+
+    const studioItemNames = {
+      equipment: ["Neural Canvas Tablet", "Holographic Projector", "AI Rendering Server", "Motion Capture Rig"],
+      software: ["Quantum Paint Pro", "Reality Sculptor", "Consciousness Mapper", "Dream Compiler"],
+      lighting: ["Spectrum Infinity Lights", "Mood Resonance Array", "Solar Mimicry System", "Aurora Emulator"],
+      furniture: ["Ergonomic Creation Pod", "Floating Work Station", "Meditation Chair", "Inspiration Lounge"],
+      inspiration: ["Emotion Crystals", "Memory Fragments", "Dream Journal Archive", "Music Synthesis Orb"],
+      materials: ["Liquid Light", "Temporal Clay", "Quantum Pigments", "Digital Marble"],
+      tools: ["Reality Brush", "Dimension Chisel", "Time Sculptor", "Essence Extractor"]
+    };
+
+    const rarities = ["common", "uncommon", "rare", "epic", "legendary"];
+
+    // Generate random items
+    const randomItemCount = Math.floor(Math.random() * 4) + 2; // 2-5 items
+    const randomItems: StudioItem[] = [];
+    
+    for (let i = 0; i < randomItemCount; i++) {
+      const category = studioItemCategories[Math.floor(Math.random() * studioItemCategories.length)];
+      const nameOptions = studioItemNames[category as keyof typeof studioItemNames];
+      const name = nameOptions[Math.floor(Math.random() * nameOptions.length)];
+      
+      randomItems.push({
+        name,
+        category,
+        description: `A ${rarities[Math.floor(Math.random() * rarities.length)]} ${category} essential for modern creative work.`,
+        rarity: rarities[Math.floor(Math.random() * rarities.length)],
+        condition: "excellent",
+        specifications: {}
+      });
+    }
+
+    // Set randomized form data
+    setStudioForm({
+      name: studioNames[Math.floor(Math.random() * studioNames.length)],
+      description: descriptions[Math.floor(Math.random() * descriptions.length)],
+      theme: themes[Math.floor(Math.random() * themes.length)],
+      art_style: artStyles[Math.floor(Math.random() * artStyles.length)],
+      studio_items: randomItems
+    });
+
+    toast({
+      title: "🎲 Studio Form Randomized!",
+      description: "Random studio data generated for testing"
+    });
+  };
+
   if (loading) {
     console.log('⏳ Component is loading...');
     return (
@@ -590,6 +695,15 @@ function StudioPageContent() {
                           Create Studio
                         </>
                       )}
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="secondary"
+                      onClick={randomizeStudioForm}
+                      disabled={isCreatingStudio}
+                    >
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      Randomize
                     </Button>
                     <Button 
                       variant="outline" 

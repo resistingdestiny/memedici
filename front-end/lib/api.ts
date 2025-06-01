@@ -61,6 +61,9 @@ export interface AgentConfig {
   creation_rate: number;
   collab_affinity: string[];
   
+  // Studio ID - REQUIRED FIELD
+  studio_id?: string | null;
+  
   // Technical Configuration
   agent_type: string;
   model_name: string;

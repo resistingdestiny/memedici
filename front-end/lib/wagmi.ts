@@ -1,4 +1,4 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
 
 // Define custom testnet chains
@@ -41,13 +41,16 @@ const rootstockTestnet = defineChain({
   testnet: true,
 });
 
-export const config = getDefaultConfig({
-  appName: 'Memedici City',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your_project_id_here', // Get this from https://cloud.walletconnect.com
+export const config = createConfig({
   chains: [
     flowTestnet,
     hederaTestnet,
     rootstockTestnet,
   ],
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  transports: {
+    [flowTestnet.id]: http(),
+    [hederaTestnet.id]: http(),
+    [rootstockTestnet.id]: http(),
+  },
+  ssr: true,
 }); 

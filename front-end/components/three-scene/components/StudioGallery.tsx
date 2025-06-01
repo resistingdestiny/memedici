@@ -8,6 +8,7 @@ import { useCityStore } from "@/lib/stores/use-city";
 import { MovementController } from "./MovementController";
 import { CyberpunkAgent } from "./CyberpunkAgent";
 import { ScaledGLB, AnimatedScaledGLB } from "./GLBScaler";
+import { getAgentArtworks, type ApiArtwork } from "@/lib/api";
 
 // Client-side check to prevent SSR issues with Text components
 const isClient = typeof window !== 'undefined';
@@ -20,22 +21,23 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
   const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
-    console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image}`);
+    console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image || artwork.file_url}`);
     setIsLoading(true);
     setHasError(false);
     
     const loader = new THREE.TextureLoader();
+    const imageUrl = artwork.image || artwork.file_url;
     
     // Special handling for NightCafe artwork
-    if (artwork.title.includes('NIGHTCAFE')) {
+    if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
       console.log('🌟 Loading YOUR NightCafe artwork via proxy...');
     }
     
     loader.load(
-      artwork.image,
+      imageUrl,
       (loadedTexture) => {
         console.log(`✅ Successfully loaded: ${artwork.title}`);
-        if (artwork.title.includes('NIGHTCAFE')) {
+        if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.log('🎉 YOUR NIGHTCAFE ARTWORK LOADED SUCCESSFULLY!');
         }
         // Optimize texture settings for better display
@@ -49,15 +51,15 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
       },
       (progress) => {
         console.log(`⏳ Loading progress for ${artwork.title}:`, progress);
-        if (artwork.title.includes('NIGHTCAFE')) {
+        if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.log('⏳ NightCafe loading progress:', progress);
         }
       },
       (error) => {
         console.error(`❌ Failed to load ${artwork.title}:`, error);
-        if (artwork.title.includes('NIGHTCAFE')) {
+        if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.error('💥 NIGHTCAFE LOADING FAILED:', error);
-          console.error('🔍 Attempted URL:', artwork.image);
+          console.error('🔍 Attempted URL:', imageUrl);
         }
         setHasError(true);
         // Create a vibrant fallback texture with better visibility
@@ -89,14 +91,14 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
           ctx.lineWidth = 2;
           ctx.font = 'bold 48px Arial';
           ctx.textAlign = 'center';
-          ctx.strokeText('NIGHTCAFE', 256, 200);
-          ctx.fillText('NIGHTCAFE', 256, 200);
-          ctx.strokeText('ARTWORK', 256, 260);
-          ctx.fillText('ARTWORK', 256, 260);
+          ctx.strokeText('ARTWORK', 256, 200);
+          ctx.fillText('ARTWORK', 256, 200);
+          ctx.strokeText('FAILED', 256, 260);
+          ctx.fillText('FAILED', 256, 260);
           
           ctx.font = 'bold 24px Arial';
-          ctx.strokeText('Loading Failed', 256, 320);
-          ctx.fillText('Loading Failed', 256, 320);
+          ctx.strokeText('Loading Error', 256, 320);
+          ctx.fillText('Loading Error', 256, 320);
         }
         const fallbackTexture = new THREE.CanvasTexture(canvas);
         fallbackTexture.needsUpdate = true;
@@ -104,7 +106,7 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
         setIsLoading(false);
       }
     );
-  }, [artwork.image, artwork.title]);
+  }, [artwork.image, artwork.file_url, artwork.title]);
   
   return (
     <>
@@ -114,7 +116,7 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
           rotation={artwork.rotation}
           onClick={(e) => {
             e.stopPropagation();
-            console.log(`🖼️ Clicked artwork: ${artwork.title}`);
+            console.log(`🖼️ Clicked artwork: ${artwork.title || artwork.prompt}`);
             onLightboxOpen?.(artwork, studio);
           }}
           onPointerEnter={() => setIsHovered(true)}
@@ -151,9 +153,15 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
         ]} center>
           <div className="bg-black/90 backdrop-blur-xl text-cyan-400 px-4 py-2 rounded-xl text-left border border-cyan-400/50 shadow-lg shadow-cyan-400/25 min-w-[200px] animate-in fade-in duration-300 pointer-events-none">
             <div className="text-xs opacity-70 font-mono">NEURAL_ART.dat</div>
-            <div className="font-bold text-lg">{artwork.title}</div>
+            <div className="font-bold text-lg">{artwork.title || artwork.prompt}</div>
             <div className="text-xs text-purple-400">HOLOGRAPHIC_RENDER</div>
             <div className="text-xs opacity-60 mt-1">Studio: {studio.name}</div>
+            {artwork.agent_name && (
+              <div className="text-xs text-green-400 mt-1">Artist: {artwork.agent_name}</div>
+            )}
+            {artwork.model_name && (
+              <div className="text-xs text-blue-400 mt-1">Model: {artwork.model_name}</div>
+            )}
             <div className="text-xs text-yellow-400 mt-1">🖱️ Click to view full-size</div>
             {isLoading && <div className="text-xs text-yellow-400 mt-1">Loading...</div>}
             {hasError && <div className="text-xs text-red-400 mt-1">Failed to load image</div>}
@@ -171,28 +179,80 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
   onArtistClick?: (artist: any) => void;
 }) {
   const galleryRef = useRef<THREE.Group>(null);
+  const [studioArtworks, setStudioArtworks] = useState<ApiArtwork[]>([]);
+  const [loadingArtworks, setLoadingArtworks] = useState(false);
 
-  // Use real artwork data from the studio - only show if artworks actually exist
-  const realArtworks = studio.recentArtworks && studio.recentArtworks.length > 0
-    ? studio.recentArtworks.map((artwork: any, index: number) => ({
+  // Fetch real artworks from studio members
+  useEffect(() => {
+    const fetchStudioArtworks = async () => {
+      if (!studio.agent || !studio.agent.agent_id) {
+        console.log(`🏛️ No agent assigned to studio: ${studio.name}`);
+        setStudioArtworks([]);
+        return;
+      }
+
+      setLoadingArtworks(true);
+      console.log(`🎨 Fetching artworks for studio: ${studio.name} from agent: ${studio.agent.name}`);
+
+      try {
+        const response = await getAgentArtworks(studio.agent.agent_id, 12, 0, true);
+        
+        if (response.success && response.artworks) {
+          console.log(`✅ Loaded ${response.artworks.length} artworks for studio: ${studio.name}`);
+          setStudioArtworks(response.artworks);
+        } else {
+          console.warn(`⚠️ Failed to load artworks for studio: ${studio.name}`, response.error);
+          setStudioArtworks([]);
+        }
+      } catch (error) {
+        console.error(`❌ Error fetching artworks for studio: ${studio.name}`, error);
+        setStudioArtworks([]);
+      } finally {
+        setLoadingArtworks(false);
+      }
+    };
+
+    fetchStudioArtworks();
+  }, [studio.agent?.agent_id, studio.name]);
+
+  // Convert API artworks to gallery format
+  const galleryArtworks = studioArtworks.length > 0
+    ? studioArtworks.slice(0, 8).map((artwork, index) => ({
         id: artwork.id,
-        title: artwork.title,
-        image: artwork.image,
+        title: artwork.prompt, // Use prompt as title for AI artworks
+        image: artwork.file_url,
+        agent_name: studio.agent?.name,
+        model_name: artwork.model_name,
+        created_at: artwork.created_at,
         position: [
           // Position artworks in a circle around the center
-          Math.cos(index * (Math.PI * 2 / studio.recentArtworks.length)) * 12,
+          Math.cos(index * (Math.PI * 2 / Math.min(studioArtworks.length, 8))) * 12,
           6 + Math.sin(index * 0.5) * 2, // Varying heights
-          Math.sin(index * (Math.PI * 2 / studio.recentArtworks.length)) * 12
+          Math.sin(index * (Math.PI * 2 / Math.min(studioArtworks.length, 8))) * 12
         ] as [number, number, number],
-        rotation: [0, index * (Math.PI * 2 / studio.recentArtworks.length), 0] as [number, number, number],
+        rotation: [0, index * (Math.PI * 2 / Math.min(studioArtworks.length, 8)), 0] as [number, number, number],
         scale: [4, 3, 0.1] as [number, number, number]
       }))
-    : []; // Empty array if no artworks
+    : [];
 
-  // Only show agents that are actually assigned to this studio
+  // Check for different studio states
+  const hasAgent = studio.agent && studio.agent.agent_id;
+  const hasArtworks = galleryArtworks.length > 0;
+
+  // Always get at least one platform position
   const getStudioArtists = () => {
-    if (!studio.agent) {
-      return []; // No agents if none are assigned
+    if (!hasAgent) {
+      // Return empty platform position even without an agent
+      return [{
+        id: `${studio.id}-empty`,
+        agentId: null,
+        name: null,
+        specialty: null,
+        position: [0, 0, 0] as [number, number, number],
+        isActive: false,
+        platformId: 0,
+        agent: null
+      }];
     }
 
     // Return the single assigned agent
@@ -210,23 +270,20 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
 
   const studioArtists = getStudioArtists();
   
-  // Only show platforms and robots if there are actual assigned agents
-  const shouldShowAgentContent = studioArtists.length > 0;
-  
   // Split artworks between platforms (if multiple agents) or show all for single agent
   const getArtworksForPlatform = (platformId: number) => {
-    if (realArtworks.length === 0) return [];
+    if (galleryArtworks.length === 0) return [];
     
     if (studioArtists.length === 1) {
       // Single agent gets all artworks
-      return realArtworks;
+      return galleryArtworks;
     }
     
-    const artworksPerPlatform = Math.ceil(realArtworks.length / studioArtists.length);
+    const artworksPerPlatform = Math.ceil(galleryArtworks.length / studioArtists.length);
     const startIndex = platformId * artworksPerPlatform;
-    const endIndex = Math.min(startIndex + artworksPerPlatform, realArtworks.length);
+    const endIndex = Math.min(startIndex + artworksPerPlatform, galleryArtworks.length);
     
-    return realArtworks.slice(startIndex, endIndex).map((artwork, index) => {
+    return galleryArtworks.slice(startIndex, endIndex).map((artwork, index) => {
       const platformCenter = studioArtists[platformId]?.position || [0, 0, 0];
       return {
         ...artwork,
@@ -267,21 +324,17 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
   // Debug logging
   useEffect(() => {
     console.log('🎨 Gallery loaded for studio:', studio.name);
-    console.log('🤖 Studio artists:', studioArtists.length);
-    console.log('🖼️ Real artworks:', realArtworks.length);
-    console.log('🏛️ Should show agent content:', shouldShowAgentContent);
+    console.log('🤖 Has agent:', hasAgent);
+    console.log('🖼️ Real artworks from API:', studioArtworks.length);
+    console.log('🖼️ Gallery artworks displayed:', galleryArtworks.length);
+    console.log('🏛️ Has artworks:', hasArtworks);
     
     if (studio.agent) {
       console.log('👨‍🎨 Assigned agent:', studio.agent.name);
     } else {
       console.log('❌ No agent assigned to this studio');
     }
-    
-    studioArtists.forEach((artist, i) => {
-      const artworksForPlatform = getArtworksForPlatform(i);
-      console.log(`Platform ${i + 1}: ${artworksForPlatform.length} artworks`);
-    });
-  }, [studio.name, realArtworks.length, studioArtists.length]);
+  }, [studio.name, studioArtworks.length, galleryArtworks.length, hasAgent, hasArtworks]);
 
   return (
     <>
@@ -349,8 +402,8 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       <directionalLight position={[0, 20, 0]} intensity={1.5} color="#ffffff" castShadow />
       <pointLight position={[0, 15, 0]} intensity={2} color="#ffffff" distance={50} />
       
-      {/* ONLY SHOW PLATFORMS IF THERE ARE ASSIGNED AGENTS */}
-      {shouldShowAgentContent && studioArtists.map((artist, index) => (
+      {/* ALWAYS SHOW PLATFORM - Empty if no agent, occupied if agent exists */}
+      {studioArtists.map((artist, index) => (
         <AnimatedScaledGLB 
           key={`platform-${artist.id}`}
           glbFile="https://siliconroads.com/fucursor.glb"
@@ -361,80 +414,95 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
         />
       ))}
 
-      {/* FLOATING ARTWORKS - ONLY SHOW IF ARTWORKS EXIST */}
-      {realArtworks.length > 0 && (
-        <group ref={galleryRef}>
-          {shouldShowAgentContent ? (
-            // Show artworks grouped by platform if agents exist
-            studioArtists.map((artist, platformId) => (
-              <group key={artist.id}>
-                {getArtworksForPlatform(platformId).map((artwork, index) => (
-                  <FloatingArtwork 
-                    key={artwork.id} 
-                    artwork={artwork} 
-                    index={index} 
-                    studio={studio}
-                    onLightboxOpen={onLightboxOpen}
-                  />
-                ))}
-              </group>
-            ))
-          ) : (
-            // Show artworks without platform grouping if no agents
-            realArtworks.map((artwork, index) => (
-              <FloatingArtwork 
-                key={artwork.id} 
-                artwork={artwork} 
-                index={index} 
-                studio={studio}
-                onLightboxOpen={onLightboxOpen}
-              />
-            ))
-          )}
-        </group>
-      )}
-
-      {/* ROBOTS ON TOP OF THEIR PLATFORMS - ONLY IF AGENTS ARE ASSIGNED */}
-      {shouldShowAgentContent && studioArtists.map((artist) => (
-        <AnimatedScaledGLB
-          key={`robot-${artist.id}`}
-          glbFile="https://siliconroads.com/robot_playground.glb"
-          position={[artist.position[0], 6, artist.position[2]]}
-          targetSizeOverride={8}
-          playAllAnimations={true}
-          castShadow
-          receiveShadow
-          onClick={() => onArtistClick?.({
-            id: artist.id,
-            agentId: artist.agentId,
-            name: artist.agent?.name || "Gallery Assistant",
-            specialty: artist.specialty,
-            type: "AI Assistant",
-            isAIAgent: true,
-            isActive: artist.isActive,
-            avatar: artist.agent?.avatar,
-            description: artist.agent?.description,
-            stats: artist.agent?.stats
-          })}
-        />
-      ))}
-
-      {/* EMPTY STUDIO MESSAGE IF NO AGENTS OR ARTWORKS */}
-      {!shouldShowAgentContent && realArtworks.length === 0 && (
-        <Html position={[0, 5, 0]} center>
-          <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-600 rounded-lg px-6 py-4 text-gray-300 text-center shadow-lg">
-            <div className="text-2xl font-bold mb-2">{studio.studioData.name}</div>
-            <div className="text-lg opacity-70 mb-3">Empty Studio</div>
-            <div className="text-sm opacity-60">
-              This studio is available for an agent to claim and start creating artworks.
-            </div>
-            <div className="text-xs text-blue-400 mt-2">Theme: {studio.studioData.theme}</div>
+      {/* LOADING STATE */}
+      {loadingArtworks && (
+        <Html position={[0, 8, 0]} center>
+          <div className="bg-purple-900/90 backdrop-blur-xl text-purple-200 px-6 py-4 rounded-xl text-center border border-purple-400/50 shadow-lg shadow-purple-400/25 pointer-events-none animate-pulse">
+            <div className="text-lg font-bold mb-2">🎨 Loading Studio Artworks...</div>
+            <div className="text-sm opacity-70">Fetching creations from studio members</div>
           </div>
         </Html>
       )}
 
-      {/* RANDOM SPINNING FEATURE - ONLY IF THERE'S CONTENT IN THE STUDIO */}
-      {(shouldShowAgentContent || realArtworks.length > 0) && (
+      {/* FLOATING ARTWORKS - Only show if agent exists and has artworks */}
+      {hasAgent && hasArtworks && !loadingArtworks && (
+        <group ref={galleryRef}>
+          {studioArtists.map((artist, platformId) => (
+            <group key={artist.id}>
+              {getArtworksForPlatform(platformId).map((artwork, index) => (
+                <FloatingArtwork 
+                  key={artwork.id} 
+                  artwork={artwork} 
+                  index={index} 
+                  studio={studio}
+                  onLightboxOpen={onLightboxOpen}
+                />
+              ))}
+            </group>
+          ))}
+        </group>
+      )}
+
+      {/* ROBOT ON PLATFORM - Only show if agent is assigned */}
+      {hasAgent && studioArtists.map((artist) => (
+        artist.agent && (
+          <AnimatedScaledGLB
+            key={`robot-${artist.id}`}
+            glbFile="https://siliconroads.com/robot_playground.glb"
+            position={[artist.position[0], 6, artist.position[2]]}
+            targetSizeOverride={8}
+            playAllAnimations={true}
+            castShadow
+            receiveShadow
+            onClick={() => onArtistClick?.({
+              id: artist.id,
+              agentId: artist.agentId,
+              name: artist.agent?.name || "Gallery Assistant",
+              specialty: artist.specialty,
+              type: "AI Assistant",
+              isAIAgent: true,
+              isActive: artist.isActive,
+              avatar: artist.agent?.avatar,
+              description: artist.agent?.description,
+              stats: artist.agent?.stats
+            })}
+          />
+        )
+      ))}
+
+      {/* SCENARIO 1: NO AGENT - Empty platform with "no artists" message */}
+      {!hasAgent && !loadingArtworks && (
+        <Html position={[0, 8, 0]} center>
+          <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-600 rounded-lg px-6 py-4 text-gray-300 text-center shadow-lg">
+            <div className="text-2xl font-bold mb-2">🏛️ {studio.studioData.name}</div>
+            <div className="text-lg opacity-70 mb-3">Empty Studio</div>
+            <div className="text-sm opacity-60 mb-2">
+              There are no artists in this studio yet.
+            </div>
+            <div className="text-xs text-blue-400 mt-2">Theme: {studio.studioData.theme}</div>
+            <div className="text-xs text-yellow-400 mt-1">Platform ready for an artist to claim</div>
+          </div>
+        </Html>
+      )}
+
+      {/* SCENARIO 2: AGENT EXISTS BUT NO ARTWORKS - Show platform + robot + message */}
+      {hasAgent && !hasArtworks && !loadingArtworks && (
+        <Html position={[0, 10, 0]} center>
+          <div className="bg-blue-900/90 backdrop-blur-sm border border-blue-400/50 rounded-lg px-6 py-4 text-blue-200 text-center shadow-lg">
+            <div className="text-2xl font-bold mb-2">🎨 {studio.studioData.name}</div>
+            <div className="text-lg opacity-70 mb-3">Studio Ready</div>
+            <div className="text-sm opacity-60 mb-2">
+              Artist <span className="text-cyan-400 font-bold">{studio.agent.name}</span> is ready to create
+            </div>
+            <div className="text-xs text-yellow-400">
+              Artworks will appear here as the artist creates them
+            </div>
+          </div>
+        </Html>
+      )}
+
+      {/* SCENARIO 3: AGENT + ARTWORKS - Show spinning feature */}
+      {hasAgent && hasArtworks && (
         <group ref={featureRef} position={[0, 8, -30]}>
           <AnimatedScaledGLB
             glbFile={randomFeature.glbFile}

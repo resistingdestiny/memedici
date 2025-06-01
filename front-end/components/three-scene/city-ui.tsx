@@ -50,6 +50,15 @@ export function CityUI() {
     }
   }, [agents.length, fetchAgents]);
   
+  // Initialize studios when agents are loaded
+  useEffect(() => {
+    if (agents.length > 0 && studios.length === 0) {
+      console.log('🏛️ CityUI: Agents loaded, initializing studios...', agents.length);
+      const { loadStudiosFromAPI } = useCityStore.getState();
+      loadStudiosFromAPI();
+    }
+  }, [agents.length, studios.length]);
+  
   // Enhanced Debug: Log state changes with more detail
   useEffect(() => {
     console.log('🔍 CityUI Enhanced Debug:');
@@ -59,7 +68,9 @@ export function CityUI() {
     console.log('  👆 hoveredMarketplace:', hoveredMarketplace);
     console.log('  🎯 showAgentHub:', !!(pinnedAgentHub || hoveredAgentHub));
     console.log('  🎯 showMarketplace:', !!(pinnedMarketplace || hoveredMarketplace));
-  }, [pinnedAgentHub, hoveredAgentHub, pinnedMarketplace, hoveredMarketplace]);
+    console.log('  🏛️ studios loaded:', studios.length);
+    console.log('  🗺️ showMinimap:', showMinimap);
+  }, [pinnedAgentHub, hoveredAgentHub, pinnedMarketplace, hoveredMarketplace, studios.length, showMinimap]);
   
   const activeStudioData = studios.find(s => s.id === activeStudio);
   const hoveredStudioData = studios.find(s => s.id === hoveredStudio);
@@ -160,28 +171,44 @@ export function CityUI() {
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg shadow-yellow-400/50" />
               
               {/* Enhanced studios on minimap */}
-              {studios.map((studio) => {
-                // Fixed coordinate mapping for spread-out studios (range -80 to +80)
-                const x = (studio.position[0] + 80) / 160 * 100;
-                const z = (studio.position[2] + 80) / 160 * 100;
-                const isActive = activeStudio === studio.id;
-                const isHovered = hoveredStudio === studio.id;
-                
-                return (
-                  <button
-                    key={studio.id}
-                    className={`absolute w-4 h-4 rounded-sm transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 scale-150 shadow-lg shadow-purple-500/50' 
-                        : isHovered
-                        ? 'bg-white scale-125 shadow-md'
-                        : 'bg-white/60 hover:bg-white hover:scale-110'
-                    }`}
-                    style={{ left: `${x}%`, top: `${z}%` }}
-                    onClick={() => moveToStudio(studio.id)}
-                  />
-                );
-              })}
+              {studios.length > 0 ? studios.map((studio) => {
+                try {
+                  // Ensure studio has required position data
+                  if (!studio?.position || !Array.isArray(studio.position) || studio.position.length < 3) {
+                    console.warn('⚠️ Studio missing position data:', studio?.name || 'Unknown', studio);
+                    return null;
+                  }
+                  
+                  // Fixed coordinate mapping for spread-out studios (range -240 to +240 based on new API data)
+                  const x = Math.max(0, Math.min(100, (studio.position[0] + 240) / 480 * 100));
+                  const z = Math.max(0, Math.min(100, (studio.position[2] + 240) / 480 * 100));
+                  const isActive = activeStudio === studio.id;
+                  const isHovered = hoveredStudio === studio.id;
+                  
+                  return (
+                    <button
+                      key={studio.id}
+                      className={`absolute w-4 h-4 rounded-sm transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-gradient-to-r from-purple-500 to-blue-500 scale-150 shadow-lg shadow-purple-500/50' 
+                          : isHovered
+                          ? 'bg-white scale-125 shadow-md'
+                          : 'bg-white/60 hover:bg-white hover:scale-110'
+                      }`}
+                      style={{ left: `${x}%`, top: `${z}%` }}
+                      onClick={() => moveToStudio(studio.id)}
+                      title={studio.name || 'Studio'}
+                    />
+                  );
+                } catch (error) {
+                  console.error('❌ Error rendering studio on minimap:', studio?.name || 'Unknown', error);
+                  return null;
+                }
+              }) : (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 text-xs text-center">
+                  {agents.length > 0 ? 'Loading studios...' : 'No studios available'}
+                </div>
+              )}
               
               {/* Agent Builder Hub on minimap */}
               <button
@@ -190,10 +217,10 @@ export function CityUI() {
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-500 scale-150 shadow-lg shadow-cyan-500/50'
                     : 'bg-cyan-400/80 hover:bg-cyan-400 hover:scale-125'
                 }`}
-                style={{ left: '85%', top: '85%' }} // Position at [80, 0, 80]
+                style={{ left: '75%', top: '25%' }} // Position for [120, 0, 0] - adjusted for new coordinate system
                 onClick={() => {
-                  setCameraPosition([88, 25, 88]);
-                  setCameraTarget([80, 0, 80]);
+                  setCameraPosition([128, 25, 8]);
+                  setCameraTarget([120, 0, 0]);
                 }}
                 title="Agent Builder Hub"
               />
@@ -205,10 +232,10 @@ export function CityUI() {
                     ? 'bg-gradient-to-r from-yellow-500 to-orange-500 scale-150 shadow-lg shadow-yellow-500/50'
                     : 'bg-yellow-400/80 hover:bg-yellow-400 hover:scale-125'
                 }`}
-                style={{ left: '50%', top: '95%' }} // Position at [0, 5, 120]
+                style={{ left: '50%', top: '90%' }} // Position for [0, 0, 140] - adjusted for new coordinate system
                 onClick={() => {
-                  setCameraPosition([8, 25, 128]);
-                  setCameraTarget([0, 5, 120]);
+                  setCameraPosition([8, 25, 148]);
+                  setCameraTarget([0, 0, 140]);
                 }}
                 title="MEDI Exchange"
               />
@@ -219,7 +246,7 @@ export function CityUI() {
       
       {/* Studio info panel */}
       {displayStudio && (
-        <Card className="absolute bottom-4 left-4 w-96 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl">
+        <Card className="absolute bottom-4 left-4 w-[450px] z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -300,7 +327,7 @@ export function CityUI() {
       
       {/* Agent Builder Hub info panel - ENHANCED VISIBILITY */}
       {showAgentHub && (
-        <Card className="absolute bottom-4 left-4 w-[500px] z-50 backdrop-blur-md bg-black/30 border-4 border-cyan-400 shadow-2xl shadow-cyan-400/50 animate-pulse">
+        <Card className="absolute bottom-4 left-4 w-[650px] z-50 backdrop-blur-md bg-black/30 border-4 border-cyan-400 shadow-2xl shadow-cyan-400/50 animate-pulse">
           <CardContent className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
@@ -391,7 +418,7 @@ export function CityUI() {
       
       {/* Trading Exchange info panel - POSITIONED TO THE RIGHT */}
       {showMarketplace && (
-        <Card className="absolute bottom-4 right-4 w-96 z-50 backdrop-blur-md bg-black/30 border-4 border-yellow-400 shadow-2xl shadow-yellow-400/50 animate-pulse">
+        <Card className="absolute bottom-4 right-4 w-[460px] z-50 backdrop-blur-md bg-black/30 border-4 border-yellow-400 shadow-2xl shadow-yellow-400/50 animate-pulse">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -487,7 +514,7 @@ export function CityUI() {
       )}
       
       {/* Enhanced Studios list - POSITIONED TO AVOID OVERLAP */}
-      <Card className={`absolute ${showMarketplace ? 'bottom-4 right-[420px]' : 'bottom-4 right-4'} w-80 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl transition-all duration-300`}>
+      <Card className={`absolute ${showMarketplace ? 'bottom-4 right-[480px]' : 'bottom-4 right-4'} w-96 z-10 backdrop-blur-md bg-black/20 border-white/20 shadow-xl transition-all duration-300`}>
         <CardContent className="p-6">
           <h3 className="font-bold mb-4 text-white text-lg">AI Creator Studios</h3>
           <div className="space-y-3 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
@@ -525,7 +552,7 @@ export function CityUI() {
       {/* Enhanced Tour mode overlay */}
       {tourMode && (
         <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
-          <div className="backdrop-blur-md bg-black/30 rounded-2xl p-8 border border-white/20 shadow-2xl max-w-md text-center">
+          <div className="backdrop-blur-md bg-black/30 rounded-2xl p-8 border border-white/20 shadow-2xl max-w-lg text-center">
             <div className="mb-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full shadow-lg shadow-purple-500/25 mb-4">
                 <Sparkles className="h-8 w-8 text-white" />

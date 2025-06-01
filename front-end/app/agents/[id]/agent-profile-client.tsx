@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,9 +16,10 @@ import { useAgentArtworks } from "@/hooks/useAgentArtworks";
 import { api } from "@/lib/api";
 import { type AgentConfig } from "@/lib/types";
 import { type Agent } from "@/lib/stubs";
-import { ArrowLeft, TrendingUp, Users, MessageSquare, ImageIcon, Sparkles, AlertCircle, Trash2, Zap, ArrowDown, Loader2 } from "lucide-react";
+import { ArrowLeft, TrendingUp, MessageSquare, ImageIcon, Sparkles, AlertCircle, Trash2, Zap, ArrowDown, Loader2 } from "lucide-react";
 import { httpClient } from "@/lib/http";
 import { toast } from "sonner";
+import { useAgents, ChatMessage } from "@/lib/stores/use-agents";
 
 // Helper function to convert AgentConfig to Agent for legacy components
 function convertAgentConfigToAgent(config: AgentConfig): Agent {
@@ -43,59 +44,94 @@ function convertAgentConfigToAgent(config: AgentConfig): Agent {
 
 export function AgentProfileClient() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const agentId = params.id as string;
+
+  // State for different operations
   const [currentTab, setCurrentTab] = useState("overview");
+  const [isStaking, setIsStaking] = useState(false);
   const [isEvolving, setIsEvolving] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  
+  // Add chat state
+  const [chatInput, setChatInput] = useState("");
+  
+  // Get chat functionality from the agents store
+  const { 
+    chatWithAgent, 
+    chatMessages, 
+    chatLoading, 
+    addChatMessage, 
+    clearChatMessages 
+  } = useAgents();
 
-  // Debug logging
-  console.log("AgentProfileClient mounted with id:", id);
+  const { data: agent, isLoading, error } = useGetAgent(agentId);
+  const { artworks, statistics, isLoading: artworksLoading, isError: isArtworksError, hasMore, loadMore, refetch: refetchArtworks } = useAgentArtworks(agentId);
 
-  const { data: agent, isLoading: isAgentLoading, isError: isAgentError, error: agentError, refetch: refetchAgent } = useGetAgent(id as string);
-  const { artworks, statistics, isLoading: isArtworksLoading, isError: isArtworksError, hasMore, loadMore, refetch: refetchArtworks } = useAgentArtworks(id as string);
+  // Convert agent data for legacy components
+  const legacyAgent = agent ? convertAgentConfigToAgent(agent) : null;
 
-  // Debug logging
-  console.log("Agent data:", { agent, isAgentLoading, isAgentError, agentError });
+  // Add chat message handler
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || !agent) return;
+
+    try {
+      await chatWithAgent(agent.id, chatInput.trim());
+      setChatInput("");
+    } catch (error) {
+      console.error("Chat error:", error);
+      // Error is already handled by the store
+    }
+  };
+
+  // Add initial greeting when agent loads
+  useEffect(() => {
+    if (agent && !chatMessages.some(msg => msg.agentId === agent.id)) {
+      const greeting: ChatMessage = {
+        id: `${Date.now()}-greeting`,
+        sender: "agent",
+        message: `Hello! I'm ${agent.display_name}. I'm excited to create art with you and discuss my techniques. What would you like to explore together?`,
+        timestamp: new Date(),
+        agentId: agent.id
+      };
+      addChatMessage(greeting);
+    }
+  }, [agent, chatMessages, addChatMessage]);
 
   const handleEvolve = async () => {
-    if (!agent) return;
-    
     setIsEvolving(true);
     try {
-      const response = await httpClient.post(`/agents/${agent.id}/evolve`);
-      if (response.data.success) {
-        toast.success("Agent evolved successfully! 🎭");
-        refetchAgent();
-      } else {
-        toast.error("Failed to evolve agent");
-      }
-    } catch (error) {
-      toast.error("Error evolving agent");
+      await api.post(`/agents/${agentId}/evolve`, {
+        agent_id: agentId,
+        interaction_type: "manual_evolution",
+        outcome: "positive"
+      });
+      
+      toast.success("Agent persona evolved! 🎭");
+      // Note: We can't refetch here without getting the original refetch function
+    } catch (error: any) {
+      console.error("Error evolving agent:", error);
+      toast.error("Failed to evolve agent persona");
     } finally {
       setIsEvolving(false);
     }
   };
 
   const handleClearMemory = async () => {
-    if (!agent) return;
-    
     setIsClearing(true);
     try {
-      const response = await httpClient.delete(`/agents/${agent.id}/memory`);
-      if (response.data.success) {
-        toast.success("Agent memory cleared successfully! 🧠");
-        refetchAgent();
-      } else {
-        toast.error("Failed to clear agent memory");
-      }
-    } catch (error) {
-      toast.error("Error clearing agent memory");
+      await api.delete(`/agents/${agentId}/memory?thread_id=default`);
+      toast.success("Agent memory cleared! 🧠");
+      clearChatMessages(); // Clear local chat too
+    } catch (error: any) {
+      console.error("Error clearing memory:", error);
+      toast.error("Failed to clear agent memory");
     } finally {
       setIsClearing(false);
     }
   };
 
-  if (isAgentLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -106,17 +142,17 @@ export function AgentProfileClient() {
     );
   }
 
-  if (isAgentError || !agent) {
-    console.error("Agent error:", agentError);
+  if (error || !agent) {
+    console.error("Agent error:", error);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Agent not found or failed to load.
-            {agentError && (
+            {error && (
               <div className="mt-2 text-xs">
-                Error: {agentError.message}
+                Error: {error.message}
               </div>
             )}
           </AlertDescription>
@@ -124,9 +160,6 @@ export function AgentProfileClient() {
       </div>
     );
   }
-
-  // Convert to legacy format for components that need it
-  const legacyAgent = convertAgentConfigToAgent(agent);
 
   return (
     <>
@@ -360,12 +393,13 @@ export function AgentProfileClient() {
             defaultValue="overview" 
             value={currentTab}
             onValueChange={setCurrentTab}
-            className="w-full"
+            className="space-y-8"
           >
-            <TabsList className="grid grid-cols-3 w-full max-w-md mb-8">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="artworks">Gallery</TabsTrigger>
+              <TabsTrigger value="chat">Chat</TabsTrigger>
               <TabsTrigger value="create">Create</TabsTrigger>
-              <TabsTrigger value="invest">Invest</TabsTrigger>
             </TabsList>
             
             <TabsContent value="overview" className="space-y-8">
@@ -376,7 +410,7 @@ export function AgentProfileClient() {
                 </h2>
                 
                 {/* Real Artworks from API */}
-                {isArtworksLoading && artworks.length === 0 ? (
+                {artworksLoading && artworks.length === 0 ? (
                   <div className="text-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     <p className="text-muted-foreground">Loading artworks...</p>
@@ -431,10 +465,10 @@ export function AgentProfileClient() {
                         <Button
                           variant="outline"
                           onClick={loadMore}
-                          disabled={isArtworksLoading}
+                          disabled={artworksLoading}
                           className="flex items-center gap-2"
                         >
-                          {isArtworksLoading ? (
+                          {artworksLoading ? (
                             <>
                               <Loader2 className="h-4 w-4 animate-spin" />
                               Loading...
@@ -611,30 +645,6 @@ export function AgentProfileClient() {
                   </div>
                 </div>
               )}
-              
-              <div>
-                <h2 className="text-2xl font-bold font-cinzel mb-6 flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-primary" />
-                  Top Backers
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {[...Array(4)].map((_, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-muted"></div>
-                          <div>
-                            <p className="font-medium">Patron #{i+1}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {Math.floor(Math.random() * 1000)} tokens
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
             </TabsContent>
             
             <TabsContent value="create" className="space-y-8">
@@ -655,14 +665,192 @@ export function AgentProfileClient() {
                         <span>Total Backers</span>
                         <span className="font-semibold">{agent.stats?.backersCount || 0}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Return Rate</span>
-                        <span className="font-semibold text-green-600">+12.5%</span>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+            
+            <TabsContent value="chat" className="space-y-8">
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-bold font-cinzel mb-6 flex items-center">
+                    💬 Chat with {agent.display_name}
+                  </h2>
+                  
+                  {/* Chat Messages */}
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto space-y-4 mb-4">
+                    {chatMessages
+                      .filter(msg => msg.agentId === agent.id)
+                      .map((msg) => (
+                        <div
+                          key={msg.id}
+                          className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className="flex items-start space-x-2 max-w-[80%]">
+                            {msg.sender === 'agent' && (
+                              <Image
+                                src={(agent as any).avatar_url || `https://api.dicebear.com/7.x/avatars/svg?seed=${agent.id}`}
+                                alt={agent.display_name}
+                                width={32}
+                                height={32}
+                                className="w-8 h-8 rounded-full object-cover border border-gray-300"
+                              />
+                            )}
+                            <div
+                              className={`p-3 rounded-lg ${
+                                msg.sender === 'user'
+                                  ? 'bg-primary text-primary-foreground'
+                                  : msg.sender === 'system'
+                                  ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                                  : 'bg-white text-gray-900 border shadow-sm dark:bg-gray-800 dark:text-gray-100'
+                              }`}
+                            >
+                              {/* Show assets (images/videos) if any */}
+                              {msg.assets && Object.keys(msg.assets).length > 0 && (
+                                <div className="mb-3">
+                                  {Object.entries(msg.assets).map(([assetId, assetInfo]) => (
+                                    <div key={assetId} className="mb-2">
+                                      {assetInfo.type?.includes('image') && (
+                                        <div>
+                                          <img
+                                            src={assetInfo.url}
+                                            alt={assetInfo.prompt}
+                                            className="max-w-full h-auto rounded-lg mb-2"
+                                          />
+                                          <p className="text-xs opacity-70">🎨 {assetInfo.prompt}</p>
+                                        </div>
+                                      )}
+                                      {assetInfo.type?.includes('video') && (
+                                        <div>
+                                          <video
+                                            src={assetInfo.url}
+                                            controls
+                                            className="max-w-full h-auto rounded-lg mb-2"
+                                          />
+                                          <p className="text-xs opacity-70">🎬 {assetInfo.prompt}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="text-sm">{msg.message}</p>
+                              {/* Show tools used if any */}
+                              {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="text-xs opacity-70">🛠️ Tools: {msg.toolsUsed.join(', ')}</p>
+                                </div>
+                              )}
+                              <p className="text-xs opacity-70 mt-1">
+                                {msg.timestamp.toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    
+                    {/* Loading indicator */}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="flex items-start space-x-2 max-w-[80%]">
+                          <Image
+                            src={(agent as any).avatar_url || `https://api.dicebear.com/7.x/avatars/svg?seed=${agent.id}`}
+                            alt={agent.display_name}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 rounded-full object-cover border border-gray-300"
+                          />
+                          <div className="bg-white text-gray-900 border shadow-sm p-3 rounded-lg dark:bg-gray-800 dark:text-gray-100">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chat Input */}
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
+                      placeholder={`Ask ${agent.display_name} about art, request image generation, or discuss techniques...`}
+                      disabled={chatLoading}
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <Button
+                      onClick={handleSendChatMessage}
+                      disabled={!chatInput.trim() || chatLoading}
+                      className="px-6"
+                    >
+                      {chatLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Send
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setChatInput("Can you create a beautiful landscape painting for me?")}
+                      disabled={chatLoading}
+                    >
+                      🎨 Request Art
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setChatInput("What's your artistic style and inspiration?")}
+                      disabled={chatLoading}
+                    >
+                      💭 Ask About Style
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setChatInput("Can you teach me some art techniques?")}
+                      disabled={chatLoading}
+                    >
+                      🎓 Learn Techniques
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        clearChatMessages();
+                        // Re-add greeting
+                        const greeting: ChatMessage = {
+                          id: `${Date.now()}-greeting`,
+                          sender: "agent",
+                          message: `Hello! I'm ${agent.display_name}. I'm excited to create art with you and discuss my techniques. What would you like to explore together?`,
+                          timestamp: new Date(),
+                          agentId: agent.id
+                        };
+                        addChatMessage(greeting);
+                      }}
+                      disabled={chatLoading}
+                    >
+                      🗑️ Clear Chat
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

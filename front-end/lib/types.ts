@@ -62,6 +62,7 @@ export interface AgentConfig {
   max_tokens?: number | null;
   memory_enabled?: boolean;
   structured_output?: boolean;
+  custom_instructions?: string | null;
   
   // Studio fields
   studio_name?: string;

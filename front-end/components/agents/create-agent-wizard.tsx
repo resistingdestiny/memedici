@@ -264,6 +264,9 @@ export function CreateAgentWizard({ open, onOpenChange }: CreateAgentWizardProps
           creation_rate: data.creation_rate,
           collab_affinity: data.collab_affinity || [],
           
+          // Studio ID - REQUIRED FIELD
+          studio_id: `${agentId}_studio`, // Create unique studio for this agent
+          
           // Technical Configuration
           agent_type: "creative_artist",
           model_name: data.model_name,

@@ -185,11 +185,11 @@ export const useCityStore = create<CityState>((set, get) => ({
     // Generate studio positions in a circle around the city
     const generateStudioPositions = (count: number) => {
       const positions: [number, number, number][] = [];
-      const baseRadius = 80; // Distance from center
+      const baseRadius = 240; // Distance from center - increased from 80 to spread buildings out more
       
       for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2;
-        const radius = baseRadius + (Math.random() - 0.5) * 20;
+        const radius = baseRadius + (Math.random() - 0.5) * 60; // Increased variation from 20 to 60
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
         positions.push([x, 0, z]);
@@ -317,13 +317,27 @@ export const useCityStore = create<CityState>((set, get) => ({
       
       // Generate positions for studios in a circle formation
       const generateStudioPositions = (count: number) => {
-        const radius = 40; // Base radius
+        const radius = 120; // Base radius - increased from 40 to spread buildings out more
         const positions: [number, number, number][] = [];
         
         for (let i = 0; i < count; i++) {
           const angle = (i / count) * 2 * Math.PI;
-          // Vary the radius slightly for more organic layout
-          const currentRadius = radius + Math.sin(i * 0.7) * 10;
+          
+          // Check if this studio will use cyberpunk building (need to determine which GLB will be used)
+          const studioData = studiosToProcess[i];
+          const isCyberpunkThemed = studioData?.studio?.theme?.toLowerCase().includes('cyberpunk') || 
+                                   studioData?.studio?.art_style?.toLowerCase().includes('digital') ||
+                                   studioData?.studio?.art_style?.toLowerCase().includes('cyberpunk');
+          
+          // For cyberpunk-themed studios, use much larger radius to isolate them
+          let currentRadius;
+          if (isCyberpunkThemed) {
+            currentRadius = radius * 2.5 + Math.sin(i * 0.7) * 50; // 2.5x further out (300+ units from center)
+            console.log(`🏙️ Placing cyberpunk studio "${studioData.studio.name}" at isolated position (radius: ${currentRadius.toFixed(1)})`);
+          } else {
+            currentRadius = radius + Math.sin(i * 0.7) * 30; // Normal radius variation
+          }
+          
           const x = Math.cos(angle) * currentRadius;
           const z = Math.sin(angle) * currentRadius;
           const y = 0;

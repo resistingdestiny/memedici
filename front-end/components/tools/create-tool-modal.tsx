@@ -29,9 +29,10 @@ import {
   HelpCircle,
   AlertTriangle,
   CheckCircle,
-  X
+  X,
+  Wand2
 } from "lucide-react";
-import { createTool } from "@/lib/api";
+import { createTool, createCustomTool, uploadToolSpec } from "@/lib/api";
 
 interface CreateToolModalProps {
   open: boolean;
@@ -205,47 +206,34 @@ export function CreateToolModal({ open, onOpenChange, onSuccess }: CreateToolMod
     try {
       let toolData;
       
-      if (currentTab === "upload" && specContent) {
-        // Submit uploaded spec
-        toolData = {
-          method: "upload",
-          spec: specContent,
-          name: formData.name || "Uploaded Tool",
-          description: formData.description || "Tool created from uploaded specification",
-        };
+      if (currentTab === "upload" && uploadedFile) {
+        // Use the upload endpoint for file uploads
+        await uploadToolSpec(uploadedFile);
       } else {
-        // Submit manual entry
+        // Use the CustomToolRequest format for manual entry
         toolData = {
-          method: "manual",
-          ...formData,
+          tool_name: formData.name,  // API expects tool_name, not name
+          description: formData.description,
+          api_endpoint: formData.api_config?.endpoint || null,  // API expects api_endpoint, not nested config
+          response_format: formData.api_config?.response_format || "json"
         };
         
-        // Add authentication if specified
-        if (authType !== "none" && formData.api_config) {
-          toolData.api_config.auth = {
-            type: authType,
-            value: (document.getElementById('authValue') as HTMLInputElement)?.value || "",
-          };
-        }
-        
-        // Parse request schema if provided
+        // Parse and add request schema as parameters if provided
         const requestSchemaInput = document.getElementById('requestSchema') as HTMLTextAreaElement;
         if (requestSchemaInput?.value.trim()) {
           try {
-            toolData.api_config!.request_schema = JSON.parse(requestSchemaInput.value);
+            toolData.parameters = JSON.parse(requestSchemaInput.value);
           } catch (e) {
             throw new Error('Invalid JSON in request schema');
           }
+        } else {
+          toolData.parameters = {};  // Default empty object
         }
         
-        // Add response example
-        const responseExampleInput = document.getElementById('responseExample') as HTMLTextAreaElement;
-        if (responseExampleInput?.value.trim()) {
-          toolData.api_config!.response_example = responseExampleInput.value;
-        }
+        // Use the createCustomTool function which matches the API spec
+        await createCustomTool(toolData);
       }
       
-      await createTool(toolData);
       onSuccess();
       onOpenChange(false);
       resetForm();
@@ -255,6 +243,194 @@ export function CreateToolModal({ open, onOpenChange, onSuccess }: CreateToolMod
     } finally {
       setIsCreating(false);
     }
+  };
+
+  // Randomize function for testing
+  const randomizeToolForm = () => {
+    // Predefined lists for random selection
+    const toolNames = [
+      "neural_style_transfer",
+      "quantum_color_generator", 
+      "ai_composition_analyzer",
+      "semantic_image_search",
+      "creative_prompt_enhancer",
+      "digital_texture_synthesizer",
+      "emotion_palette_mapper",
+      "trend_prediction_engine",
+      "artistic_similarity_finder",
+      "mood_based_filter"
+    ];
+
+    const categories = [
+      "art_creation",
+      "analysis", 
+      "enhancement",
+      "utility",
+      "blockchain"
+    ];
+
+    const descriptions = [
+      "Transforms images using advanced neural style transfer techniques to apply artistic styles from master paintings",
+      "Generates harmonious color palettes using quantum computing principles for unprecedented color combinations",
+      "Analyzes visual composition using AI to provide detailed feedback on balance, rhythm, and visual flow",
+      "Searches through vast image databases using semantic understanding rather than simple keyword matching",
+      "Enhances creative prompts by expanding on themes, adding contextual details, and suggesting artistic techniques",
+      "Synthesizes realistic digital textures from simple parameters for use in 3D modeling and digital art",
+      "Maps human emotions to color palettes based on psychological color theory and machine learning",
+      "Predicts upcoming art trends by analyzing social media, gallery exhibitions, and market data",
+      "Finds artworks with similar compositional elements, color schemes, or emotional resonance",
+      "Applies mood-based filters that adjust lighting, color temperature, and atmosphere dynamically"
+    ];
+
+    const endpoints = [
+      "https://api.neuralstyle.ai/v2/transfer",
+      "https://quantumcolor.io/api/v1/generate",
+      "https://compositionai.com/analyze/v3",
+      "https://semanticsearch.art/api/find",
+      "https://promptenhancer.io/v1/enhance",
+      "https://texturesynth.com/api/generate",
+      "https://emotionpalette.ai/v2/map",
+      "https://trendpredict.art/api/v1/forecast",
+      "https://similarity.gallery/api/search",
+      "https://moodfilter.io/v1/apply"
+    ];
+
+    const methods = ["GET", "POST", "PUT"];
+    const contentTypes = ["application/json", "application/x-www-form-urlencoded", "multipart/form-data"];
+    const responseFormats = ["json", "text", "image", "binary"];
+
+    const sampleSchemas = [
+      `{
+  "type": "object",
+  "properties": {
+    "input_image": {
+      "type": "string",
+      "description": "Base64 encoded image or URL"
+    },
+    "style": {
+      "type": "string",
+      "enum": ["impressionist", "cubist", "abstract", "photorealistic"],
+      "description": "Artistic style to apply"
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Style transfer intensity"
+    }
+  },
+  "required": ["input_image", "style"]
+}`,
+      `{
+  "type": "object", 
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Creative prompt to enhance"
+    },
+    "style_preference": {
+      "type": "string",
+      "enum": ["classical", "modern", "surreal", "minimalist"]
+    },
+    "complexity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    }
+  },
+  "required": ["prompt"]
+}`,
+      `{
+  "type": "object",
+  "properties": {
+    "color_count": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 12,
+      "description": "Number of colors in palette"
+    },
+    "mood": {
+      "type": "string",
+      "enum": ["calm", "energetic", "mysterious", "warm", "cool"]
+    },
+    "format": {
+      "type": "string",
+      "enum": ["hex", "rgb", "hsl"]
+    }
+  },
+  "required": ["color_count"]
+}`
+    ];
+
+    const responseExamples = [
+      `{
+  "status": "success",
+  "result_url": "https://cdn.example.com/stylized_image.jpg",
+  "processing_time": 2.4,
+  "style_applied": "impressionist"
+}`,
+      `{
+  "enhanced_prompt": "A serene landscape painting featuring rolling hills under a golden sunset, painted in the impressionist style with visible brushstrokes and warm color palette",
+  "suggested_techniques": ["alla prima", "color blocking", "atmospheric perspective"],
+  "mood": "peaceful",
+  "complexity_score": 7
+}`,
+      `{
+  "palette": [
+    {"hex": "#FF6B6B", "name": "Coral Pink"},
+    {"hex": "#4ECDC4", "name": "Turquoise"},
+    {"hex": "#45B7D1", "name": "Sky Blue"},
+    {"hex": "#96CEB4", "name": "Mint Green"},
+    {"hex": "#FFEAA7", "name": "Vanilla"}
+  ],
+  "harmony_type": "analogous",
+  "mood_match": 0.87
+}`
+    ];
+
+    // Randomly select values
+    const randomName = toolNames[Math.floor(Math.random() * toolNames.length)];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    const randomDescription = descriptions[Math.floor(Math.random() * descriptions.length)];
+    const randomEndpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+    const randomMethod = methods[Math.floor(Math.random() * methods.length)];
+    const randomContentType = contentTypes[Math.floor(Math.random() * contentTypes.length)];
+    const randomResponseFormat = responseFormats[Math.floor(Math.random() * responseFormats.length)];
+    const randomSchema = sampleSchemas[Math.floor(Math.random() * sampleSchemas.length)];
+    const randomResponseExample = responseExamples[Math.floor(Math.random() * responseExamples.length)];
+
+    // Set randomized form data
+    setFormData({
+      name: randomName,
+      description: randomDescription,
+      category: randomCategory,
+      api_config: {
+        endpoint: randomEndpoint,
+        method: randomMethod,
+        content_type: randomContentType,
+        response_format: randomResponseFormat,
+        response_example: randomResponseExample
+      }
+    });
+
+    // Set auth type randomly
+    const authTypes = ["none", "bearer", "api_key", "basic"];
+    const randomAuthType = authTypes[Math.floor(Math.random() * authTypes.length)];
+    setAuthType(randomAuthType);
+
+    // Populate schema text area
+    const requestSchemaInput = document.getElementById('requestSchema') as HTMLTextAreaElement;
+    if (requestSchemaInput) {
+      requestSchemaInput.value = randomSchema;
+    }
+
+    // Populate response example text area  
+    const responseExampleInput = document.getElementById('responseExample') as HTMLTextAreaElement;
+    if (responseExampleInput) {
+      responseExampleInput.value = randomResponseExample;
+    }
+
+    console.log("🎲 Tool form randomized for testing");
   };
 
   return (
@@ -342,7 +518,7 @@ export function CreateToolModal({ open, onOpenChange, onSuccess }: CreateToolMod
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="endpoint">API Endpoint URL *</Label>
+                    <Label htmlFor="endpoint">API Endpoint URL (Optional)</Label>
                     <Input
                       id="endpoint"
                       type="url"
@@ -352,8 +528,10 @@ export function CreateToolModal({ open, onOpenChange, onSuccess }: CreateToolMod
                         api_config: {...formData.api_config!, endpoint: e.target.value}
                       })}
                       placeholder="https://api.example.com/v1/generate"
-                      required
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave empty for purely internal or prompt-only tools
+                    </p>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4">
@@ -620,6 +798,15 @@ export function CreateToolModal({ open, onOpenChange, onSuccess }: CreateToolMod
               }}
             >
               Cancel
+            </Button>
+            <Button 
+              type="button"
+              variant="secondary"
+              onClick={randomizeToolForm}
+              disabled={isCreating}
+            >
+              <Wand2 className="h-4 w-4 mr-2" />
+              Randomize
             </Button>
             <Button type="submit" disabled={isCreating}>
               {isCreating ? (

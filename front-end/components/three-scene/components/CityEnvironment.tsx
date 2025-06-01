@@ -182,30 +182,6 @@ export function CityGround() {
         />
       </mesh>
       
-      {/* PATHWAY MARKERS - Highest layer */}
-      {Array.from({ length: 12 }, (_, i) => {
-        const angle = (i / 12) * Math.PI * 2;
-        const radius = 70 + (i % 2) * 30;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        
-        return (
-          <mesh key={i} position={[x, -0.4, z]} rotation={[-Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[2, 8]} />
-            <meshStandardMaterial
-              color="#00aaff"
-              transparent
-              opacity={0.7}
-              emissive="#00aaff"
-              emissiveIntensity={1.0}
-              roughness={0.0}
-              metalness={0.0}
-              depthWrite={false}
-            />
-          </mesh>
-        );
-      })}
-      
       {/* CIRCUIT PATTERNS - Clean lines */}
       {Array.from({ length: 6 }, (_, i) => {
         const angle = (i / 6) * Math.PI * 2;
