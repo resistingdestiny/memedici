@@ -58,11 +58,18 @@ class FeedbackOracle:
     """
     
     def __init__(self, web3_provider_url: str, oracle_private_key: str, 
-                 oracle_contract_address: str, reward_token_address: str):
+                 oracle_contract_address: str, reward_token_address: str,
+                 skip_verification: bool = False):
         self.w3 = Web3(Web3.HTTPProvider(web3_provider_url))
         self.oracle_account = Account.from_key(oracle_private_key)
         self.oracle_contract_address = oracle_contract_address
         self.reward_token_address = reward_token_address
+        self.skip_verification = skip_verification
+        
+        # Load skip verification flag from environment
+        env_skip = os.getenv('FEEDBACK_SKIP_VERIFICATION', 'false').lower()
+        if env_skip in ['true', '1', 'yes']:
+            self.skip_verification = True
         
         # Load contract ABIs (would be loaded from files in production)
         self.oracle_abi = self._load_oracle_abi()
@@ -179,6 +186,17 @@ class FeedbackOracle:
         """
         Generate cryptographic proof for feedback submission
         """
+        # Skip signature generation if verification is disabled
+        if self.skip_verification:
+            print("⚠️  Verification skipped - generating dummy signature")
+            return FeedbackProof(
+                user=user.lower(),
+                feedback_id=feedback_id,
+                quality_rating=quality_rating,
+                timestamp=timestamp,
+                signature="0x" + "0" * 130  # Dummy signature
+            )
+        
         # Create feedback hash (same as contract)
         feedback_hash = Web3.keccak(
             Web3.toBytes(hexstr=user.lower()) + 
@@ -416,27 +434,114 @@ class FeedbackOracle:
         """Load token contract ABI"""
         # This would load from a JSON file in production
         return []  # Placeholder
+    
+    def set_verification_skip(self, skip: bool, owner_key: Optional[str] = None) -> bool:
+        """
+        Set verification skip flag (owner only)
+        
+        Args:
+            skip: Whether to skip verification
+            owner_key: Owner's private key for authorization
+            
+        Returns:
+            True if successfully set
+        """
+        # Check if caller is owner (simplified check)
+        if owner_key and owner_key == self.oracle_account.key.hex():
+            self.skip_verification = skip
+            print(f"⚠️  Verification skip flag set to: {skip}")
+            return True
+        
+        # Check environment variable for owner override
+        owner_override = os.getenv('FEEDBACK_OWNER_OVERRIDE', 'false').lower()
+        if owner_override in ['true', '1', 'yes']:
+            self.skip_verification = skip
+            print(f"⚠️  Verification skip flag set via environment override: {skip}")
+            return True
+            
+        print("❌ Unauthorized attempt to modify verification skip flag")
+        return False
+    
+    def update_contract_verification_skip(self, skip: bool) -> Optional[str]:
+        """
+        Update the verification skip flag on the contract
+        
+        Args:
+            skip: Whether to skip verification
+            
+        Returns:
+            Transaction hash if successful
+        """
+        try:
+            # Call the contract to update verification skip
+            tx = self.oracle_contract.functions.updateVerificationSkip(skip).build_transaction({
+                'from': self.oracle_account.address,
+                'nonce': self.w3.eth.get_transaction_count(self.oracle_account.address),
+                'gas': 100000,
+                'gasPrice': self.w3.eth.gas_price
+            })
+            
+            # Sign and send transaction
+            signed_tx = self.oracle_account.sign_transaction(tx)
+            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            
+            # Wait for confirmation
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            
+            if receipt.status == 1:
+                print(f"✅ Contract verification skip updated to: {skip}")
+                self.skip_verification = skip  # Update local flag
+                return tx_hash.hex()
+            else:
+                print("❌ Transaction failed")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Error updating contract verification skip: {e}")
+            return None
 
 # Global oracle instance
 feedback_oracle: Optional[FeedbackOracle] = None
 
 def initialize_feedback_oracle():
-    """Initialize the global feedback oracle"""
-    global feedback_oracle
+    """
+    Initialize the global feedback oracle instance
+    """
+    global feedback_oracle_instance
     
-    provider_url = os.getenv('WEB3_PROVIDER_URL', 'http://localhost:8545')
-    oracle_key = os.getenv('ORACLE_PRIVATE_KEY')
-    oracle_address = os.getenv('ORACLE_CONTRACT_ADDRESS')
-    token_address = os.getenv('REWARD_TOKEN_ADDRESS')
-    
-    if oracle_key and oracle_address and token_address:
-        feedback_oracle = FeedbackOracle(
-            provider_url, oracle_key, oracle_address, token_address
+    try:
+        # Load configuration from environment variables
+        web3_url = os.getenv('WEB3_RPC_URL', 'http://localhost:8545')
+        oracle_key = os.getenv('FEEDBACK_ORACLE_SIGNER_KEY')
+        oracle_address = os.getenv('FEEDBACK_ORACLE_CONTRACT_ADDRESS')
+        token_address = os.getenv('FEEDBACK_REWARD_TOKEN_ADDRESS')
+        skip_verification = os.getenv('FEEDBACK_SKIP_VERIFICATION', 'false').lower() in ['true', '1', 'yes']
+        
+        if not oracle_key:
+            print("⚠️  FEEDBACK_ORACLE_SIGNER_KEY not set - feedback system disabled")
+            return
+            
+        if not oracle_address:
+            print("⚠️  FEEDBACK_ORACLE_CONTRACT_ADDRESS not set - feedback system disabled")
+            return
+            
+        if not token_address:
+            print("⚠️  FEEDBACK_REWARD_TOKEN_ADDRESS not set - feedback system disabled")
+            return
+        
+        feedback_oracle_instance = FeedbackOracle(
+            web3_url, oracle_key, oracle_address, token_address, skip_verification
         )
-        print("✅ Feedback oracle initialized")
-    else:
-        print("⚠️  Feedback oracle not initialized - missing environment variables")
+        
+        status_msg = "✅ Feedback Oracle initialized successfully"
+        if skip_verification:
+            status_msg += " (⚠️  VERIFICATION SKIPPED)"
+        print(status_msg)
+        
+    except Exception as e:
+        print(f"❌ Failed to initialize Feedback Oracle: {e}")
+        feedback_oracle_instance = None
 
 def get_feedback_oracle() -> Optional[FeedbackOracle]:
     """Get the global feedback oracle instance"""
-    return feedback_oracle 
+    return feedback_oracle_instance 

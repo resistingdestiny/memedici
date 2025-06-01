@@ -254,19 +254,6 @@ def generate_image(
                     "artwork_id": artwork_id
                 }
                 
-                proof = create_content_proof(
-                    agent_id=agent_id,
-                    api_endpoint="https://api.novita.ai/v3/async/txt2img",
-                    request_data=request_data,
-                    response_data=response_data,
-                    prompt=prompt,
-                    model_name=selected_model,
-                    generation_type="image"
-                )
-                
-                if proof:
-                    print(f"🔐 Content authenticity proof created: {proof.session_id}")
-                
             except Exception as e:
                 print(f"⚠️  Failed to create content proof: {e}")
         

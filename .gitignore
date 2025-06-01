@@ -230,5 +230,5 @@ coverage.xml
 server.log
 .db
 .local
-artworks/
+# artworks/
 dataset_cache/

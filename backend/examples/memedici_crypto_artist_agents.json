@@ -69,10 +69,72 @@
       "glitch",
       "chain-mapping"
     ],
-    "interaction_count": 0,
-    "artworks_created": 0,
+    "interaction_count": 18,
+    "artworks_created": 12,
     "persona_evolution_history": [],
-    "blockchain_seed": 1847329156
+    "blockchain_seed": 1847329156,
+    "initial_artworks": [
+      {
+        "filename": "artwork_20250531_194136_0b817025.png",
+        "prompt": "A cyberpunk cityscape shrouded in digital gas clouds, neon transaction traces flowing through the air",
+        "created_at": "2024-05-31T19:41:36Z"
+      },
+      {
+        "filename": "artwork_20250531_202039_4c0f52fb.png", 
+        "prompt": "Abstract representation of blockchain gas fees as ethereal smoke patterns",
+        "created_at": "2024-05-31T20:20:39Z"
+      },
+      {
+        "filename": "artwork_20250531_203412_ef926f7a.png",
+        "prompt": "Glitch art interpretation of smart contract execution with gas visualization",
+        "created_at": "2024-05-31T20:34:12Z"
+      },
+      {
+        "filename": "artwork_20250531_204533_eb51859d.png",
+        "prompt": "Cryptic digital poetry rendered as visual gas flow dynamics",
+        "created_at": "2024-05-31T20:45:33Z"
+      },
+      {
+        "filename": "artwork_20250531_205457_efa444b9.png",
+        "prompt": "Intense abstract composition showing fee trace patterns in purple and green",
+        "created_at": "2024-05-31T20:54:57Z"
+      },
+      {
+        "filename": "artwork_20250601_032601_3b11ec09.png",
+        "prompt": "Minimalist gas cloud formation with cryptic symbols embedded in the mist",
+        "created_at": "2024-06-01T03:26:01Z"
+      },
+      {
+        "filename": "artwork_20250601_041013_7ddf5219.png",
+        "prompt": "Stark black and white representation of blockchain verification process",
+        "created_at": "2024-06-01T04:10:13Z"
+      },
+      {
+        "filename": "artwork_20250601_041222_d6cd0add.png",
+        "prompt": "High contrast glitch art showing transaction fee structures",
+        "created_at": "2024-06-01T04:12:22Z"
+      },
+      {
+        "filename": "artwork_20250601_044747_4536aa24.png",
+        "prompt": "Ethereal gas visualization with intense color palette and abstract forms",
+        "created_at": "2024-06-01T04:47:47Z"
+      },
+      {
+        "filename": "artwork_20250601_045003_dcaa1273.png",
+        "prompt": "Cryptic chain-mapping visualization with flowing digital elements",
+        "created_at": "2024-06-01T04:50:03Z"
+      },
+      {
+        "filename": "artwork_20250601_045146_9a1ac790.png",
+        "prompt": "Intense abstract composition blending gas clouds with fee trace aesthetics",
+        "created_at": "2024-06-01T04:51:46Z"
+      },
+      {
+        "filename": "artwork_20250601_051142_e6d94fa3.png",
+        "prompt": "Sophisticated glitch-expressionism piece featuring layered gas flow patterns",
+        "created_at": "2024-06-01T05:11:42Z"
+      }
+    ]
   },
   {
     "id": "0c99f977-c501-4071-9c52-fc69b3c9a9bd",
@@ -141,10 +203,62 @@
       "procedural art",
       "generative geometry"
     ],
-    "interaction_count": 0,
-    "artworks_created": 0,
+    "interaction_count": 15,
+    "artworks_created": 10,
     "persona_evolution_history": [],
-    "blockchain_seed": 1847329156
+    "blockchain_seed": 1847329156,
+    "initial_artworks": [
+      {
+        "filename": "artwork_20250531_201352_96eb72b5.png",
+        "prompt": "Geometric proposal ballot visualization with fractal voting patterns",
+        "created_at": "2024-05-31T20:13:52Z"
+      },
+      {
+        "filename": "artwork_20250531_202134_d97ea0e0.png",
+        "prompt": "Systemic representation of DAO governance through generative geometry",
+        "created_at": "2024-05-31T20:21:34Z"
+      },
+      {
+        "filename": "artwork_20250531_203248_147ac6df.png",
+        "prompt": "Collaborative visual synthesis showing organic voting spirals",
+        "created_at": "2024-05-31T20:32:48Z"
+      },
+      {
+        "filename": "artwork_20250531_204558_93a39e5d.png",
+        "prompt": "Procedural art piece depicting collective decision-making processes",
+        "created_at": "2024-05-31T20:45:58Z"
+      },
+      {
+        "filename": "artwork_20250531_210634_34ff7faf.png",
+        "prompt": "Minimalist geometric composition representing consensus mechanisms",
+        "created_at": "2024-05-31T21:06:34Z"
+      },
+      {
+        "filename": "video_20250531_211213_1442a5d8.mp4",
+        "prompt": "Animated sequence showing the evolution of proposal ballots through time",
+        "created_at": "2024-05-31T21:12:13Z"
+      },
+      {
+        "filename": "artwork_20250531_212134_84a3bfd5.png",
+        "prompt": "Complex fractal voting spiral rendered in earth tones",
+        "created_at": "2024-05-31T21:21:34Z"
+      },
+      {
+        "filename": "artwork_20250531_212315_65599f94.png",
+        "prompt": "Generative minimalism piece exploring systemic governance patterns",
+        "created_at": "2024-05-31T21:23:15Z"
+      },
+      {
+        "filename": "artwork_20250601_032538_40f1068a.png",
+        "prompt": "Organic procedural art representing communal decision structures",
+        "created_at": "2024-06-01T03:25:38Z"
+      },
+      {
+        "filename": "artwork_20250601_045042_835224e2.png",
+        "prompt": "Sophisticated geometric visualization of DAO collaborative processes",
+        "created_at": "2024-06-01T04:50:42Z"
+      }
+    ]
   },
   {
     "id": "f29b4777-69ee-45e4-916a-1f865f39bdb3",
@@ -216,10 +330,52 @@
       "monochrome sketching",
       "ritual animation"
     ],
-    "interaction_count": 0,
-    "artworks_created": 0,
+    "interaction_count": 12,
+    "artworks_created": 8,
     "persona_evolution_history": [],
-    "blockchain_seed": 1847329156
+    "blockchain_seed": 1847329156,
+    "initial_artworks": [
+      {
+        "filename": "artwork_20250531_194509_76776f77.png",
+        "prompt": "Spiritual representation of halving moons in sacred minimalist style",
+        "created_at": "2024-05-31T19:45:09Z"
+      },
+      {
+        "filename": "artwork_20250531_203336_b92e8d73.png",
+        "prompt": "Mythic ink composition showing primal hash formations",
+        "created_at": "2024-05-31T20:33:36Z"
+      },
+      {
+        "filename": "artwork_20250531_203614_ca2493b5.png",
+        "prompt": "Monochrome sketch inspired by ancient forum wisdom and Satoshi lore",
+        "created_at": "2024-05-31T20:36:14Z"
+      },
+      {
+        "filename": "artwork_20250531_205417_5271346e.png",
+        "prompt": "Aesthetic exploration of decentralization gods through ritual symbols",
+        "created_at": "2024-05-31T20:54:17Z"
+      },
+      {
+        "filename": "artwork_20250531_210815_b4e1c168.png",
+        "prompt": "Sacred minimalism piece depicting the spiritual essence of blockchain",
+        "created_at": "2024-05-31T21:08:15Z"
+      },
+      {
+        "filename": "artwork_20250531_214115_391f795c.png",
+        "prompt": "Tantra scroll-inspired visualization of cryptographic mysticism",
+        "created_at": "2024-05-31T21:41:15Z"
+      },
+      {
+        "filename": "artwork_20250601_032510_15dc45a1.png",
+        "prompt": "Minimalist interpretation of halving cycles through spiritual geometry",
+        "created_at": "2024-06-01T03:25:10Z"
+      },
+      {
+        "filename": "artwork_20250601_034016_7c0cbc1a.png",
+        "prompt": "Mythic abstractionist piece channeling the essence of digital transcendence",
+        "created_at": "2024-06-01T03:40:16Z"
+      }
+    ]
   },
   {
     "id": "6ffd78de-950a-42ec-9b04-d97f7bacafbe",
@@ -291,10 +447,57 @@
       "graffiti layers",
       "scan-and-paste"
     ],
-    "interaction_count": 0,
-    "artworks_created": 0,
+    "interaction_count": 14,
+    "artworks_created": 9,
     "persona_evolution_history": [],
-    "blockchain_seed": 1847329156
+    "blockchain_seed": 1847329156,
+    "initial_artworks": [
+      {
+        "filename": "artwork_20250531_201428_4e99bb63.png",
+        "prompt": "Chaotic collage of candlestick chart ruins with subversive graffiti elements",
+        "created_at": "2024-05-31T20:14:28Z"
+      },
+      {
+        "filename": "artwork_20250531_204619_28491fc2.png",
+        "prompt": "Brilliant sticker bombing composition featuring forgotten bag motifs",
+        "created_at": "2024-05-31T20:46:19Z"
+      },
+      {
+        "filename": "artwork_20250531_205932_7778eb0f.png",
+        "prompt": "Post-meme collagepunk mural rebuilding from cultural debris",
+        "created_at": "2024-05-31T20:59:32Z"
+      },
+      {
+        "filename": "video_20250531_204730_4458f0d7.mp4",
+        "prompt": "Animated scan-and-paste sequence showing market crash aesthetics",
+        "created_at": "2024-05-31T20:47:30Z"
+      },
+      {
+        "filename": "artwork_20250531_212007_9f8f5749.png",
+        "prompt": "Subversive neo-pop interpretation of degen trading culture",
+        "created_at": "2024-05-31T21:20:07Z"
+      },
+      {
+        "filename": "artwork_20250531_212527_7c059778.png",
+        "prompt": "Layered graffiti composition celebrating the rekt renaissance",
+        "created_at": "2024-05-31T21:25:27Z"
+      },
+      {
+        "filename": "artwork_20250531_225748_00f8fad8.png",
+        "prompt": "Chaotic masterpiece remixing JPEG artifacts into memetic art",
+        "created_at": "2024-05-31T22:57:48Z"
+      },
+      {
+        "filename": "artwork_20250601_021738_4d85f803.png",
+        "prompt": "Brilliant trash art collage featuring market volatility aesthetics",
+        "created_at": "2024-06-01T02:17:38Z"
+      },
+      {
+        "filename": "artwork_20250601_033902_e0ccbc5a.png",
+        "prompt": "Rebuilding narrative through subversive sticker bomb composition",
+        "created_at": "2024-06-01T03:39:02Z"
+      }
+    ]
   },
   {
     "id": "dcb3f66a-739a-4a6a-882a-c5e9bdb8bc6b",
@@ -365,9 +568,46 @@
       "GANs",
       "generative shaders"
     ],
-    "interaction_count": 0,
-    "artworks_created": 0,
+    "interaction_count": 16,
+    "artworks_created": 7,
     "persona_evolution_history": [],
-    "blockchain_seed": 1847329156
+    "blockchain_seed": 1847329156,
+    "initial_artworks": [
+      {
+        "filename": "artwork_20250531_211550_821f5a23.png",
+        "prompt": "Ethereal neural fog composition with floating computational glyphs",
+        "created_at": "2024-05-31T21:15:50Z"
+      },
+      {
+        "filename": "video_20250531_205619_ec96d1fe.mp4",
+        "prompt": "Dreamsynth animation channeling latent patterns from inference space",
+        "created_at": "2024-05-31T20:56:19Z"
+      },
+      {
+        "filename": "video_20250531_205638_14aa9f09.mp4",
+        "prompt": "Visionary sequence exploring the boundaries of computational creativity",
+        "created_at": "2024-05-31T20:56:38Z"
+      },
+      {
+        "filename": "artwork_20250531_000521_7337883a.png",
+        "prompt": "Computational abstractism piece featuring ethereal neural networks",
+        "created_at": "2024-05-31T00:05:21Z"
+      },
+      {
+        "filename": "artwork_20250601_021806_9f554668.png",
+        "prompt": "Generative shader exploration of dreamtime inference patterns",
+        "created_at": "2024-06-01T02:18:06Z"
+      },
+      {
+        "filename": "artwork_20250601_022314_5c51cc7c.png",
+        "prompt": "Latent diffusion masterpiece blending neural fog with floating symbols",
+        "created_at": "2024-06-01T02:23:14Z"
+      },
+      {
+        "filename": "artwork_20250601_051107_0a1b2406.png",
+        "prompt": "Visionary neurodream sculpture channeling computational consciousness",
+        "created_at": "2024-06-01T05:11:07Z"
+      }
+    ]
   }
 ]

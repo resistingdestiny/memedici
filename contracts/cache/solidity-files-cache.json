@@ -1482,8 +1482,8 @@
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/FeedbackOracle.sol": {
-      "lastModificationDate": 1748742865285,
-      "contentHash": "1008b58895ca831f0a2a7d6044d02667",
+      "lastModificationDate": 1748754869575,
+      "contentHash": "69fef848a28f00987dadfdf8b32fa50f",
       "sourceName": "contracts/FeedbackOracle.sol",
       "solcConfig": {
         "version": "0.8.20",
