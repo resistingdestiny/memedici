@@ -2,17 +2,20 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpad.sol": {
-      "lastModificationDate": 1748742916428,
-      "contentHash": "bfc11dac0d9827cc16aadda3cf18fc98",
+      "lastModificationDate": 1748745873072,
+      "contentHash": "755aa1cd26e606eeb2763391d2476d21",
       "sourceName": "contracts/AgentLaunchpad.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -49,17 +52,20 @@
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentToken.sol": {
-      "lastModificationDate": 1748742862516,
-      "contentHash": "3fda10bceffac04890a4bd7c86837449",
+      "lastModificationDate": 1748745868579,
+      "contentHash": "97fd97024bcfecdf4950be1d054aa7f7",
       "sourceName": "contracts/AgentToken.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -93,162 +99,6 @@
         "AgentToken"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol": {
-      "lastModificationDate": 1748742819349,
-      "contentHash": "204e26c16f0a9ae5f37e8181100c5c35",
-      "sourceName": "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IEntropyConsumer"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/entropy-sdk-solidity/IEntropy.sol": {
-      "lastModificationDate": 1748742819349,
-      "contentHash": "8d909c9528e24b4059b9e690aeb51c1e",
-      "sourceName": "@pythnetwork/entropy-sdk-solidity/IEntropy.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./EntropyEvents.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IEntropy"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
-      "lastModificationDate": 1748740168303,
-      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ReentrancyGuard"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Pausable.sol": {
-      "lastModificationDate": 1748740168289,
-      "contentHash": "0d47b53e10b1985efbb396f937626279",
-      "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Pausable"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
       "lastModificationDate": 1748740168278,
       "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
@@ -258,9 +108,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -289,6 +142,174 @@
         "Ownable"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/entropy-sdk-solidity/IEntropy.sol": {
+      "lastModificationDate": 1748742819349,
+      "contentHash": "8d909c9528e24b4059b9e690aeb51c1e",
+      "sourceName": "@pythnetwork/entropy-sdk-solidity/IEntropy.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./EntropyEvents.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IEntropy"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Pausable.sol": {
+      "lastModificationDate": 1748740168289,
+      "contentHash": "0d47b53e10b1985efbb396f937626279",
+      "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Pausable"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
+      "lastModificationDate": 1748740168303,
+      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol": {
+      "lastModificationDate": 1748742819349,
+      "contentHash": "204e26c16f0a9ae5f37e8181100c5c35",
+      "sourceName": "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IEntropyConsumer"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Nonces.sol": {
       "lastModificationDate": 1748740168275,
       "contentHash": "c32d108058718efb9061b88e83a83f79",
@@ -298,9 +319,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -336,9 +360,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -370,48 +397,6 @@
         "ERC20"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol": {
-      "lastModificationDate": 1748740168084,
-      "contentHash": "51c2083b160453420aaa0a046c16d5ca",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../ERC20.sol",
-        "../../../governance/utils/Votes.sol",
-        "../../../utils/structs/Checkpoints.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC20Votes"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol": {
       "lastModificationDate": 1748740168083,
       "contentHash": "b1a8fc63b83ce00408e0c9ed1230b717",
@@ -421,9 +406,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -456,6 +444,51 @@
         "ERC20Permit"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol": {
+      "lastModificationDate": 1748740168084,
+      "contentHash": "51c2083b160453420aaa0a046c16d5ca",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC20.sol",
+        "../../../governance/utils/Votes.sol",
+        "../../../utils/structs/Checkpoints.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20Votes"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Context.sol": {
       "lastModificationDate": 1748740168004,
       "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
@@ -465,9 +498,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -503,9 +539,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -543,9 +582,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -581,9 +623,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -612,18 +657,21 @@
         "IERC20Metadata"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/structs/Checkpoints.sol": {
-      "lastModificationDate": 1748740168001,
-      "contentHash": "7ca7c8421d39c1e99338f38f7952d1b8",
-      "sourceName": "@openzeppelin/contracts/utils/structs/Checkpoints.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": {
+      "lastModificationDate": 1748740168037,
+      "contentHash": "81de029d56aa803972be03c5d277cb6c",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -642,28 +690,29 @@
           }
         }
       },
-      "imports": [
-        "../math/Math.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "Checkpoints"
+        "ECDSA"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/governance/utils/Votes.sol": {
-      "lastModificationDate": 1748740168328,
-      "contentHash": "95aceafdc639babdd22576e5e3774d64",
-      "sourceName": "@openzeppelin/contracts/governance/utils/Votes.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/EIP712.sol": {
+      "lastModificationDate": 1748740168039,
+      "contentHash": "b21731956bbef780b4cc856e8dda7426",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -683,20 +732,228 @@
         }
       },
       "imports": [
-        "../../interfaces/IERC5805.sol",
-        "../../utils/Context.sol",
-        "../../utils/Nonces.sol",
-        "../../utils/cryptography/EIP712.sol",
-        "../../utils/structs/Checkpoints.sol",
-        "../../utils/math/SafeCast.sol",
-        "../../utils/cryptography/ECDSA.sol",
-        "../../utils/types/Time.sol"
+        "./MessageHashUtils.sol",
+        "../ShortStrings.sol",
+        "../../interfaces/IERC5267.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "Votes"
+        "EIP712"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "lastModificationDate": 1748740168228,
+      "contentHash": "94ec15baf0d5df863f45b8f351937ec7",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20Permit"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol": {
+      "lastModificationDate": 1748740168270,
+      "contentHash": "260f3968eefa3bbd30520cff5384cd93",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Strings.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "MessageHashUtils"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/ShortStrings.sol": {
+      "lastModificationDate": 1748740168314,
+      "contentHash": "c1be9487e5a64acf23b5d8028482e748",
+      "sourceName": "@openzeppelin/contracts/utils/ShortStrings.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ShortStrings"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/interfaces/IERC5267.sol": {
+      "lastModificationDate": 1748740168235,
+      "contentHash": "94364524cb1a39dcbc3d3afff6d8e53e",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC5267.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC5267"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1748740168319,
+      "contentHash": "13dbc135f563c72a11b1cf4fbb5fb284",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./math/Math.sol",
+        "./math/SafeCast.sol",
+        "./math/SignedMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Strings"
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
@@ -708,9 +965,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -749,9 +1009,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -778,6 +1041,49 @@
         "SafeCast"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1748740168316,
+      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SignedMath"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Panic.sol": {
       "lastModificationDate": 1748740168287,
       "contentHash": "2133dc13536b4a6a98131e431fac59e1",
@@ -787,9 +1093,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -816,60 +1125,21 @@
         "Panic"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/EIP712.sol": {
-      "lastModificationDate": 1748740168039,
-      "contentHash": "b21731956bbef780b4cc856e8dda7426",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/StorageSlot.sol": {
+      "lastModificationDate": 1748740168318,
+      "contentHash": "e656d64c4ce918f3d13030b91c935134",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./MessageHashUtils.sol",
-        "../ShortStrings.sol",
-        "../../interfaces/IERC5267.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "EIP712"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": {
-      "lastModificationDate": 1748740168037,
-      "contentHash": "81de029d56aa803972be03c5d277cb6c",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
+          "metadata": {
+            "bytecodeHash": "none"
           },
-          "viaIR": true,
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -893,7 +1163,100 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "ECDSA"
+        "StorageSlot"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/governance/utils/Votes.sol": {
+      "lastModificationDate": 1748740168328,
+      "contentHash": "95aceafdc639babdd22576e5e3774d64",
+      "sourceName": "@openzeppelin/contracts/governance/utils/Votes.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../interfaces/IERC5805.sol",
+        "../../utils/Context.sol",
+        "../../utils/Nonces.sol",
+        "../../utils/cryptography/EIP712.sol",
+        "../../utils/structs/Checkpoints.sol",
+        "../../utils/math/SafeCast.sol",
+        "../../utils/cryptography/ECDSA.sol",
+        "../../utils/types/Time.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Votes"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/structs/Checkpoints.sol": {
+      "lastModificationDate": 1748740168001,
+      "contentHash": "7ca7c8421d39c1e99338f38f7952d1b8",
+      "sourceName": "@openzeppelin/contracts/utils/structs/Checkpoints.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../math/Math.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Checkpoints"
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/interfaces/IERC5805.sol": {
@@ -905,9 +1268,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -946,9 +1312,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -978,244 +1347,6 @@
         "Time"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol": {
-      "lastModificationDate": 1748740168270,
-      "contentHash": "260f3968eefa3bbd30520cff5384cd93",
-      "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../Strings.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "MessageHashUtils"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/interfaces/IERC5267.sol": {
-      "lastModificationDate": 1748740168235,
-      "contentHash": "94364524cb1a39dcbc3d3afff6d8e53e",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC5267.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC5267"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/ShortStrings.sol": {
-      "lastModificationDate": 1748740168314,
-      "contentHash": "c1be9487e5a64acf23b5d8028482e748",
-      "sourceName": "@openzeppelin/contracts/utils/ShortStrings.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./StorageSlot.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ShortStrings"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
-      "lastModificationDate": 1748740168319,
-      "contentHash": "13dbc135f563c72a11b1cf4fbb5fb284",
-      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./math/Math.sol",
-        "./math/SafeCast.sol",
-        "./math/SignedMath.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Strings"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
-      "lastModificationDate": 1748740168316,
-      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
-      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./SafeCast.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SignedMath"
-      ]
-    },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/utils/StorageSlot.sol": {
-      "lastModificationDate": 1748740168318,
-      "contentHash": "e656d64c4ce918f3d13030b91c935134",
-      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "StorageSlot"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/governance/utils/IVotes.sol": {
       "lastModificationDate": 1748740168260,
       "contentHash": "905ffceb29869fee4b5a649abe7e2927",
@@ -1225,9 +1356,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1263,9 +1397,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1292,44 +1429,6 @@
         "IERC6372"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol": {
-      "lastModificationDate": 1748740168228,
-      "contentHash": "94ec15baf0d5df863f45b8f351937ec7",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC20Permit"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/entropy-sdk-solidity/EntropyEvents.sol": {
       "lastModificationDate": 1748742819349,
       "contentHash": "8e9c1090566186ab10ce4f7f85b484d2",
@@ -1339,9 +1438,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1379,9 +1481,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1408,6 +1513,51 @@
         "EntropyStructs"
       ]
     },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/FeedbackRewardToken.sol": {
+      "lastModificationDate": 1748742858869,
+      "contentHash": "1fe879fee4aa088290925d6519bf46f8",
+      "sourceName": "contracts/FeedbackRewardToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "FeedbackRewardToken"
+      ]
+    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/FeedbackOracle.sol": {
       "lastModificationDate": 1748742865285,
       "contentHash": "1008b58895ca831f0a2a7d6044d02667",
@@ -1417,9 +1567,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1454,18 +1607,21 @@
         "FeedbackOracle"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/FeedbackRewardToken.sol": {
-      "lastModificationDate": 1748742858869,
-      "contentHash": "1fe879fee4aa088290925d6519bf46f8",
-      "sourceName": "contracts/FeedbackRewardToken.sol",
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/PythStructs.sol": {
+      "lastModificationDate": 1748740168322,
+      "contentHash": "f43da46300095c422885907eb6f25052",
+      "sourceName": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1484,16 +1640,12 @@
           }
         }
       },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8.0"
       ],
       "artifacts": [
-        "FeedbackRewardToken"
+        "PythStructs"
       ]
     },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/IPyth.sol": {
@@ -1505,9 +1657,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {
@@ -1537,44 +1692,6 @@
         "IPyth"
       ]
     },
-    "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/PythStructs.sol": {
-      "lastModificationDate": 1748740168322,
-      "contentHash": "f43da46300095c422885907eb6f25052",
-      "sourceName": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "PythStructs"
-      ]
-    },
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/node_modules/@pythnetwork/pyth-sdk-solidity/IPythEvents.sol": {
       "lastModificationDate": 1748740168318,
       "contentHash": "706e4e13d1848923ce42834f849033e1",
@@ -1584,9 +1701,12 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 200
+            "runs": 1000
           },
           "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
           "evmVersion": "paris",
           "outputSelection": {
             "*": {

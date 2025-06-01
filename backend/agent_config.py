@@ -176,7 +176,7 @@ class AgentConfig(BaseModel):
     persona_evolution_history: List[Dict[str, Any]] = []
     
     # Blockchain Integration
-    blockchain_seed: Optional[str] = None  # Random seed from blockchain
+    blockchain_seed: Optional[int] = None  # Random seed from blockchain
     
     def get_system_prompt(self) -> str:
         """Get the comprehensive system prompt for this artistic agent configuration."""

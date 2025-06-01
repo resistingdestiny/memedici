@@ -121,15 +121,7 @@ async def chat_with_agent(request: ChatRequest):
                 generation_time_ms=generation_time_ms
             )
             
-            logger.info(f"💾 Dataset entry created: {dataset_entry.id}")
-            
-            # Try to upload batch if we have enough entries
-            try:
-                uploaded_cid = dataset_manager.store_batch_to_filecoin(force=False)
-                if uploaded_cid:
-                    logger.info(f"🗂️  Batch uploaded to Filecoin: {uploaded_cid}")
-            except Exception as batch_e:
-                logger.warning(f"⚠️  Batch upload failed (continuing): {batch_e}")
+            logger.info(f"💾 Dataset entry created: {dataset_entry.id} (will upload after 2 minutes or on feedback)")
             
         except Exception as dataset_e:
             logger.warning(f"⚠️  Dataset capture failed (continuing): {dataset_e}")

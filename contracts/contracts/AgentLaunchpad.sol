@@ -4,8 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@pythnetwork/entropy-sdk-solidity/IEntropy.sol";
-import "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol";
 import "./AgentToken.sol";
 
 // Uniswap V2 Interfaces
@@ -32,7 +30,7 @@ interface IUniswapV2Factory {
  * @title AgentLaunchpad
  * @dev Launchpad for creating and funding AI creative agents with automatic LP deployment
  */
-contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer {
+contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable {
     
     // Agent Configuration Structure
     struct AgentConfig {
@@ -43,8 +41,8 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         string metadataURI;
         uint256 fundingTarget;
         uint256 tokenSupply;
-        uint256 liquidityTokens;  // Tokens reserved for LP
-        uint256 treasuryTokens;   // Tokens for treasury
+        uint256 liquidityTokens;
+        uint256 treasuryTokens;
         address creator;
         bool isBonded;
         bool isCancelled;
@@ -52,8 +50,8 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         uint256 createdAt;
         address tokenAddress;
         address lpPairAddress;
-        uint256 seed;             // Random seed generated during bonding
-        string agentConfigJSON;   // Complete agent configuration as JSON string
+        uint256 seed;
+        string agentConfigJSON;
     }
     
     // State Variables
@@ -65,18 +63,13 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
     // Protocol Configuration
     address public treasuryAddress;
     address public uniswapRouter;
-    IEntropy public entropy;
-    uint256 public protocolFeePercentage = 300; // 3% in basis points
-    uint256 public constant MAX_FEE = 1000; // 10% max fee
+    uint256 public protocolFeePercentage = 300; // 3%
+    uint256 public constant MAX_FEE = 1000; // 10%
     uint256 public constant BASIS_POINTS = 10000;
     
     // Default LP Configuration
-    uint256 public defaultLiquidityPercentage = 8000; // 80% of raised funds to LP
-    uint256 public defaultTokenLPPercentage = 8000;   // 80% of tokens to LP
-    
-    // Entropy request tracking
-    mapping(uint64 => uint256) public entropyRequestToAgentId;
-    uint64 private _currentSequenceNumber;
+    uint256 public defaultLiquidityPercentage = 8000; // 80%
+    uint256 public defaultTokenLPPercentage = 8000;   // 80%
     
     // Events
     event AgentCreated(
@@ -119,12 +112,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         uint256 ethAmount
     );
     
-    event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
-    event RouterUpdated(address indexed oldRouter, address indexed newRouter);
-    event ProtocolFeeUpdated(uint256 oldFee, uint256 newFee);
-    event SeedGenerated(uint256 indexed agentId, uint256 seed);
-    event EntropyRequested(uint256 indexed agentId, uint64 sequenceNumber);
-    
     // Errors
     error AgentNotFound();
     error AgentAlreadyBonded();
@@ -135,24 +122,19 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
     error WithdrawalNotAllowed();
     error InvalidFeePercentage();
     error InvalidAddress();
-    error InsufficientLiquidity();
     error TransferFailed();
     
     constructor(
         address _treasuryAddress,
-        address _uniswapRouter,
-        address _entropyAddress
+        address _uniswapRouter
     ) Ownable(msg.sender) {
-        if (_treasuryAddress == address(0) || _uniswapRouter == address(0) || _entropyAddress == address(0)) {
+        if (_treasuryAddress == address(0) || _uniswapRouter == address(0)) {
             revert InvalidAddress();
         }
         
         treasuryAddress = _treasuryAddress;
         uniswapRouter = _uniswapRouter;
-        entropy = IEntropy(_entropyAddress);
     }
-    
-    // Agent Lifecycle Functions
     
     /**
      * @dev Creates a new agent campaign with complete configuration
@@ -188,7 +170,8 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
             archetype,
             metadataURI,
             tokenSupply,
-            address(this)
+            address(this),
+            agentConfigJSON
         );
         
         // Store agent configuration
@@ -229,7 +212,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         
         require(msg.value > 0, "Must contribute more than 0");
         
-        // Check if contribution would exceed funding target
         if (agent.totalRaised + msg.value > agent.fundingTarget) {
             revert FundingTargetExceeded();
         }
@@ -292,6 +274,9 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         // Mark as bonded
         agent.isBonded = true;
         
+        // Generate simple seed (block-based for now)
+        agent.seed = uint256(keccak256(abi.encode(agentId, block.timestamp, block.prevrandao)));
+        
         // Send protocol fee to treasury
         if (protocolFee > 0) {
             (bool treasurySuccess, ) = payable(treasuryAddress).call{value: protocolFee}("");
@@ -304,12 +289,12 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
             require(creatorSuccess, "Creator transfer failed");
         }
         
-        // Request random seed from Entropy
-        _requestEntropySeed(agentId);
-        
-        // Create liquidity pool
-        address lpPair = _initializeLiquidityPool(agentId, liquidityETH);
-        agent.lpPairAddress = lpPair;
+        // Create liquidity pool if router is set
+        address lpPair = address(0);
+        if (uniswapRouter != address(0)) {
+            lpPair = _initializeLiquidityPool(agentId, liquidityETH);
+            agent.lpPairAddress = lpPair;
+        }
         
         // Transfer treasury tokens to treasury
         AgentToken agentToken = AgentToken(agent.tokenAddress);
@@ -317,81 +302,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         
         emit AgentBonded(agentId, agent.tokenAddress, lpPair, liquidityETH, agent.seed, agent.agentConfigJSON);
     }
-    
-    /**
-     * @dev Request random seed from Pyth Entropy
-     */
-    function _requestEntropySeed(uint256 agentId) internal {
-        // Get the required fee for entropy request
-        uint256 entropyFee = entropy.getFee(entropy.getDefaultProvider());
-        
-        // Generate a user random number (use bytes32 instead of uint64)
-        bytes32 userRandomNumber = keccak256(abi.encode(agentId, block.timestamp, block.prevrandao));
-        
-        // Request random number from entropy
-        uint64 sequenceNumber = entropy.requestWithCallback{value: entropyFee}(
-            entropy.getDefaultProvider(),
-            userRandomNumber
-        );
-        
-        // Store mapping for callback
-        entropyRequestToAgentId[sequenceNumber] = agentId;
-        _currentSequenceNumber = sequenceNumber;
-        
-        emit EntropyRequested(agentId, sequenceNumber);
-    }
-    
-    /**
-     * @dev Callback function called by Entropy contract with random number
-     * This function is called by the Entropy contract when the random number is ready
-     */
-    function entropyCallback(
-        uint64 sequenceNumber,
-        address provider,
-        bytes32 randomNumber
-    ) internal override {
-        // Get the agent ID from the sequence number
-        uint256 agentId = entropyRequestToAgentId[sequenceNumber];
-        
-        // Generate final random seed by combining the random number with agent data
-        uint256 seed = uint256(keccak256(abi.encode(randomNumber, agentId, provider)));
-        
-        // Store the seed in the agent config
-        agents[agentId].seed = seed;
-        
-        // Clean up the mapping
-        delete entropyRequestToAgentId[sequenceNumber];
-        
-        emit SeedGenerated(agentId, seed);
-        
-        // Emit updated AgentBonded event with the final seed
-        AgentConfig storage agent = agents[agentId];
-        if (agent.isBonded) {
-            emit AgentBonded(agentId, agent.tokenAddress, agent.lpPairAddress, 0, seed, agent.agentConfigJSON);
-        }
-    }
-    
-    /**
-     * @dev Get the address of the entropy contract
-     */
-    function getEntropy() internal view override returns (address) {
-        return address(entropy);
-    }
-    
-    /**
-     * @dev Cancel an unbonded agent (admin only)
-     */
-    function cancelAgent(uint256 agentId, string calldata reason) external onlyOwner {
-        AgentConfig storage agent = agents[agentId];
-        if (agent.creator == address(0)) revert AgentNotFound();
-        if (agent.isBonded) revert AgentAlreadyBonded();
-        
-        agent.isCancelled = true;
-        
-        emit AgentCancelled(agentId, reason);
-    }
-    
-    // Liquidity Pool Functions
     
     /**
      * @dev Initialize Uniswap V2 liquidity pool
@@ -416,10 +326,10 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
         IUniswapV2Router02(uniswapRouter).addLiquidityETH{value: ethAmount}(
             agent.tokenAddress,
             agent.liquidityTokens,
-            agent.liquidityTokens, // Accept any amount of tokens
-            ethAmount,              // Accept any amount of ETH
-            address(this),          // LP tokens go to launchpad
-            block.timestamp + 300   // 5 minute deadline
+            agent.liquidityTokens,
+            ethAmount,
+            address(this),
+            block.timestamp + 300
         );
         
         emit LiquidityProvided(agentId, lpPair, agent.liquidityTokens, ethAmount);
@@ -428,62 +338,16 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
     }
     
     /**
-     * @dev Get liquidity pool address for an agent
+     * @dev Cancel an unbonded agent (admin only)
      */
-    function getLiquidityPool(uint256 agentId) external view returns (address) {
-        return agents[agentId].lpPairAddress;
-    }
-    
-    // Admin Functions
-    
-    /**
-     * @dev Set treasury address
-     */
-    function setTreasuryAddress(address _treasuryAddress) external onlyOwner {
-        if (_treasuryAddress == address(0)) revert InvalidAddress();
+    function cancelAgent(uint256 agentId, string calldata reason) external onlyOwner {
+        AgentConfig storage agent = agents[agentId];
+        if (agent.creator == address(0)) revert AgentNotFound();
+        if (agent.isBonded) revert AgentAlreadyBonded();
         
-        address oldTreasury = treasuryAddress;
-        treasuryAddress = _treasuryAddress;
+        agent.isCancelled = true;
         
-        emit TreasuryUpdated(oldTreasury, _treasuryAddress);
-    }
-    
-    /**
-     * @dev Set Uniswap router address
-     */
-    function setUniswapRouter(address _uniswapRouter) external onlyOwner {
-        if (_uniswapRouter == address(0)) revert InvalidAddress();
-        
-        address oldRouter = uniswapRouter;
-        uniswapRouter = _uniswapRouter;
-        
-        emit RouterUpdated(oldRouter, _uniswapRouter);
-    }
-    
-    /**
-     * @dev Set protocol fee percentage
-     */
-    function setProtocolFeePercentage(uint256 _feePercentage) external onlyOwner {
-        if (_feePercentage > MAX_FEE) revert InvalidFeePercentage();
-        
-        uint256 oldFee = protocolFeePercentage;
-        protocolFeePercentage = _feePercentage;
-        
-        emit ProtocolFeeUpdated(oldFee, _feePercentage);
-    }
-    
-    /**
-     * @dev Pause the launchpad
-     */
-    function pauseLaunchpad() external onlyOwner {
-        _pause();
-    }
-    
-    /**
-     * @dev Unpause the launchpad
-     */
-    function unpauseLaunchpad() external onlyOwner {
-        _unpause();
+        emit AgentCancelled(agentId, reason);
     }
     
     // View Functions
@@ -575,13 +439,6 @@ contract AgentLaunchpad is Ownable, ReentrancyGuard, Pausable, IEntropyConsumer 
      */
     function hasSeed(uint256 agentId) external view returns (bool) {
         return agents[agentId].seed != 0;
-    }
-    
-    /**
-     * @dev Get entropy contract address
-     */
-    function getEntropyAddress() external view returns (address) {
-        return address(entropy);
     }
     
     /**

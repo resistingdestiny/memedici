@@ -864,9 +864,9 @@
       "@openzeppelin/contracts/utils/Panic.sol:Panic": {
         "src": "@openzeppelin/contracts/utils/Panic.sol:26",
         "version": {
-          "withMetadata": "9cfedfce65f9c5ba0e8402a67f4915141ead9e143ba84283e6163ef0272dd68f",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [],
@@ -955,9 +955,9 @@
       "@openzeppelin/contracts/utils/ShortStrings.sol:ShortStrings": {
         "src": "@openzeppelin/contracts/utils/ShortStrings.sol:40",
         "version": {
-          "withMetadata": "5c5effd327968eb0a04df34a2ed8d9b9c7665687788df9d97c10bbbda357af51",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -978,9 +978,9 @@
       "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot": {
         "src": "@openzeppelin/contracts/utils/StorageSlot.sol:34",
         "version": {
-          "withMetadata": "8a7ff2ca73a633f34721a5bacf42fc10345e89a6e504dd8a895869f9ede2925b",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [],
@@ -999,9 +999,9 @@
       "@openzeppelin/contracts/utils/Strings.sol:Strings": {
         "src": "@openzeppelin/contracts/utils/Strings.sol:13",
         "version": {
-          "withMetadata": "b35ce95c52490d1ac8986f5bc9a0332530b0e0bb7d58b0269966f7b954afeef1",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1024,9 +1024,9 @@
       "@openzeppelin/contracts/utils/cryptography/ECDSA.sol:ECDSA": {
         "src": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol:12",
         "version": {
-          "withMetadata": "7679e5b08e341b968a3319575a7c93eee7fe6586adb6e5963ff05e2299721ef4",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [],
@@ -1096,9 +1096,9 @@
       "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol:MessageHashUtils": {
         "src": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol:15",
         "version": {
-          "withMetadata": "ce31b2e9e0c61e40feb8c5ed9d3f600cc8af98cac81fc5a92e1486ac6b1f2278",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1119,9 +1119,9 @@
       "@openzeppelin/contracts/utils/math/Math.sol:Math": {
         "src": "@openzeppelin/contracts/utils/math/Math.sol:12",
         "version": {
-          "withMetadata": "5ca3cf8fa99e81ce081df3aaa19dfabf9b970c73ab0e4f8e6a36c1561d83954b",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1144,9 +1144,9 @@
       "@openzeppelin/contracts/utils/math/SafeCast.sol:SafeCast": {
         "src": "@openzeppelin/contracts/utils/math/SafeCast.sol:19",
         "version": {
-          "withMetadata": "01d07a2a88989c422fe63efd09bde53d644103dc3f5555b0bb643dcad6cf2ea9",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [],
@@ -1165,9 +1165,9 @@
       "@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath": {
         "src": "@openzeppelin/contracts/utils/math/SignedMath.sol:11",
         "version": {
-          "withMetadata": "aec03d6bc9aa7c8c29941b88cf0790c5578e3cb4c903ec6400baeb883e9a122f",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1188,9 +1188,9 @@
       "@openzeppelin/contracts/utils/structs/Checkpoints.sol:Checkpoints": {
         "src": "@openzeppelin/contracts/utils/structs/Checkpoints.sol:16",
         "version": {
-          "withMetadata": "4dc4d9fdfa5739b8489d17d4569f4eb33ff702b4d54027809d39ddfdf94bd22f",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1211,9 +1211,9 @@
       "@openzeppelin/contracts/utils/types/Time.sol:Time": {
         "src": "@openzeppelin/contracts/utils/types/Time.sol:20",
         "version": {
-          "withMetadata": "ca873abadd71e7a95d27fcd07b80b7459f4fdac2fe625cbcffc920d7a6871717",
-          "withoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a",
-          "linkedWithoutMetadata": "e2a89a66865458f0d9fedd4bc7faf0ee62e4c341d176ab79d29bd77a1bdfc32a"
+          "withMetadata": "419fee843828c6f0d695437c0fb1ff3b96990c9b2c0cccb526f5063806690048",
+          "withoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568",
+          "linkedWithoutMetadata": "ef51aca7aca5d0718cb96883d326646a1b17e1d1087661f068995ef31477e568"
         },
         "inherit": [],
         "libraries": [
@@ -1252,9 +1252,9 @@
       "@pythnetwork/entropy-sdk-solidity/EntropyStructs.sol:EntropyStructs": {
         "src": "@pythnetwork/entropy-sdk-solidity/EntropyStructs.sol:5",
         "version": {
-          "withMetadata": "fba2f42560a178e4eda8e2c02996cbca3eddb1194edb26af92a53df2d7b82bb7",
-          "withoutMetadata": "db12cee82c0b61d41a3f406731f32d59d43e3328864896b25d38f32824fd2bb5",
-          "linkedWithoutMetadata": "db12cee82c0b61d41a3f406731f32d59d43e3328864896b25d38f32824fd2bb5"
+          "withMetadata": "7671073bc0304a45d8d07ed9372b4fcf5a1febbb0cf2898d5668ebf8f8060fa2",
+          "withoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42",
+          "linkedWithoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42"
         },
         "inherit": [],
         "libraries": [],
@@ -1374,9 +1374,9 @@
       "@pythnetwork/pyth-sdk-solidity/PythStructs.sol:PythStructs": {
         "src": "@pythnetwork/pyth-sdk-solidity/PythStructs.sol:4",
         "version": {
-          "withMetadata": "b8732f84df327c19c3345c6e20e493b8e5b8893006a28f1f36a204cdc6d16e8d",
-          "withoutMetadata": "db12cee82c0b61d41a3f406731f32d59d43e3328864896b25d38f32824fd2bb5",
-          "linkedWithoutMetadata": "db12cee82c0b61d41a3f406731f32d59d43e3328864896b25d38f32824fd2bb5"
+          "withMetadata": "7671073bc0304a45d8d07ed9372b4fcf5a1febbb0cf2898d5668ebf8f8060fa2",
+          "withoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42",
+          "linkedWithoutMetadata": "b8a9196cfa1c2fb5e431cdf27771d30fc2cca0ff9ce8892b90afaf64a198dc42"
         },
         "inherit": [],
         "libraries": [],
@@ -1395,9 +1395,9 @@
       "contracts/AgentLaunchpad.sol:AgentLaunchpad": {
         "src": "contracts/AgentLaunchpad.sol:35",
         "version": {
-          "withMetadata": "beca0b9b2d2c0eada9e2f7c05386ea62c788a3363555925f0526bb179b90af59",
-          "withoutMetadata": "e73ffee61b887a44c4ac171bc946abf412f2cbbb2f047b815a151c37ec95de5e",
-          "linkedWithoutMetadata": "e73ffee61b887a44c4ac171bc946abf412f2cbbb2f047b815a151c37ec95de5e"
+          "withMetadata": "c89d749b4d73f932d4169e7e4cdd9a2e8c3eadaed5c157ff7c0d31cc2e22e235",
+          "withoutMetadata": "1fa012ab693ff942866042541e3a5ac60415c21852619e051e1068772e6f6b4f",
+          "linkedWithoutMetadata": "1fa012ab693ff942866042541e3a5ac60415c21852619e051e1068772e6f6b4f"
         },
         "inherit": [
           "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol:IEntropyConsumer",
@@ -1409,7 +1409,7 @@
         "libraries": [],
         "methods": [
           "(address,address,address)",
-          "createAgent(string,string,string,string,string,uint256,uint256)",
+          "createAgent(string,string,string,string,string,uint256,uint256,string)",
           "contribute(uint256)",
           "withdrawContribution(uint256)",
           "bondAgent(uint256)",
@@ -1429,6 +1429,7 @@
           "getAgentSeed(uint256)",
           "hasSeed(uint256)",
           "getEntropyAddress()",
+          "getAgentConfigJSON(uint256)",
           "emergencyWithdraw()",
           "contractBalance()"
         ],
@@ -1437,22 +1438,22 @@
           {
             "kind": "constructor",
             "contract": "AgentLaunchpad",
-            "src": "contracts/AgentLaunchpad.sol:137"
+            "src": "contracts/AgentLaunchpad.sol:141"
           },
           {
             "kind": "state-variable-assignment",
             "name": "protocolFeePercentage",
-            "src": "contracts/AgentLaunchpad.sol:68"
+            "src": "contracts/AgentLaunchpad.sol:69"
           },
           {
             "kind": "state-variable-assignment",
             "name": "defaultLiquidityPercentage",
-            "src": "contracts/AgentLaunchpad.sol:73"
+            "src": "contracts/AgentLaunchpad.sol:74"
           },
           {
             "kind": "state-variable-assignment",
             "name": "defaultTokenLPPercentage",
-            "src": "contracts/AgentLaunchpad.sol:74"
+            "src": "contracts/AgentLaunchpad.sol:75"
           }
         ],
         "layout": {
@@ -1487,15 +1488,15 @@
               "slot": "3",
               "type": "t_uint256",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:59"
+              "src": "contracts/AgentLaunchpad.sol:60"
             },
             {
               "label": "agents",
               "offset": 0,
               "slot": "4",
-              "type": "t_mapping(t_uint256,t_struct(AgentConfig)10679_storage)",
+              "type": "t_mapping(t_uint256,t_struct(AgentConfig)10681_storage)",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:60"
+              "src": "contracts/AgentLaunchpad.sol:61"
             },
             {
               "label": "contributions",
@@ -1503,7 +1504,7 @@
               "slot": "5",
               "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:61"
+              "src": "contracts/AgentLaunchpad.sol:62"
             },
             {
               "label": "userAgents",
@@ -1511,7 +1512,7 @@
               "slot": "6",
               "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:62"
+              "src": "contracts/AgentLaunchpad.sol:63"
             },
             {
               "label": "treasuryAddress",
@@ -1519,7 +1520,7 @@
               "slot": "7",
               "type": "t_address",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:65"
+              "src": "contracts/AgentLaunchpad.sol:66"
             },
             {
               "label": "uniswapRouter",
@@ -1527,7 +1528,7 @@
               "slot": "8",
               "type": "t_address",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:66"
+              "src": "contracts/AgentLaunchpad.sol:67"
             },
             {
               "label": "entropy",
@@ -1535,7 +1536,7 @@
               "slot": "9",
               "type": "t_contract(IEntropy)10294",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:67"
+              "src": "contracts/AgentLaunchpad.sol:68"
             },
             {
               "label": "protocolFeePercentage",
@@ -1543,7 +1544,7 @@
               "slot": "10",
               "type": "t_uint256",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:68"
+              "src": "contracts/AgentLaunchpad.sol:69"
             },
             {
               "label": "defaultLiquidityPercentage",
@@ -1551,7 +1552,7 @@
               "slot": "11",
               "type": "t_uint256",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:73"
+              "src": "contracts/AgentLaunchpad.sol:74"
             },
             {
               "label": "defaultTokenLPPercentage",
@@ -1559,7 +1560,7 @@
               "slot": "12",
               "type": "t_uint256",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:74"
+              "src": "contracts/AgentLaunchpad.sol:75"
             },
             {
               "label": "entropyRequestToAgentId",
@@ -1567,7 +1568,7 @@
               "slot": "13",
               "type": "t_mapping(t_uint64,t_uint256)",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:77"
+              "src": "contracts/AgentLaunchpad.sol:78"
             },
             {
               "label": "_currentSequenceNumber",
@@ -1575,7 +1576,7 @@
               "slot": "14",
               "type": "t_uint64",
               "contract": "AgentLaunchpad",
-              "src": "contracts/AgentLaunchpad.sol:78"
+              "src": "contracts/AgentLaunchpad.sol:79"
             }
           ],
           "types": {
@@ -1607,7 +1608,7 @@
               "label": "mapping(uint256 => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_uint256,t_struct(AgentConfig)10679_storage)": {
+            "t_mapping(t_uint256,t_struct(AgentConfig)10681_storage)": {
               "label": "mapping(uint256 => struct AgentLaunchpad.AgentConfig)",
               "numberOfBytes": "32"
             },
@@ -1619,7 +1620,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(AgentConfig)10679_storage": {
+            "t_struct(AgentConfig)10681_storage": {
               "label": "struct AgentLaunchpad.AgentConfig",
               "members": [
                 {
@@ -1723,9 +1724,15 @@
                   "type": "t_uint256",
                   "offset": 0,
                   "slot": "14"
+                },
+                {
+                  "label": "agentConfigJSON",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "15"
                 }
               ],
-              "numberOfBytes": "480"
+              "numberOfBytes": "512"
             },
             "t_uint256": {
               "label": "uint256",
@@ -1784,9 +1791,9 @@
       "contracts/AgentToken.sol:AgentToken": {
         "src": "contracts/AgentToken.sol:16",
         "version": {
-          "withMetadata": "8929b8db5806b28bf91bb379dfc12140f0239c039303503104dfe7d518f10465",
-          "withoutMetadata": "8929b8db5806b28bf91bb379dfc12140f0239c039303503104dfe7d518f10465",
-          "linkedWithoutMetadata": "8929b8db5806b28bf91bb379dfc12140f0239c039303503104dfe7d518f10465"
+          "withMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf",
+          "withoutMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf",
+          "linkedWithoutMetadata": "abe27ac77b1c4558958ef32e02d381a1fc283710e1e15bcc1a5cf3858848d3cf"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -1809,11 +1816,13 @@
         ],
         "libraries": [],
         "methods": [
-          "(string,string,string,string,string,uint256,address)",
+          "(string,string,string,string,string,uint256,address,string)",
           "agentName()",
           "archetype()",
           "metadataURI()",
+          "agentConfigJSON()",
           "setMetadataURI(string)",
+          "setAgentConfigJSON(string)",
           "depositRevenue()",
           "claimRevenue()",
           "getClaimableRevenue(address)",
@@ -1829,7 +1838,7 @@
           {
             "kind": "constructor",
             "contract": "AgentToken",
-            "src": "contracts/AgentToken.sol:48"
+            "src": "contracts/AgentToken.sol:51"
           }
         ],
         "layout": {
@@ -1963,15 +1972,15 @@
               "src": "contracts/AgentToken.sol:21"
             },
             {
-              "label": "totalRevenue",
+              "label": "_agentConfigJSON",
               "offset": 0,
               "slot": "16",
-              "type": "t_uint256",
+              "type": "t_string_storage",
               "contract": "AgentToken",
-              "src": "contracts/AgentToken.sol:24"
+              "src": "contracts/AgentToken.sol:22"
             },
             {
-              "label": "totalDistributedRevenue",
+              "label": "totalRevenue",
               "offset": 0,
               "slot": "17",
               "type": "t_uint256",
@@ -1979,15 +1988,15 @@
               "src": "contracts/AgentToken.sol:25"
             },
             {
-              "label": "claimedRevenue",
+              "label": "totalDistributedRevenue",
               "offset": 0,
               "slot": "18",
-              "type": "t_mapping(t_address,t_uint256)",
+              "type": "t_uint256",
               "contract": "AgentToken",
               "src": "contracts/AgentToken.sol:26"
             },
             {
-              "label": "lastClaimSnapshot",
+              "label": "claimedRevenue",
               "offset": 0,
               "slot": "19",
               "type": "t_mapping(t_address,t_uint256)",
@@ -1995,20 +2004,28 @@
               "src": "contracts/AgentToken.sol:27"
             },
             {
-              "label": "revenuePerToken",
+              "label": "lastClaimSnapshot",
               "offset": 0,
               "slot": "20",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "AgentToken",
+              "src": "contracts/AgentToken.sol:28"
+            },
+            {
+              "label": "revenuePerToken",
+              "offset": 0,
+              "slot": "21",
               "type": "t_uint256",
               "contract": "AgentToken",
-              "src": "contracts/AgentToken.sol:31"
+              "src": "contracts/AgentToken.sol:32"
             },
             {
               "label": "authorizedRevenueSources",
               "offset": 0,
-              "slot": "21",
+              "slot": "22",
               "type": "t_mapping(t_address,t_bool)",
               "contract": "AgentToken",
-              "src": "contracts/AgentToken.sol:34"
+              "src": "contracts/AgentToken.sol:35"
             }
           ],
           "types": {
@@ -2100,9 +2117,9 @@
       "contracts/FeedbackOracle.sol:FeedbackOracle": {
         "src": "contracts/FeedbackOracle.sol:17",
         "version": {
-          "withMetadata": "8d4aa65881a4b4f904c1f4ad119504bacecb6c424cebf9725948c01599c49b0c",
-          "withoutMetadata": "b112d5fea701f98bb23a386ad912c3c564bbec7377ef84e0a78a8e3e1614ba04",
-          "linkedWithoutMetadata": "b112d5fea701f98bb23a386ad912c3c564bbec7377ef84e0a78a8e3e1614ba04"
+          "withMetadata": "8b0a76374669242ee3980e7ba289fb4406a661044e584fa6e3d210d2047a2559",
+          "withoutMetadata": "f1b9c12e30552110fa9642a4d9b7a95945556011d0e5ed13b68be40f2ad6f26e",
+          "linkedWithoutMetadata": "f1b9c12e30552110fa9642a4d9b7a95945556011d0e5ed13b68be40f2ad6f26e"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
@@ -2284,9 +2301,9 @@
       "contracts/FeedbackRewardToken.sol:FeedbackRewardToken": {
         "src": "contracts/FeedbackRewardToken.sol:13",
         "version": {
-          "withMetadata": "5ff6406919d2b61af99808ee86ec7072b225b4c44b506e2b3aea8215e2a23f71",
-          "withoutMetadata": "95b5679aa22e272dfedf3fd34469b9ad8ce903747f07e3797437bf3de85aa47d",
-          "linkedWithoutMetadata": "95b5679aa22e272dfedf3fd34469b9ad8ce903747f07e3797437bf3de85aa47d"
+          "withMetadata": "b7e6db077139de3d1e42819fdbcc1051dbd4b7af101228fc61dae0b7871c53e7",
+          "withoutMetadata": "939620ed806702b5c4d634c02320d434a43560a47643a13c9879d3c3857b25dd",
+          "linkedWithoutMetadata": "939620ed806702b5c4d634c02320d434a43560a47643a13c9879d3c3857b25dd"
         },
         "inherit": [
           "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
