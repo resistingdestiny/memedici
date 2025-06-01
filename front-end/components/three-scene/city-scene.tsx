@@ -549,16 +549,19 @@ export function CityScene() {
                 {/* GLB STUDIOS - SPREAD OUT WITH AUTOMATIC SCALING */}
                 {studios.map((studio, index) => {
                   // Map studios to available GLB files (excluding ams_s2, cyberpunk_bar, and missing files)
-                  const availableBuildings = [
+                  const studioTypes = [
                     'hw_4_cyberpunk_sci-fi_building.glb',
-                    'pastel_house.glb',
+                    'oriental_building.glb', 
                     'mushroom_house.glb',
-                    'oriental_building.glb',
-                    'the_neko_stop-off__-_hand-painted_diorama.glb'
+                    'pastel_house.glb',
+                    'cyberpunk_bar.glb',
+                    'ams_s2.glb',
+                    'the_neko_stop-off__-_hand-painted_diorama.glb',
+                    'cyberpunk_robot.glb'
                   ];
                   
                   // Use the studio's actual position and rotation from API data
-                  const glbFile = availableBuildings[index % availableBuildings.length];
+                  const glbFile = studioTypes[index % studioTypes.length];
                   const position = studio.position; // Use real position from API
                   const rotation = studio.rotation; // Use real rotation from API
                   
