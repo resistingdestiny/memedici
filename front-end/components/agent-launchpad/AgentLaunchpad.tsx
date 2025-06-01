@@ -229,20 +229,31 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
   };
 
   const loadDashboardData = async () => {
-    if (!contracts.core) return;
+    if (!contracts.core) {
+      console.log('No contracts.core available');
+      return;
+    }
 
     try {
       setLoading(true);
       console.log('Loading dashboard data...');
+      console.log('Connected to network:', currentNetwork?.name, 'Chain ID:', chainId);
+      console.log('Contract address:', CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]?.LAUNCHPAD_CORE);
       
       // Get bonded tokens
-      const bondedResult = await contracts.core.getAllBondedTokens();
-      const bondedAgentIds = bondedResult[4].map((id: any) => id.toString());
-      console.log('Bonded agent IDs:', bondedAgentIds);
+      let bondedAgentIds: string[] = [];
+      try {
+        const bondedResult = await contracts.core.getAllBondedTokens();
+        bondedAgentIds = bondedResult[4].map((id: any) => id.toString());
+        console.log('Bonded agent IDs:', bondedAgentIds);
+      } catch (error) {
+        console.log('getAllBondedTokens failed (this is normal if no bonded tokens exist):', error);
+        bondedAgentIds = [];
+      }
       
-      // Get in-progress agents (check more IDs - up to 50)
+      // Get in-progress agents (check more IDs - up to 20 to start)
       const inProgress: AgentInfo[] = [];
-      const maxAgentId = Math.max(50, ...bondedAgentIds.map(id => parseInt(id) + 10));
+      const maxAgentId = Math.max(20, ...bondedAgentIds.map(id => parseInt(id) + 5));
       
       console.log(`Checking agent IDs 0 to ${maxAgentId}...`);
       
@@ -251,24 +262,34 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
           // Check if agent exists by trying to get its data first
           const agent = await getAgent(i.toString());
           if (agent && agent.creator !== "0x0000000000000000000000000000000000000000") {
-            console.log(`Found agent ${i}:`, agent.agentName, 'Bonded:', agent.isBonded);
+            console.log(`Found agent ${i}:`, {
+              name: agent.agentName,
+              bonded: agent.isBonded,
+              creator: agent.creator.slice(0, 8) + '...',
+              target: agent.fundingTargetFormatted,
+              raised: agent.totalRaisedFormatted
+            });
             
             // Only add to in-progress if not bonded
             if (!agent.isBonded) {
               inProgress.push(agent);
-              console.log(`Added agent ${i} to in-progress:`, agent.agentName);
+              console.log(`✅ Added agent ${i} to in-progress:`, agent.agentName);
+            } else {
+              console.log(`⚠️ Agent ${i} is already bonded:`, agent.agentName);
             }
           }
         } catch (error) {
           // Agent might not exist, which is normal
-          if (i < 10) {
+          if (i < 5) {
             console.log(`Agent ${i} does not exist`);
           }
         }
       }
 
-      console.log('In-progress agents found:', inProgress.length);
-      console.log('In-progress agents:', inProgress.map(a => `${a.id}: ${a.agentName}`));
+      console.log('📊 Summary:');
+      console.log('- In-progress agents found:', inProgress.length);
+      console.log('- Bonded agents found:', bondedAgentIds.length);
+      console.log('- In-progress agents:', inProgress.map(a => `${a.id}: ${a.agentName}`));
 
       // Get bonded tokens with details
       const bondedWithDetails = await Promise.all(
@@ -292,9 +313,15 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
         }
       });
       
-      console.log('Dashboard data loaded successfully');
+      console.log('✅ Dashboard data loaded successfully');
+      
+      // If no agents found, suggest creating one
+      if (inProgress.length === 0 && bondedAgentIds.length === 0) {
+        console.log('💡 No agents found. User should create the first agent on this network.');
+      }
+      
     } catch (error: any) {
-      console.error('Failed to load dashboard data:', error);
+      console.error('❌ Failed to load dashboard data:', error);
       setError(`Failed to load dashboard data: ${error.message}`);
     } finally {
       setLoading(false);
@@ -934,7 +961,15 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
                     🔥 Active Fundraising
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {inProgressAgents.length === 0 ? (
+                    {loading ? (
+                      <div className="bg-black/50 border border-gray-600 rounded-md p-4 flex items-center justify-center">
+                        <RefreshCw className="w-5 h-5 animate-spin text-blue-400 mr-3" />
+                        <div className="text-center">
+                          <div className="text-gray-300">Loading agents from {currentNetwork?.name}...</div>
+                          <div className="text-xs text-gray-500 mt-1">Checking contract: {CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]?.LAUNCHPAD_CORE.slice(0, 10)}...</div>
+                        </div>
+                      </div>
+                    ) : inProgressAgents.length === 0 ? (
                       <div className="col-span-full text-center py-8">
                         <Target className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                         <p className="text-gray-400">No agents currently fundraising</p>
@@ -1181,13 +1216,27 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
               <TabsContent value="contribute" className="space-y-6">
                 <Card className="bg-black/50 border-blue-400/50">
                   <CardHeader>
-                    <CardTitle className="text-white flex items-center">
-                      <Target className="w-6 h-6 mr-2 text-blue-400" />
-                      Support Agent Fundraising
-                    </CardTitle>
-                    <CardDescription className="text-gray-300">
-                      Fund agents to help them reach their bonding threshold
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-white flex items-center">
+                          <Target className="w-6 h-6 mr-2 text-blue-400" />
+                          Support Agent Fundraising
+                        </CardTitle>
+                        <CardDescription className="text-gray-300">
+                          Fund agents to help them reach their bonding threshold
+                        </CardDescription>
+                      </div>
+                      <Button
+                        onClick={refreshData}
+                        disabled={loading}
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-400 text-blue-400 hover:bg-blue-500/10"
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                        {loading ? 'Loading...' : 'Refresh'}
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -1205,9 +1254,12 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
                       </div>
                       
                       {loading ? (
-                        <div className="bg-black/50 border border-gray-600 rounded-md p-3 flex items-center justify-center">
-                          <RefreshCw className="w-4 h-4 animate-spin text-gray-400 mr-2" />
-                          <span className="text-gray-400">Loading agents...</span>
+                        <div className="bg-black/50 border border-gray-600 rounded-md p-4 flex items-center justify-center">
+                          <RefreshCw className="w-5 h-5 animate-spin text-blue-400 mr-3" />
+                          <div className="text-center">
+                            <div className="text-gray-300">Loading agents from {currentNetwork?.name}...</div>
+                            <div className="text-xs text-gray-500 mt-1">Checking contract: {CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES]?.LAUNCHPAD_CORE.slice(0, 10)}...</div>
+                          </div>
                         </div>
                       ) : (
                         <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
@@ -1235,27 +1287,29 @@ export default function AgentLaunchpad({ onClose }: { onClose: () => void }) {
                             <div>
                               <p className="text-yellow-400 font-medium">No agents currently fundraising</p>
                               <p className="text-yellow-300/80 text-sm mt-1">
-                                All existing agents may have already reached their funding targets and been bonded. 
-                                Try creating a new agent in the "Create" tab to get started!
+                                {dashboardData?.counts?.totalAgents === 0 
+                                  ? "No agents have been created on this network yet. Be the first to launch an agent!"
+                                  : "All existing agents may have already reached their funding targets and been bonded. Try creating a new agent to get started!"
+                                }
                               </p>
                               <div className="mt-3 flex space-x-2">
-                                <Button
-                                  onClick={() => setActiveTab('create')}
-                                  size="sm"
-                                  className="bg-orange-600 hover:bg-orange-500 text-white"
-                                >
-                                  Create New Agent
-                                </Button>
                                 <Button
                                   onClick={() => {
                                     setActiveTab('create');
                                     fillTestData();
                                   }}
                                   size="sm"
-                                  variant="outline"
-                                  className="border-purple-400 text-purple-400 hover:bg-purple-500/10"
+                                  className="bg-orange-600 hover:bg-orange-500 text-white font-semibold"
                                 >
-                                  🧪 Create Test Agent
+                                  🚀 Create First Agent
+                                </Button>
+                                <Button
+                                  onClick={() => setActiveTab('create')}
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-orange-400 text-orange-400 hover:bg-orange-500/10"
+                                >
+                                  Create New Agent
                                 </Button>
                               </div>
                             </div>
