@@ -2,27 +2,26 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpad.sol": {
-      "lastModificationDate": 1748745873072,
-      "contentHash": "755aa1cd26e606eeb2763391d2476d21",
+      "lastModificationDate": 1748746898490,
+      "contentHash": "c930e7d9e0a84873a860b35106467c32",
       "sourceName": "contracts/AgentLaunchpad.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -31,15 +30,14 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "@openzeppelin/contracts/utils/Pausable.sol",
-        "@pythnetwork/entropy-sdk-solidity/IEntropy.sol",
-        "@pythnetwork/entropy-sdk-solidity/IEntropyConsumer.sol",
         "./AgentToken.sol"
       ],
       "versionPragmas": [
@@ -60,19 +58,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -81,7 +78,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -108,19 +106,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -129,7 +126,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -194,19 +192,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -215,7 +212,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -237,19 +235,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -258,7 +255,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -319,19 +317,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -340,7 +337,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -360,19 +358,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -381,7 +378,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -406,19 +404,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -427,7 +424,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -453,19 +451,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -474,7 +471,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -498,19 +496,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -519,7 +516,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -539,19 +537,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -560,7 +557,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -582,19 +580,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -603,7 +600,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -623,19 +621,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -644,7 +641,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -666,19 +664,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -687,7 +684,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -707,19 +705,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -728,7 +725,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -752,19 +750,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -773,7 +770,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -793,19 +791,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -814,7 +811,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -836,19 +834,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -857,7 +854,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -879,19 +877,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -900,7 +897,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -920,19 +918,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -941,7 +938,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -965,19 +963,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -986,7 +983,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1009,19 +1007,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1030,7 +1027,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1050,19 +1048,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1071,7 +1068,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1093,19 +1091,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1114,7 +1111,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1134,19 +1132,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1155,7 +1152,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1175,19 +1173,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1196,7 +1193,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1225,19 +1223,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1246,7 +1243,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1268,19 +1266,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1289,7 +1286,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1312,19 +1310,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1333,7 +1330,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1356,19 +1354,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1377,7 +1374,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1397,19 +1395,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1418,7 +1415,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1522,19 +1520,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1543,7 +1540,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1567,19 +1565,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1588,7 +1585,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1616,19 +1614,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1637,7 +1634,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1657,19 +1655,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1678,7 +1675,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [
@@ -1701,19 +1699,18 @@
         "settings": {
           "optimizer": {
             "enabled": true,
-            "runs": 1000
+            "runs": 100
           },
           "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
-                "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
+                "abi",
                 "evm.methodIdentifiers",
                 "metadata",
                 "storageLayout"
@@ -1722,7 +1719,8 @@
                 "ast"
               ]
             }
-          }
+          },
+          "evmVersion": "paris"
         }
       },
       "imports": [],
@@ -1731,6 +1729,51 @@
       ],
       "artifacts": [
         "IPythEvents"
+      ]
+    },
+    "/Users/lucas/Desktop/VibeCode/memedici/contracts/contracts/AgentLaunchpadMinimal.sol": {
+      "lastModificationDate": 1748746805649,
+      "contentHash": "e101076d1b61c0aaa72f07668d2e424c",
+      "sourceName": "contracts/AgentLaunchpadMinimal.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 100
+          },
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "evmVersion": "paris"
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "./AgentToken.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AgentLaunchpadMinimal"
       ]
     }
   }
