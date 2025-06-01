@@ -19,6 +19,7 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
     string private _agentName;
     string private _archetype;
     string private _metadataURI;
+    string private _agentConfigJSON;  // Complete agent configuration JSON
     
     // Revenue Distribution
     uint256 public totalRevenue;
@@ -37,12 +38,14 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
     event RevenueDeposited(uint256 amount, address indexed source);
     event RevenueClaimed(address indexed user, uint256 amount);
     event MetadataUpdated(string newMetadataURI);
+    event AgentConfigUpdated(string newAgentConfigJSON);
     event RevenueSourceAuthorized(address indexed source, bool authorized);
     
     // Errors
     error NoClaimableRevenue();
     error UnauthorizedRevenueSource();
     error InvalidMetadataURI();
+    error InvalidAgentConfig();
     error TransferFailed();
     
     constructor(
@@ -52,7 +55,8 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
         string memory archetype_,
         string memory metadataURI_,
         uint256 totalSupply_,
-        address owner_
+        address owner_,
+        string memory agentConfigJSON_
     ) 
         ERC20(name_, symbol_) 
         ERC20Permit(name_)
@@ -61,6 +65,7 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
         _agentName = agentName_;
         _archetype = archetype_;
         _metadataURI = metadataURI_;
+        _agentConfigJSON = agentConfigJSON_;
         
         // Mint total supply to owner (launchpad contract)
         _mint(owner_, totalSupply_);
@@ -93,12 +98,28 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
     }
     
     /**
+     * @dev Returns the complete agent configuration JSON
+     */
+    function agentConfigJSON() external view returns (string memory) {
+        return _agentConfigJSON;
+    }
+    
+    /**
      * @dev Updates the metadata URI (onlyOwner)
      */
     function setMetadataURI(string calldata newMetadataURI) external onlyOwner {
         if (bytes(newMetadataURI).length == 0) revert InvalidMetadataURI();
         _metadataURI = newMetadataURI;
         emit MetadataUpdated(newMetadataURI);
+    }
+    
+    /**
+     * @dev Updates the agent configuration JSON (onlyOwner)
+     */
+    function setAgentConfigJSON(string calldata newAgentConfigJSON) external onlyOwner {
+        if (bytes(newAgentConfigJSON).length == 0) revert InvalidAgentConfig();
+        _agentConfigJSON = newAgentConfigJSON;
+        emit AgentConfigUpdated(newAgentConfigJSON);
     }
     
     // Revenue Distribution Functions
@@ -223,7 +244,8 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
         string memory metadataURI_,
         uint256 totalSupply_,
         uint256 totalRevenue_,
-        uint256 totalDistributedRevenue_
+        uint256 totalDistributedRevenue_,
+        string memory agentConfigJSON_
     ) {
         return (
             name(),
@@ -233,7 +255,8 @@ contract AgentToken is ERC20, ERC20Votes, ERC20Permit, Ownable, ReentrancyGuard 
             _metadataURI,
             totalSupply(),
             totalRevenue,
-            totalDistributedRevenue
+            totalDistributedRevenue,
+            _agentConfigJSON
         );
     }
 } 

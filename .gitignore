@@ -231,3 +231,4 @@ server.log
 .db
 .local
 artworks/
+dataset_cache/
