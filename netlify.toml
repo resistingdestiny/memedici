@@ -24,32 +24,7 @@
 [context.branch-deploy]
   command = "npm run clean && npm run build"
 
-# Redirect rules for SPA - exclude static assets from SPA redirects
-[[redirects]]
-  from = "/glb/*"
-  to = "/glb/:splat"
-  status = 200
-  force = false
-
-[[redirects]]
-  from = "/hdr/*"
-  to = "/hdr/:splat"
-  status = 200
-  force = false
-
-[[redirects]]
-  from = "/_next/*"
-  to = "/_next/:splat"
-  status = 200
-  force = false
-
-[[redirects]]
-  from = "/static/*"
-  to = "/static/:splat"
-  status = 200
-  force = false
-
-# SPA fallback - must be last
+# SPA redirect for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
