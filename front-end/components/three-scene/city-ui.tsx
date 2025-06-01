@@ -92,7 +92,7 @@ export function CityUI() {
   };
   
   const resetCamera = () => {
-    setCameraPosition([0, 15, 25]);
+    setCameraPosition([0, 100, 200]);
     setCameraTarget([0, 0, 0]);
   };
   
@@ -274,7 +274,7 @@ export function CityUI() {
                 asChild
                 className="bg-gradient-to-r from-purple-500 to-blue-500 border-0 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
               >
-                <Link href={`/agents/${displayStudio.agentId}`}>
+                <Link href={`/studios/${displayStudio.studio_id}`}>
                   <Info className="h-4 w-4 mr-2" />
                   Profile
                 </Link>
@@ -290,37 +290,14 @@ export function CityUI() {
               ) : null;
             })()}
             
-            <div className="space-y-4">
-              <h4 className="font-semibold text-sm flex items-center text-white">
-                <Sparkles className="h-4 w-4 mr-2 text-yellow-400" />
-                Recent Creations
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                {displayStudio.recentArtworks.map((artwork) => (
-                  <div key={artwork.id} className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-lg">
-                    <img
-                      src={artwork.image}
-                      alt={artwork.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end">
-                      <p className="text-white text-xs font-medium p-3 leading-tight">
-                        {artwork.title}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <Button
-                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
-                onClick={() => {
-                  enterGalleryMode(displayStudio.id);
-                }}
-              >
-                🏛️ Visit Studio
-              </Button>
-            </div>
+            <Button
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all duration-300"
+              onClick={() => {
+                enterGalleryMode(displayStudio.id);
+              }}
+            >
+              🏛️ Visit Studio
+            </Button>
           </CardContent>
         </Card>
       )}

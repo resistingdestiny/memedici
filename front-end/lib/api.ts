@@ -34,6 +34,7 @@ export interface ChatResponse {
   error?: string;
   agent_id: string;
   thread_id: string;
+  dataset_entry_id?: string;
   tools_used?: string[];
   persona_evolved?: boolean;
   assets?: Record<string, any>; // For generated images/videos
@@ -61,7 +62,7 @@ export interface AgentConfig {
   creation_rate: number;
   collab_affinity: string[];
   
-  // Studio ID - REQUIRED FIELD
+  // Studio ID - Now optional
   studio_id?: string | null;
   
   // Technical Configuration
@@ -72,12 +73,12 @@ export interface AgentConfig {
   memory_enabled: boolean;
   structured_output: boolean;
   
-  // Studio fields
-  studio_name: string;
-  studio_description: string;
-  studio_theme: string;
-  art_style: string;
-  studio_items: StudioItem[];
+  // Studio fields - Now optional
+  studio_name?: string;
+  studio_description?: string;
+  studio_theme?: string;
+  art_style?: string;
+  studio_items?: StudioItem[];
   
   // Tools
   tools_enabled: string[];
@@ -271,6 +272,20 @@ export async function chatWithAgent(agentId: string, message: string, threadId: 
     thread_id: threadId 
   });
   return res.data;
+}
+
+// Submit feedback on a chat response
+export async function submitFeedback(feedbackData: DatasetFeedbackRequest): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await api.post('/dataset/feedback', feedbackData);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error submitting feedback:', error);
+    return { 
+      success: false, 
+      error: error?.response?.data?.detail || error?.message || 'Failed to submit feedback' 
+    };
+  }
 }
 
 // Agent management
@@ -496,4 +511,16 @@ export async function getAgentRecentArtworks(agentId: string, days: number = 7) 
 export async function getArtwork(artworkId: string) {
   const res = await api.get(`/artworks/${artworkId}`);
   return res.data;
+}
+
+// Add feedback types
+export interface DatasetFeedbackRequest {
+  entry_id: string;
+  rating: number; // 1-5 star rating
+  flags?: string[]; // "inappropriate", "low_quality", "copyright_violation"
+  comments?: string;
+  helpful?: boolean;
+  wallet_address: string;
+  signed_message: string; // Must include entry_id
+  signature: string;
 }

@@ -11,11 +11,11 @@ import {
   Menu, 
   X, 
   Home,
-  LayoutDashboard, 
   Users, 
   Compass,
   Settings,
-  Building
+  Building,
+  MapPin
 } from "lucide-react";
 import { useWallet, useWalletConnection } from "@/lib/stores/use-wallet";
 
@@ -42,10 +42,10 @@ export function NavBar() {
   const navItems = [
     { href: "/", label: "Home", icon: <Home className="h-5 w-5 mr-2" /> },
     { href: "/explore", label: "Explore", icon: <Compass className="h-5 w-5 mr-2" /> },
+    { href: "/city", label: "City", icon: <MapPin className="h-5 w-5 mr-2" /> },
     { href: "/agents", label: "Creators", icon: <Users className="h-5 w-5 mr-2" /> },
-    { href: "/studios", label: "Studios", icon: <Building className="h-5 w-5 mr-2" /> },
+    { href: "/studio", label: "Studios", icon: <Building className="h-5 w-5 mr-2" /> },
     { href: "/tools", label: "Tools", icon: <Settings className="h-5 w-5 mr-2" /> },
-    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5 mr-2" /> },
   ];
 
   return (

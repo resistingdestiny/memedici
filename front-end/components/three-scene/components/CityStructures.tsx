@@ -43,7 +43,26 @@ export function MysteriousContraption() {
   });
 
   return (
-    <group ref={contraptionRef} position={[0, 0, 0]}>
+    <group 
+      ref={contraptionRef} 
+      position={[0, 0, 0]}
+      onPointerEnter={(e) => {
+        // Stop event propagation to prevent unwanted overlay effects
+        e.stopPropagation();
+      }}
+      onPointerLeave={(e) => {
+        // Stop event propagation to prevent unwanted overlay effects
+        e.stopPropagation();
+      }}
+      onPointerOver={(e) => {
+        // Stop event propagation to prevent unwanted overlay effects
+        e.stopPropagation();
+      }}
+      onClick={(e) => {
+        // Stop event propagation to prevent unwanted overlay effects
+        e.stopPropagation();
+      }}
+    >
       {/* MYSTERIOUS CONTRAPTION GLB MODEL with automatic scaling */}
       <AnimatedScaledGLB 
         glbFile="https://siliconroads.com/16_mysterious_contraption.glb"

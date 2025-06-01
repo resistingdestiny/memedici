@@ -103,6 +103,7 @@ export interface ChatResponse {
   error?: string | null;
   agent_id: string;
   thread_id: string;
+  dataset_entry_id?: string;
   tools_used?: string[] | null;
   persona_evolved?: boolean;
   metadata?: {
@@ -122,4 +123,23 @@ export interface ChatResponse {
     };
   };
   artworks_created?: number;
+}
+
+// Add feedback-related types
+export interface DatasetFeedbackRequest {
+  entry_id: string;
+  rating: number; // 1-5 star rating
+  flags?: string[]; // "inappropriate", "low_quality", "copyright_violation"
+  comments?: string;
+  helpful?: boolean;
+  wallet_address: string;
+  signed_message: string; // Must include entry_id
+  signature: string;
+}
+
+export interface FeedbackState {
+  rating: number;
+  flags: string[];
+  comments: string;
+  helpful: boolean;
 }

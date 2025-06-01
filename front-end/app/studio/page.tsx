@@ -826,7 +826,7 @@ function StudioPageContent() {
                                       {agent.description}
                                     </p>
                                     <div className="flex flex-wrap gap-1 mt-2">
-                                      {agent.specialty.slice(0, 3).map((spec, index) => (
+                                      {(agent.specialty || []).slice(0, 3).map((spec, index) => (
                                         <Badge key={index} variant="outline" className="text-xs">
                                           {spec}
                                         </Badge>

@@ -63,7 +63,7 @@ export function ExchangeBuilding({ position, marketId }: { position: [number, nu
         {/* Simple hover info only */}
         {isHovered && (
           <Html position={[0, 12, 0]} center>
-            <div className="bg-black/95 backdrop-blur-xl border-2 border-orange-400/70 rounded-2xl px-6 py-4 font-mono animate-in fade-in duration-200 shadow-2xl min-w-[300px]">
+            <div className="bg-black/95 backdrop-blur-xl border-2 border-orange-400/70 rounded-2xl px-6 py-4 font-mono animate-in fade-in duration-200 shadow-2xl min-w-[300px] pointer-events-none">
               <div className="text-center mb-4">
                 <h2 className="text-2xl font-bold text-white mb-1">🏦 MEDICI EXCHANGE</h2>
                 <p className="text-sm text-orange-300">Digital Art Trading Hub</p>
@@ -103,8 +103,8 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
       }
       
-      // Subtle rotation
-      groupRef.current.rotation.y += Math.sin(state.clock.elapsedTime * 0.3) * 0.001;
+      // Removed rotation - the bar now stays facing the opposite direction (180 degrees)
+      // groupRef.current.rotation.y += Math.sin(state.clock.elapsedTime * 0.3) * 0.001;
     }
   });
 
@@ -132,7 +132,7 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
   };
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={position} rotation={[0, Math.PI, 0]}>
       <ScaledGLB 
         glbFile="https://siliconroads.com/cyberpunk_bar.glb"
         castShadow
@@ -145,7 +145,7 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
       {/* Simple hover info only */}
       {isHovered && (
         <Html position={[0, 12, 0]} center>
-          <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl px-6 py-4 font-mono animate-in fade-in duration-200 shadow-2xl min-w-[300px]">
+          <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400/70 rounded-2xl px-6 py-4 font-mono animate-in fade-in duration-200 shadow-2xl min-w-[300px] pointer-events-none">
             <div className="text-center mb-4">
               <h2 className="text-2xl font-bold text-white mb-1">🤖 AGENT BUILDER</h2>
               <p className="text-sm text-cyan-300">AI Assistant Creation Hub</p>

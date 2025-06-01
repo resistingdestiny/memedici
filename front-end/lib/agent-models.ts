@@ -1,14 +1,23 @@
 /**
  * Agent Model Assignment System
  * Randomly assigns robot models to agents and persists them in localStorage
+ * NOTE: These models are for AGENTS ONLY - not for studio buildings
  */
 
-// Available robot/character models
+// Available robot/character models for AI agents
 export const AVAILABLE_ROBOT_MODELS = [
+  'cyberpunk_robot.glb',      // Cyberpunk-themed agent - AGENT ONLY, not for buildings
+  'robot_playground.glb',     // Playground robot agent
+  'diamond_hands.glb',        // Diamond hands character
+  'the_artist.glb'            // Artist character
+];
+
+// Additional models for roaming artists with more variety
+export const ROAMING_ARTIST_MODELS = [
   'cyberpunk_robot.glb',
-  'robot_playground.glb', 
-  'diamond_hands.glb',
-  'the_artist.glb'
+  'destiny_-_ghost_follower_giveaway.glb',
+  'genshin_destiny2_paimon_ghost.glb', 
+  'ghost_ship.glb'
 ];
 
 const STORAGE_KEY = 'medici-agent-model-assignments';
@@ -45,33 +54,40 @@ function saveAgentModelAssignments(assignments: AgentModelAssignment[]) {
   }
 }
 
-// Get model for a specific agent (assign if not exists)
-export function getModelForAgent(agentId: string): string {
-  const assignments = getAgentModelAssignments();
-  
-  // Check if agent already has an assignment
-  const existing = assignments.find(a => a.agentId === agentId);
-  if (existing) {
-    console.log(`🤖 Using existing model for ${agentId}: ${existing.modelFile}`);
-    return existing.modelFile;
+/**
+ * Get a robot model for an agent ensuring variety across the system
+ * @param agentId - The unique agent identifier
+ * @param agentIndex - The index of this agent in the overall list (for variety)
+ * @param totalAgents - Total number of agents (to determine if we need variety)
+ */
+export function getAgentModel(agentId: string, agentIndex: number = 0, totalAgents: number = 1): string {
+  // For the first N agents, ensure we cover all model types for variety
+  if (agentIndex < AVAILABLE_ROBOT_MODELS.length && totalAgents >= AVAILABLE_ROBOT_MODELS.length) {
+    console.log(`🎭 Assigning ${AVAILABLE_ROBOT_MODELS[agentIndex]} to agent ${agentId} for variety (position ${agentIndex + 1})`);
+    return AVAILABLE_ROBOT_MODELS[agentIndex];
   }
   
-  // Assign a random model
-  const randomModel = AVAILABLE_ROBOT_MODELS[Math.floor(Math.random() * AVAILABLE_ROBOT_MODELS.length)];
+  // For additional agents, use consistent hash-based assignment
+  const seed = agentId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  const modelIndex = seed % AVAILABLE_ROBOT_MODELS.length;
   
-  // Create new assignment
-  const newAssignment: AgentModelAssignment = {
-    agentId,
-    modelFile: randomModel,
-    assignedAt: new Date().toISOString()
-  };
+  console.log(`🎲 Assigning ${AVAILABLE_ROBOT_MODELS[modelIndex]} to agent ${agentId} via hash`);
+  return AVAILABLE_ROBOT_MODELS[modelIndex];
+}
+
+/**
+ * Get a roaming artist model with variety preference
+ */
+export function getRoamingArtistModel(agentId: string, agentIndex: number = 0): string {
+  // Ensure variety for the first batch of roaming artists
+  if (agentIndex < ROAMING_ARTIST_MODELS.length) {
+    return ROAMING_ARTIST_MODELS[agentIndex];
+  }
   
-  // Save new assignment
-  const updatedAssignments = [...assignments, newAssignment];
-  saveAgentModelAssignments(updatedAssignments);
-  
-  console.log(`🎲 Assigned new model to ${agentId}: ${randomModel}`);
-  return randomModel;
+  // Use hash for consistent assignment after variety is ensured
+  const seed = agentId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  const modelIndex = seed % ROAMING_ARTIST_MODELS.length;
+  return ROAMING_ARTIST_MODELS[modelIndex];
 }
 
 // Reassign a specific agent (for testing/admin)

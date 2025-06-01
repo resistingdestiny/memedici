@@ -98,7 +98,7 @@ export function ToolCard({ tool, onUpdate }: ToolCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{getCategoryIcon(tool.category)}</span>
+            <span className="text-lg">{getCategoryIcon(tool.category || 'unknown')}</span>
             <CardTitle className="text-lg font-semibold">{tool.name}</CardTitle>
           </div>
           
@@ -142,7 +142,7 @@ export function ToolCard({ tool, onUpdate }: ToolCardProps) {
             {tool.status || 'unknown'}
           </Badge>
           <Badge variant="outline" className="text-xs">
-            {tool.category.replace(/_/g, ' ')}
+            {(tool.category || 'uncategorized').replace(/_/g, ' ')}
           </Badge>
         </div>
       </CardHeader>

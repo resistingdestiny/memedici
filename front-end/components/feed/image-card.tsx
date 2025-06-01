@@ -13,9 +13,10 @@ import { useFeed } from "@/lib/stores/use-feed";
 
 interface ImageCardProps {
   item: FeedItem;
+  onClick?: () => void;
 }
 
-export function ImageCard({ item }: ImageCardProps) {
+export function ImageCard({ item, onClick }: ImageCardProps) {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -36,11 +37,23 @@ export function ImageCard({ item }: ImageCardProps) {
       return null;
     }
   };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger lightbox if clicking on interactive elements
+    if (
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('a')
+    ) {
+      return;
+    }
+    onClick?.();
+  };
   
   return (
     <Card
       ref={ref}
       className="overflow-hidden group cursor-pointer"
+      onClick={handleCardClick}
     >
       <div className="relative aspect-auto overflow-hidden">
         {inView && (
@@ -146,18 +159,21 @@ export function ImageCard({ item }: ImageCardProps) {
               variant="ghost"
               size="icon"
               className={item.isLiked ? "text-red-500" : ""}
-              onClick={() => likeItem(item.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                likeItem(item.id);
+              }}
             >
               <Heart className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
               <MessageCircle className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
               <Share2 className="h-5 w-5" />
             </Button>
           </div>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
             <Bookmark className="h-5 w-5" />
           </Button>
         </div>

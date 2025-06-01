@@ -20,6 +20,43 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   
+  // Create a loading texture immediately (synchronously) to prevent white images
+  const createLoadingTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a subtle loading gradient
+      const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(0.5, '#16213e');
+      gradient.addColorStop(1, '#0f3460');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Add loading animation dots
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Loading...', 256, 256);
+      
+      // Add some sparkle effects
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    const loadingTex = new THREE.CanvasTexture(canvas);
+    loadingTex.needsUpdate = true;
+    return loadingTex;
+  };
+  
+  // Initialize with loading texture immediately
+  const [loadingTexture] = useState(() => createLoadingTexture());
+  
   useEffect(() => {
     console.log(`🖼️ Loading artwork: ${artwork.title} from ${artwork.image || artwork.file_url}`);
     setIsLoading(true);
@@ -27,6 +64,16 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
     
     const loader = new THREE.TextureLoader();
     const imageUrl = artwork.image || artwork.file_url;
+    
+    // Validate URL before attempting to load
+    if (!imageUrl || imageUrl.trim() === '') {
+      console.error(`❌ No valid URL for artwork: ${artwork.title || artwork.id}`);
+      setHasError(true);
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log(`🔗 Attempting to load from URL: ${imageUrl}`);
     
     // Special handling for NightCafe artwork
     if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
@@ -36,7 +83,7 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
     loader.load(
       imageUrl,
       (loadedTexture) => {
-        console.log(`✅ Successfully loaded: ${artwork.title}`);
+        console.log(`✅ Successfully loaded artwork: ${artwork.title || artwork.id} from ${imageUrl}`);
         if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.log('🎉 YOUR NIGHTCAFE ARTWORK LOADED SUCCESSFULLY!');
         }
@@ -50,13 +97,14 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
         setHasError(false);
       },
       (progress) => {
-        console.log(`⏳ Loading progress for ${artwork.title}:`, progress);
+        console.log(`⏳ Loading progress for ${artwork.title || artwork.id}:`, progress);
         if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.log('⏳ NightCafe loading progress:', progress);
         }
       },
       (error) => {
-        console.error(`❌ Failed to load ${artwork.title}:`, error);
+        console.error(`❌ Failed to load artwork: ${artwork.title || artwork.id} from URL: ${imageUrl}`);
+        console.error(`❌ Error details:`, error);
         if (artwork.title && artwork.title.includes('NIGHTCAFE')) {
           console.error('💥 NIGHTCAFE LOADING FAILED:', error);
           console.error('🔍 Attempted URL:', imageUrl);
@@ -126,8 +174,9 @@ function FloatingArtwork({ artwork, index, studio, onLightboxOpen }: { artwork: 
           <mesh position={[0, 0, 0]}>
             <planeGeometry args={[artwork.scale[0], artwork.scale[1]]} />
             <meshBasicMaterial 
-              map={texture}
-              transparent={false}
+              map={texture || loadingTexture}
+              transparent={true}
+              opacity={1}
               side={THREE.DoubleSide}
             />
           </mesh>
@@ -195,7 +244,7 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       console.log(`🎨 Fetching artworks for studio: ${studio.name} from agent: ${studio.agent.name}`);
 
       try {
-        const response = await getAgentArtworks(studio.agent.agent_id, 12, 0, true);
+        const response = await getAgentArtworks(studio.agent.agent_id, 50, 0, true);
         
         if (response.success && response.artworks) {
           console.log(`✅ Loaded ${response.artworks.length} artworks for studio: ${studio.name}`);
@@ -215,44 +264,63 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
     fetchStudioArtworks();
   }, [studio.agent?.agent_id, studio.name]);
 
-  // Convert API artworks to gallery format
+  // Convert API artworks to gallery format - REMOVED 8-ARTWORK LIMIT AND SPREAD MORE
   const galleryArtworks = studioArtworks.length > 0
-    ? studioArtworks.slice(0, 8).map((artwork, index) => ({
-        id: artwork.id,
-        title: artwork.prompt, // Use prompt as title for AI artworks
-        image: artwork.file_url,
-        agent_name: studio.agent?.name,
-        model_name: artwork.model_name,
-        created_at: artwork.created_at,
-        position: [
-          // Position artworks in a circle around the center
-          Math.cos(index * (Math.PI * 2 / Math.min(studioArtworks.length, 8))) * 12,
-          6 + Math.sin(index * 0.5) * 2, // Varying heights
-          Math.sin(index * (Math.PI * 2 / Math.min(studioArtworks.length, 8))) * 12
-        ] as [number, number, number],
-        rotation: [0, index * (Math.PI * 2 / Math.min(studioArtworks.length, 8)), 0] as [number, number, number],
-        scale: [4, 3, 0.1] as [number, number, number]
-      }))
+    ? studioArtworks
+        .filter(artwork => {
+          // Filter out artworks without valid image URLs
+          const hasValidUrl = artwork.file_url && artwork.file_url.trim() !== '';
+          if (!hasValidUrl) {
+            console.warn(`🚫 Skipping artwork without valid URL:`, artwork.id, artwork.prompt?.slice(0, 50));
+          }
+          return hasValidUrl;
+        })
+        .map((artwork, index) => {
+          // Create much more spread out positioning in 3D space
+          const totalArtworks = studioArtworks.length;
+          const layers = Math.ceil(totalArtworks / 12); // 12 artworks per layer
+          const currentLayer = Math.floor(index / 12);
+          const indexInLayer = index % 12;
+          
+          // Multiple concentric circles at different heights and radii
+          const baseRadius = 20 + currentLayer * 15; // Increasing radius for each layer
+          const angleStep = (Math.PI * 2) / Math.min(12, totalArtworks - currentLayer * 12);
+          const angle = indexInLayer * angleStep;
+          
+          return {
+            id: artwork.id,
+            title: artwork.prompt, // Use prompt as title for AI artworks
+            image: artwork.file_url,
+            file_url: artwork.file_url, // Keep both for debugging
+            agent_name: studio.agent?.name,
+            model_name: artwork.model_name,
+            created_at: artwork.created_at,
+            position: [
+              // X: Spread in a wider circle with some randomness
+              Math.cos(angle) * baseRadius + (Math.random() - 0.5) * 10,
+              // Y: Varying heights with layering
+              8 + currentLayer * 6 + Math.sin(index * 0.7) * 3,
+              // Z: Spread in a wider circle with some randomness
+              Math.sin(angle) * baseRadius + (Math.random() - 0.5) * 10
+            ] as [number, number, number],
+            rotation: [0, angle + Math.PI, 0] as [number, number, number], // Face inward
+            scale: [4, 3, 0.1] as [number, number, number]
+          };
+        })
     : [];
 
   // Check for different studio states
   const hasAgent = studio.agent && studio.agent.agent_id;
   const hasArtworks = galleryArtworks.length > 0;
 
+  // Only show platforms and robots if there are actual assigned agents (restored from previous version)
+  const shouldShowAgentContent = hasAgent;
+
   // Always get at least one platform position
   const getStudioArtists = () => {
     if (!hasAgent) {
-      // Return empty platform position even without an agent
-      return [{
-        id: `${studio.id}-empty`,
-        agentId: null,
-        name: null,
-        specialty: null,
-        position: [0, 0, 0] as [number, number, number],
-        isActive: false,
-        platformId: 0,
-        agent: null
-      }];
+      // Return empty array - no platforms without agents
+      return [];
     }
 
     // Return the single assigned agent
@@ -296,14 +364,21 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
     });
   };
 
-  // Random spinning feature selection
+  // Random spinning feature selection with improved variety (restored cyberpunk_robot)
   const getRandomSpinningFeature = () => {
     const features = [
       { glbFile: "https://siliconroads.com/cyberpunk_robot.glb", shouldSpin: true, name: "Cyberpunk Guardian" },
       { glbFile: "https://siliconroads.com/solaria_core.glb", shouldSpin: true, name: "Solaria Core" },
-      { glbFile: "https://siliconroads.com/diamond_hands.glb", shouldSpin: false, name: "Diamond Hands" }
+      { glbFile: "https://siliconroads.com/diamond_hands.glb", shouldSpin: false, name: "Diamond Hands" },
+      { glbFile: "https://siliconroads.com/the_artist.glb", shouldSpin: true, name: "The Artist" }
     ];
-    return features[Math.floor(Math.random() * features.length)];
+    
+    // Use studio ID to ensure consistent but varied selection across studios
+    const studioSeed = studio.id ? studio.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0;
+    const featureIndex = studioSeed % features.length;
+    
+    console.log(`🎪 Studio "${studio.name}" assigned spinning feature: ${features[featureIndex].name}`);
+    return features[featureIndex];
   };
 
   const [randomFeature] = useState(getRandomSpinningFeature());
@@ -325,9 +400,20 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
   useEffect(() => {
     console.log('🎨 Gallery loaded for studio:', studio.name);
     console.log('🤖 Has agent:', hasAgent);
-    console.log('🖼️ Real artworks from API:', studioArtworks.length);
-    console.log('🖼️ Gallery artworks displayed:', galleryArtworks.length);
+    console.log('🖼️ Raw artworks from API:', studioArtworks.length);
+    console.log('🖼️ Filtered gallery artworks displayed:', galleryArtworks.length);
     console.log('🏛️ Has artworks:', hasArtworks);
+    
+    // Log each artwork's URL for debugging
+    studioArtworks.forEach((artwork, i) => {
+      console.log(`📸 Artwork ${i + 1}:`, {
+        id: artwork.id,
+        prompt: artwork.prompt?.slice(0, 50) + '...',
+        file_url: artwork.file_url,
+        model_name: artwork.model_name,
+        created_at: artwork.created_at
+      });
+    });
     
     if (studio.agent) {
       console.log('👨‍🎨 Assigned agent:', studio.agent.name);
@@ -402,8 +488,8 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       <directionalLight position={[0, 20, 0]} intensity={1.5} color="#ffffff" castShadow />
       <pointLight position={[0, 15, 0]} intensity={2} color="#ffffff" distance={50} />
       
-      {/* ALWAYS SHOW PLATFORM - Empty if no agent, occupied if agent exists */}
-      {studioArtists.map((artist, index) => (
+      {/* ONLY SHOW PLATFORMS IF THERE ARE ASSIGNED AGENTS (restored previous logic) */}
+      {shouldShowAgentContent && studioArtists.map((artist, index) => (
         <AnimatedScaledGLB 
           key={`platform-${artist.id}`}
           glbFile="https://siliconroads.com/fucursor.glb"
@@ -424,28 +510,43 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
         </Html>
       )}
 
-      {/* FLOATING ARTWORKS - Only show if agent exists and has artworks */}
-      {hasAgent && hasArtworks && !loadingArtworks && (
+      {/* FLOATING ARTWORKS - Show artworks if they exist */}
+      {hasArtworks && !loadingArtworks && (
         <group ref={galleryRef}>
-          {studioArtists.map((artist, platformId) => (
-            <group key={artist.id}>
-              {getArtworksForPlatform(platformId).map((artwork, index) => (
-                <FloatingArtwork 
-                  key={artwork.id} 
-                  artwork={artwork} 
-                  index={index} 
-                  studio={studio}
-                  onLightboxOpen={onLightboxOpen}
-                />
-              ))}
-            </group>
-          ))}
+          {shouldShowAgentContent ? (
+            // Show artworks grouped by platform if agents exist
+            studioArtists.map((artist, platformId) => (
+              <group key={artist.id}>
+                {getArtworksForPlatform(platformId).map((artwork, index) => (
+                  <FloatingArtwork 
+                    key={artwork.id} 
+                    artwork={artwork} 
+                    index={index} 
+                    studio={studio}
+                    onLightboxOpen={onLightboxOpen}
+                  />
+                ))}
+              </group>
+            ))
+          ) : (
+            // Show artworks without platform grouping if no agents
+            galleryArtworks.map((artwork, index) => (
+              <FloatingArtwork 
+                key={artwork.id} 
+                artwork={artwork} 
+                index={index} 
+                studio={studio}
+                onLightboxOpen={onLightboxOpen}
+              />
+            ))
+          )}
         </group>
       )}
 
-      {/* ROBOT ON PLATFORM - Only show if agent is assigned */}
-      {hasAgent && studioArtists.map((artist) => (
-        artist.agent && (
+      {/* DANCING ROBOT ON PLATFORM - Only show if agent is assigned (restored robot_playground.glb) */}
+      {shouldShowAgentContent && studioArtists.map((artist) => (
+        <group key={`robot-group-${artist.id}`}>
+          {/* Robot Model */}
           <AnimatedScaledGLB
             key={`robot-${artist.id}`}
             glbFile="https://siliconroads.com/robot_playground.glb"
@@ -454,55 +555,54 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
             playAllAnimations={true}
             castShadow
             receiveShadow
-            onClick={() => onArtistClick?.({
-              id: artist.id,
-              agentId: artist.agentId,
-              name: artist.agent?.name || "Gallery Assistant",
-              specialty: artist.specialty,
-              type: "AI Assistant",
-              isAIAgent: true,
-              isActive: artist.isActive,
-              avatar: artist.agent?.avatar,
-              description: artist.agent?.description,
-              stats: artist.agent?.stats
-            })}
+            onClick={() => {
+              console.log('🤖 Robot clicked for studio artist:', artist.agent?.name);
+              // Use EXACT same format as wandering agents
+              const studioArtist = {
+                id: artist.agentId,
+                name: artist.agent?.name,
+                specialty: artist.agent?.specialty?.[0] || artist.specialty,
+                homeStudio: studio.name,
+                color: "#00ffff",
+                type: "Studio Artist",
+                isActive: false,
+                isAIAgent: false,
+                position: artist.position
+              };
+              onArtistClick?.(studioArtist);
+            }}
           />
-        )
+          
+          {/* INVISIBLE LARGER CLICKABLE AREA FOR EASIER CLICKING */}
+          <mesh
+            position={[artist.position[0], 6, artist.position[2]]}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('🎯 Robot clickable area clicked for:', artist.agent?.name);
+              // Use EXACT same format as wandering agents
+              const studioArtist = {
+                id: artist.agentId,
+                name: artist.agent?.name,
+                specialty: artist.agent?.specialty?.[0] || artist.specialty,
+                homeStudio: studio.name,
+                color: "#00ffff",
+                type: "Studio Artist",
+                isActive: false,
+                isAIAgent: false,
+                position: artist.position
+              };
+              onArtistClick?.(studioArtist);
+            }}
+            visible={false}
+          >
+            <sphereGeometry args={[10]} />
+            <meshBasicMaterial transparent opacity={0} />
+          </mesh>
+        </group>
       ))}
 
-      {/* SCENARIO 1: NO AGENT - Empty platform with "no artists" message */}
-      {!hasAgent && !loadingArtworks && (
-        <Html position={[0, 8, 0]} center>
-          <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-600 rounded-lg px-6 py-4 text-gray-300 text-center shadow-lg">
-            <div className="text-2xl font-bold mb-2">🏛️ {studio.studioData.name}</div>
-            <div className="text-lg opacity-70 mb-3">Empty Studio</div>
-            <div className="text-sm opacity-60 mb-2">
-              There are no artists in this studio yet.
-            </div>
-            <div className="text-xs text-blue-400 mt-2">Theme: {studio.studioData.theme}</div>
-            <div className="text-xs text-yellow-400 mt-1">Platform ready for an artist to claim</div>
-          </div>
-        </Html>
-      )}
-
-      {/* SCENARIO 2: AGENT EXISTS BUT NO ARTWORKS - Show platform + robot + message */}
-      {hasAgent && !hasArtworks && !loadingArtworks && (
-        <Html position={[0, 10, 0]} center>
-          <div className="bg-blue-900/90 backdrop-blur-sm border border-blue-400/50 rounded-lg px-6 py-4 text-blue-200 text-center shadow-lg">
-            <div className="text-2xl font-bold mb-2">🎨 {studio.studioData.name}</div>
-            <div className="text-lg opacity-70 mb-3">Studio Ready</div>
-            <div className="text-sm opacity-60 mb-2">
-              Artist <span className="text-cyan-400 font-bold">{studio.agent.name}</span> is ready to create
-            </div>
-            <div className="text-xs text-yellow-400">
-              Artworks will appear here as the artist creates them
-            </div>
-          </div>
-        </Html>
-      )}
-
-      {/* SCENARIO 3: AGENT + ARTWORKS - Show spinning feature */}
-      {hasAgent && hasArtworks && (
+      {/* RANDOM SPINNING FEATURE - Only if there's content in the studio (restored previous logic) */}
+      {(shouldShowAgentContent || hasArtworks) && (
         <group ref={featureRef} position={[0, 8, -30]}>
           <AnimatedScaledGLB
             glbFile={randomFeature.glbFile}

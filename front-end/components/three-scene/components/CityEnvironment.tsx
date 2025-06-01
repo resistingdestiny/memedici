@@ -9,27 +9,36 @@ export function CityEnvironment() {
       {/* ENHANCED LIGHTING SYSTEM FOR LARGER CITY 🌈 */}
       {/* Hemisphere Light for soft ambient fill */}
       <hemisphereLight
-        args={[0xddddff, 0x222222, 0.4]}
+        args={[0xddddff, 0x333333, 1.2]}
       />
       
       {/* MAIN DIRECTIONAL LIGHT - Enhanced with better shadow settings */}
       <directionalLight
         position={[50, 50, 20]}
-        intensity={2}
-        color="#00ffff"
+        intensity={4}
+        color="#ffffff"
         castShadow
-        shadow-mapSize-width={4096} // Higher quality shadows
+        shadow-mapSize-width={4096}
         shadow-mapSize-height={4096}
         shadow-camera-near={0.5}
-        shadow-camera-far={200} // Much larger shadow distance
-        shadow-camera-left={-100} // Wider shadow coverage
+        shadow-camera-far={200}
+        shadow-camera-left={-100}
         shadow-camera-right={100}
         shadow-camera-top={100}
         shadow-camera-bottom={-100}
-        shadow-bias={-0.0001} // Reduce shadow acne
+        shadow-bias={-0.0001}
+      />
+      
+      {/* ADDITIONAL AMBIENT DIRECTIONAL LIGHT for overall brightness */}
+      <directionalLight
+        position={[-30, 40, 30]}
+        intensity={2}
+        color="#e6f3ff"
+        castShadow={false}
       />
       
       {/* REGIONAL LIGHTING FOR DIFFERENT STUDIO AREAS - Enhanced with better falloff */}
+      <pointLight position={[-40, 20, -30]} intensity={6} color="#FFD700" distance={80} decay={1.5} castShadow={false} />
       <pointLight position={[-40, 20, -30]} intensity={3} color="#FFD700" distance={60} decay={2} castShadow={false} /> {/* Leonardo area */}
       <pointLight position={[45, 20, -25]} intensity={3} color="#4169E1" distance={60} decay={2} castShadow={false} /> {/* Raphael area */}
       <pointLight position={[0, 20, 50]} intensity={4} color="#DC143C" distance={80} decay={2} castShadow={false} /> {/* Michelangelo area */}
@@ -181,29 +190,6 @@ export function CityGround() {
           depthWrite={false}
         />
       </mesh>
-      
-      {/* CIRCUIT PATTERNS - Clean lines */}
-      {Array.from({ length: 6 }, (_, i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        const x = Math.cos(angle) * 120;
-        const z = Math.sin(angle) * 120;
-        
-        return (
-          <mesh key={`circuit-${i}`} position={[x, -0.5, z]} rotation={[-Math.PI / 2, 0, angle]}>
-            <planeGeometry args={[30, 1]} />
-            <meshStandardMaterial
-              color="#0088cc"
-              transparent
-              opacity={0.4}
-              emissive="#0088cc"
-              emissiveIntensity={0.6}
-              roughness={0.0}
-              metalness={0.0}
-              depthWrite={false}
-            />
-          </mesh>
-        );
-      })}
     </group>
   );
 } 

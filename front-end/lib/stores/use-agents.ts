@@ -61,6 +61,7 @@ export interface ChatMessage {
   message: string;
   timestamp: Date;
   agentId?: string;
+  dataset_entry_id?: string;
   assets?: Record<string, any>;
   toolsUsed?: string[];
 }
@@ -236,6 +237,7 @@ export const useAgents = create<AgentsState>((set, get) => ({
           message: response.response,
           timestamp: new Date(),
           agentId,
+          dataset_entry_id: response.dataset_entry_id,
           assets: response.assets,
           toolsUsed: response.tools_used
         };
@@ -336,19 +338,11 @@ export const useAgents = create<AgentsState>((set, get) => ({
         creation_rate: 4,
         collab_affinity: [],
         
-        // Studio ID - REQUIRED FIELD
-        studio_id: `${data.name?.toLowerCase().replace(/\s+/g, '_') || `agent_${Date.now()}`}_studio`,
-        
         agent_type: "creative_artist",
         model_name: "gpt-3.5-turbo",
         temperature: 0.7,
         memory_enabled: true,
         structured_output: false,
-        studio_name: data.collective || "Creative Studio",
-        studio_description: "A creative space for artistic expression",
-        studio_theme: "abstract",
-        art_style: "digital",
-        studio_items: [],
         tools_enabled: ["generate_image", "generate_video"],
         custom_tools: [],
         persona_name: data.name || "Creative Soul",

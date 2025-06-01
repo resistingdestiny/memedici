@@ -131,8 +131,8 @@ export function MovementController() {
       const newCameraPosition = currentCameraPosition.clone().add(movementVec);
       const newTarget = currentTarget.clone().add(movementVec);
       
-      // Define movement boundaries (adjust these based on your scene size)
-      const BOUNDARY_SIZE = 200; // This should contain the city area
+      // Define movement boundaries - increased for wider city view
+      const BOUNDARY_SIZE = 500; // Increased from 200 to accommodate wider zoom out
       const MIN_BOUNDARY = -BOUNDARY_SIZE;
       const MAX_BOUNDARY = BOUNDARY_SIZE;
       
@@ -163,7 +163,7 @@ export function MovementController() {
         dampingFactor={0.1}
         maxPolarAngle={Math.PI / 2.2}
         minPolarAngle={Math.PI / 6}
-        maxDistance={50}
+        maxDistance={300}
         minDistance={5}
       />
     </>

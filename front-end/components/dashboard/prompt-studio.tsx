@@ -17,14 +17,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { chatWithAgent, type ChatResponse } from "@/lib/api";
-import { type Agent } from "@/lib/stubs";
+import { chatWithAgent, type ChatResponse, type Agent } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 
 const promptSchema = z.object({
   promptText: z
     .string()
-    .min(10, { message: "Prompt must be at least 10 characters" })
+    .min(3, { message: "Prompt must be at least 3 characters" })
     .max(500, { message: "Prompt cannot exceed 500 characters" }),
 });
 
@@ -89,9 +88,17 @@ export function PromptStudio({ agent }: PromptStudioProps) {
     setResponse(null);
     setGeneratedArtworks(undefined);
     
+    console.log('🎨 Prompt Studio: Submitting prompt', {
+      agent: agent.name,
+      agentId: agent.agent_id || agent.id,
+      prompt: data.promptText
+    });
+    
     try {
       // Use the real API chat endpoint with agent ID
-      const result = await chatWithAgent(agent.id, data.promptText);
+      const result = await chatWithAgent(agent.agent_id || agent.id, data.promptText);
+      
+      console.log('🎨 Prompt Studio: API response', result);
       
       if (result.success && result.response) {
         setIsSuccess(true);

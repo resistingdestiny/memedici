@@ -58,12 +58,12 @@ function convertAPIAgentToAgentConfig(apiAgent: any): AgentConfig {
     memory_enabled: technical.memory_enabled !== false,
     structured_output: technical.structured_output || false,
     
-    // Studio fields
-    studio_name: studio.name || 'Creative Studio',
-    studio_description: studio.description || 'A creative workspace',
-    studio_theme: studio.theme || 'modern',
-    art_style: studio.art_style || 'digital',
-    studio_items: studio.featured_items?.map((item: any) => ({
+    // Studio fields - Now optional
+    studio_name: studio?.name || undefined,
+    studio_description: studio?.description || undefined,
+    studio_theme: studio?.theme || undefined,
+    art_style: studio?.art_style || undefined,
+    studio_items: studio?.featured_items?.map((item: any) => ({
       name: item.name,
       category: item.category,
       description: item.description,
@@ -73,7 +73,7 @@ function convertAPIAgentToAgentConfig(apiAgent: any): AgentConfig {
       acquisition_date: item.acquisition_date || null,
       cost: item.cost || null,
       notes: item.notes || null,
-    })) || [],
+    })) || undefined,
     
     // Tools
     tools_enabled: technical.tools_enabled || ['generate_image'],

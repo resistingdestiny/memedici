@@ -264,9 +264,6 @@ export function CreateAgentWizard({ open, onOpenChange }: CreateAgentWizardProps
           creation_rate: data.creation_rate,
           collab_affinity: data.collab_affinity || [],
           
-          // Studio ID - REQUIRED FIELD
-          studio_id: `${agentId}_studio`, // Create unique studio for this agent
-          
           // Technical Configuration
           agent_type: "creative_artist",
           model_name: data.model_name,
@@ -274,13 +271,6 @@ export function CreateAgentWizard({ open, onOpenChange }: CreateAgentWizardProps
           max_tokens: null,
           memory_enabled: data.memory_enabled,
           structured_output: data.structured_output,
-          
-          // Studio fields
-          studio_name: `${data.display_name}'s Studio`,
-          studio_description: `A creative space for ${data.display_name} to explore ${data.primary_mediums.join(', ')} and express their artistic vision.`,
-          studio_theme: data.archetype.toLowerCase().replace(/\s+/g, '_'),
-          art_style: data.primary_mediums[0] || 'digital',
-          studio_items: [],
           
           // Tools
           tools_enabled: data.tools_enabled || ["generate_image", "generate_video"],

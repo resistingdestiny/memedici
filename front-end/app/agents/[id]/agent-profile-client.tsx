@@ -15,30 +15,53 @@ import { useGetAgent } from "@/hooks/useGetAgent";
 import { useAgentArtworks } from "@/hooks/useAgentArtworks";
 import { api } from "@/lib/api";
 import { type AgentConfig } from "@/lib/types";
-import { type Agent } from "@/lib/stubs";
-import { ArrowLeft, TrendingUp, MessageSquare, ImageIcon, Sparkles, AlertCircle, Trash2, Zap, ArrowDown, Loader2 } from "lucide-react";
+import { Agent } from "@/lib/api";
+import { ArrowLeft, TrendingUp, MessageSquare, ImageIcon, Sparkles, AlertCircle, Trash2, Zap, ArrowDown, Loader2, Star } from "lucide-react";
 import { httpClient } from "@/lib/http";
 import { toast } from "sonner";
 import { useAgents, ChatMessage } from "@/lib/stores/use-agents";
+import { FeedbackButton } from "@/components/ui/feedback-button";
 
 // Helper function to convert AgentConfig to Agent for legacy components
 function convertAgentConfigToAgent(config: AgentConfig): Agent {
   return {
     id: config.id,
+    agent_id: config.id,
+    identity: {
+      display_name: config.display_name,
+      avatar_url: config.avatar || `https://api.dicebear.com/7.x/avatars/svg?seed=${config.id}`,
+      archetype: config.archetype,
+    },
+    studio: {
+      name: config.studio_name,
+      description: config.studio_description,
+      theme: config.studio_theme,
+      art_style: config.art_style,
+    },
+    creative_specs: {
+      primary_mediums: config.primary_mediums,
+      signature_motifs: config.signature_motifs,
+      influences: config.influences,
+    },
+    evolution: {
+      interaction_count: config.interaction_count,
+      artworks_created: config.artworks_created,
+    },
+    // Legacy fields for backward compatibility
     name: config.display_name,
     description: config.origin_story,
     specialty: config.core_traits,
-    collective: config.collective || "Independent",
+    collective: config.studio_name || "Independent",
     avatar: config.avatar || `https://api.dicebear.com/7.x/avatars/svg?seed=${config.id}`,
-    featured: config.featured || false,
-    gallery: config.gallery || null,
-    stats: config.stats || {
-      promptsHandled: 0,
-      artworksCreated: 0,
+    featured: false,
+    gallery: null,
+    stats: {
+      promptsHandled: config.interaction_count || 0,
+      artworksCreated: config.artworks_created || 0,
       backersCount: 0,
       totalStaked: 0,
     },
-    samples: config.samples || [],
+    samples: [],
   };
 }
 
@@ -742,9 +765,22 @@ export function AgentProfileClient() {
                                   <p className="text-xs opacity-70">🛠️ Tools: {msg.toolsUsed.join(', ')}</p>
                                 </div>
                               )}
-                              <p className="text-xs opacity-70 mt-1">
-                                {msg.timestamp.toLocaleTimeString()}
-                              </p>
+                              <div className="flex items-center justify-between mt-1">
+                                <p className="text-xs opacity-70">
+                                  {msg.timestamp.toLocaleTimeString()}
+                                </p>
+                                {/* Add feedback button for agent responses */}
+                                {msg.sender === 'agent' && msg.dataset_entry_id && (
+                                  <FeedbackButton
+                                    entryId={msg.dataset_entry_id}
+                                    agentName={agent.display_name}
+                                    responseText={msg.message}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="opacity-70 hover:opacity-100"
+                                  />
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
