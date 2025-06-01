@@ -27,7 +27,7 @@ async function debug() {
       console.log("Balance:", hre.ethers.formatEther(balance), "HBAR");
     } else {
       console.log("❌ No signers found. This means Hardhat could not initialize a signer from the private key.");
-      console.log("Ensure HEDERA_PRIVATE_KEY is correctly set in your .env file and loaded by dotenv.");
+      console.log("Ensure HEDERA_PRIVATE_KEY is correctly set in your .env file (in the `contracts` directory) and loaded by dotenv.");
       console.log("And that your hardhat.config.js getAccounts function is correctly using it for Hedera networks.");
     }
   } catch (error) {
