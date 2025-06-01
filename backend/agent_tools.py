@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 from openai import OpenAI
 from enum import Enum
-from vlayer_verification import create_content_proof, VlayerWebProof
+# from vlayer_verification import create_content_proof, VlayerWebProof
 
 class ImageSize(Enum):
     """Supported image sizes."""
