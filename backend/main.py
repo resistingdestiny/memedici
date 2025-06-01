@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import os
 import logging
+import subprocess
+from pathlib import Path
 from dotenv import load_dotenv
 import json
 from datetime import datetime
@@ -60,13 +62,62 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
 async def startup_event():
-    """Startup event to ensure crypto artist agents are loaded."""
+    """Startup event to ensure crypto artist agents are loaded and IPNS is configured."""
     logger.info("🚀 Starting Memedici server...")
     try:
+        # Check and setup IPNS configuration if needed
+        ipns_info = dataset_manager.get_ipns_info()
+        
+        if ipns_info["status"] == "not_configured":
+            logger.info("🔧 IPNS not configured - running Lighthouse CLI setup...")
+            
+            # Check if setup script exists
+            setup_script_path = Path("utils/setup_lighthouse_cli.sh")
+            if setup_script_path.exists():
+                try:
+                    # Make script executable
+                    subprocess.run(["chmod", "+x", str(setup_script_path)], check=True)
+                    
+                    # Run the setup script
+                    result = subprocess.run(
+                        ["bash", str(setup_script_path)], 
+                        capture_output=True, 
+                        text=True, 
+                        timeout=300,  # 5 minute timeout
+                        cwd=Path.cwd()
+                    )
+                    
+                    if result.returncode == 0:
+                        logger.info("✅ Lighthouse CLI setup completed successfully!")
+                        # Reload dataset manager to pick up new IPNS config
+                        dataset_manager._load_ipns_config()
+                        updated_ipns_info = dataset_manager.get_ipns_info()
+                        
+                        if updated_ipns_info["status"] == "configured":
+                            logger.info(f"🌐 IPNS configured: {updated_ipns_info['ipns_address']}")
+                        else:
+                            logger.warning("⚠️  IPNS setup completed but configuration not detected")
+                    else:
+                        logger.error(f"❌ Lighthouse CLI setup failed with return code {result.returncode}")
+                except Exception as e:
+                    logger.error(f"❌ Error during startup: {e}")
+                    traceback.print_exc()
+
+        # Load crypto artist agents
         ensure_crypto_artists_loaded()
+        
         # Refresh the main agent registry to ensure it has the latest data
         agent_registry.reload_agents()
+        
         logger.info(f"✅ Server startup complete - {len(agent_registry.list_agents())} agents loaded")
+        
+        # Log final IPNS status
+        final_ipns_info = dataset_manager.get_ipns_info()
+        if final_ipns_info["status"] == "configured":
+            logger.info("🗂️  Decentralized storage fully operational with IPNS")
+        else:
+            logger.info("🗂️  Decentralized storage operating in basic mode (uploads only)")
+            
     except Exception as e:
         logger.error(f"❌ Error during startup: {e}")
         import traceback
