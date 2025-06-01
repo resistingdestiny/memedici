@@ -38,9 +38,17 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 100,
       },
       viaIR: true,
+      metadata: {
+        bytecodeHash: "none",
+      },
+      outputSelection: {
+        "*": {
+          "*": ["evm.bytecode", "evm.deployedBytecode", "abi"]
+        }
+      },
     },
   },
   networks: {

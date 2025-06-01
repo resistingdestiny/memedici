@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 import logging
 from datetime import datetime
 import json
+from dataclasses import asdict
 
 from decentralized_dataset import dataset_manager
 
@@ -99,25 +100,74 @@ async def get_dataset_statistics():
 
 @router.post("/upload")
 async def force_dataset_upload(request: ForceUploadRequest):
-    """Manually trigger dataset batch upload to Filecoin."""
+    """Manually trigger dataset batch upload to Filecoin with IPNS publishing."""
     logger.info(f"🚀 Manual dataset upload requested (force={request.force})")
     
     try:
-        uploaded_cid = dataset_manager.store_batch_to_filecoin(force=request.force)
-        
-        if uploaded_cid:
-            return {
-                "success": True,
-                "message": "Dataset batch uploaded successfully",
-                "filecoin_cid": uploaded_cid,
-                "gateway_url": f"https://gateway.lighthouse.storage/ipfs/{uploaded_cid}",
-                "dataset_tag": dataset_manager.dataset_tag
-            }
+        if request.force:
+            # Force upload: get all pending entries
+            pending_entries = dataset_manager._get_pending_entries()
         else:
+            # Time-based upload: get entries older than upload_delay_minutes
+            pending_entries = dataset_manager._get_time_based_pending_entries()
+        
+        if not pending_entries:
             return {
                 "success": False,
                 "message": "No entries to upload or batch size not reached",
                 "stats": dataset_manager.get_dataset_stats()
+            }
+        
+        # Create dataset batch
+        dataset_batch = {
+            "dataset_info": {
+                "dataset_name": "memedici_ai_training_data",
+                "version": "1.0",
+                "description": "Decentralized AI training dataset from MemeDici platform",
+                "license": "Creative Commons Attribution 4.0",
+                "created_by": "MemeDici DAO",
+                "batch_timestamp": datetime.utcnow().isoformat(),
+                "total_entries": len(pending_entries),
+                "schema_version": "1.0",
+                "upload_trigger": "force" if request.force else "time_based"
+            },
+            "entries": [asdict(entry) for entry in pending_entries]
+        }
+        
+        # Upload directly using IPNS method
+        filename = f"dataset_batch_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{len(pending_entries)}entries.json"
+        result = dataset_manager.upload_and_publish_to_ipns(dataset_batch, filename)
+        
+        if result["success"]:
+            # Mark entries as uploaded
+            file_cid = result["cid"]
+            for entry in pending_entries:
+                entry.metadata['filecoin_cid'] = file_cid
+                entry.metadata['primary_url'] = result.get("primary_url")
+                entry.metadata['ipns_address'] = result.get("ipns_address")
+                entry.metadata['ipns_published'] = result.get("ipns_published", False)
+                entry.metadata['addressing_method'] = result.get("addressing_method")
+                entry.metadata['batch_upload_timestamp'] = datetime.utcnow().isoformat()
+                entry.metadata['upload_trigger'] = "force" if request.force else "time_based"
+                dataset_manager._mark_entry_uploaded(entry.id)
+            
+            return {
+                "success": True,
+                "message": "Dataset batch uploaded successfully",
+                "filecoin_cid": result.get("cid"),
+                "primary_url": result.get("primary_url"),
+                "ipns_address": result.get("ipns_address"),
+                "gateway_url": f"https://gateway.lighthouse.storage/ipfs/{result.get('cid')}",
+                "dataset_tag": dataset_manager.dataset_tag,
+                "ipns_published": result.get("ipns_published", False),
+                "addressing_method": result.get("addressing_method"),
+                "entries_uploaded": len(pending_entries)
+            }
+        else:
+            return {
+                "success": False,
+                "message": "IPNS upload failed",
+                "error": result.get("error")
             }
             
     except Exception as e:
