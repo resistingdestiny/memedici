@@ -116,7 +116,10 @@ def load_agents_from_file():
                 interaction_count=agent_data.get("interaction_count", 0),
                 artworks_created=agent_data.get("artworks_created", 0),
                 artwork_ids=agent_data.get("artwork_ids", []),
-                persona_evolution_history=agent_data.get("persona_evolution_history", [])
+                persona_evolution_history=agent_data.get("persona_evolution_history", []),
+                
+                # Blockchain Integration
+                blockchain_seed=agent_data.get("blockchain_seed")
             )
             agents.append((agent_data["id"], config))
         
@@ -168,13 +171,13 @@ def ensure_crypto_artists_loaded():
                         studio_name = studio.name if studio else f"Studio {config.studio_id}"
                     logger.info(f"✅ Created agent: {config.display_name} ({agent_id}) -> {studio_name}")
                 else:
-                    # Update existing agent to ensure studio_id is set
-                    if config.studio_id and not existing_config.studio_id:
-                        existing_config.studio_id = config.studio_id
-                        agent_registry.create_agent(agent_id, existing_config)
-                        logger.info(f"🔄 Updated studio assignment for: {config.display_name} ({agent_id})")
-                    else:
-                        logger.info(f"📍 Agent already exists: {config.display_name} ({agent_id})")
+                    # Always update existing agents with latest config from JSON file
+                    agent_registry.create_agent(agent_id, config)
+                    studio_name = "No Studio"
+                    if config.studio_id:
+                        studio = agent_registry.get_studio(config.studio_id)
+                        studio_name = studio.name if studio else f"Studio {config.studio_id}"
+                    logger.info(f"🔄 Updated agent: {config.display_name} ({agent_id}) -> {studio_name}")
             except Exception as e:
                 logger.error(f"❌ Error creating agent {agent_id}: {e}")
         

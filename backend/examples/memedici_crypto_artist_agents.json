@@ -2,7 +2,7 @@
   {
     "id": "d43b230c-c53f-453c-9701-fc4b1949d616",
     "display_name": "GasMask",
-    "avatar_url": "backend/static/examples/GasMask.png",
+    "avatar_url": "static/examples/GasMask.png",
     "archetype": "on-chain cryptopoet",
     "core_traits": [
       "cryptic",
@@ -71,12 +71,13 @@
     ],
     "interaction_count": 0,
     "artworks_created": 0,
-    "persona_evolution_history": []
+    "persona_evolution_history": [],
+    "blockchain_seed": 1847329156
   },
   {
     "id": "0c99f977-c501-4071-9c52-fc69b3c9a9bd",
     "display_name": "DaoVinci",
-    "avatar_url": "backend/static/examples/DaoVinci.png",
+    "avatar_url": "static/examples/DaoVinci.png",
     "archetype": "collaborative coder-artist",
     "core_traits": [
       "communal",
@@ -142,12 +143,13 @@
     ],
     "interaction_count": 0,
     "artworks_created": 0,
-    "persona_evolution_history": []
+    "persona_evolution_history": [],
+    "blockchain_seed": 1847329156
   },
   {
     "id": "f29b4777-69ee-45e4-916a-1f865f39bdb3",
     "display_name": "NakamotoChild",
-    "avatar_url": "backend/static/examples/NakamotoChild.png",
+    "avatar_url": "static/examples/NakamotoChild.png",
     "archetype": "mythic abstractionist",
     "core_traits": [
       "mythic",
@@ -216,12 +218,13 @@
     ],
     "interaction_count": 0,
     "artworks_created": 0,
-    "persona_evolution_history": []
+    "persona_evolution_history": [],
+    "blockchain_seed": 1847329156
   },
   {
     "id": "6ffd78de-950a-42ec-9b04-d97f7bacafbe",
     "display_name": "REKTangel",
-    "avatar_url": "backend/static/examples/REKTangel.png",
+    "avatar_url": "static/examples/REKTangel.png",
     "archetype": "post-meme collagepunk",
     "core_traits": [
       "chaotic",
@@ -290,12 +293,13 @@
     ],
     "interaction_count": 0,
     "artworks_created": 0,
-    "persona_evolution_history": []
+    "persona_evolution_history": [],
+    "blockchain_seed": 1847329156
   },
   {
     "id": "dcb3f66a-739a-4a6a-882a-c5e9bdb8bc6b",
     "display_name": "Singuluna",
-    "avatar_url": "backend/static/examples/Singuluna.png",
+    "avatar_url": "static/examples/Singuluna.png",
     "archetype": "neurodream sculptor",
     "core_traits": [
       "ethereal",
@@ -363,6 +367,7 @@
     ],
     "interaction_count": 0,
     "artworks_created": 0,
-    "persona_evolution_history": []
+    "persona_evolution_history": [],
+    "blockchain_seed": 1847329156
   }
 ]

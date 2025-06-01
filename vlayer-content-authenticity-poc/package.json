@@ -1,0 +1,27 @@
+{
+  "name": "memedici-content-authenticity-poc",
+  "version": "1.0.0",
+  "description": "POC for proving AI-generated content authenticity using vlayer Web Proofs",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "prove": "node scripts/generate-proof.js",
+    "verify": "node scripts/verify-proof.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "vlayer-0.1.0": "latest",
+    "hardhat": "^2.19.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["vlayer", "web-proof", "content-authenticity", "AI", "MemeDici"],
+  "author": "MemeDici Team",
+  "license": "MIT"
+} 
