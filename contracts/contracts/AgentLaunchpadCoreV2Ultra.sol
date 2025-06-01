@@ -149,26 +149,6 @@ contract AgentLaunchpadCoreV2Ultra is Ownable, ReentrancyGuard {
         }
     }
     
-    // V2 Essential Functions
-    function getAllBondedTokens() external view returns (address[] memory tokens, string[] memory names, string[] memory symbols, address[] memory lps, uint256[] memory ids) {
-        uint256 len = bondedIds.length;
-        tokens = new address[](len);
-        names = new string[](len);
-        symbols = new string[](len);
-        lps = new address[](len);
-        ids = new uint256[](len);
-        
-        for (uint256 i = 0; i < len; i++) {
-            uint256 id = bondedIds[i];
-            Agent storage agent = agents[id];
-            tokens[i] = agent.tokenAddress;
-            names[i] = agent.name;
-            symbols[i] = agent.symbol;
-            lps[i] = agent.lpPairAddress;
-            ids[i] = id;
-        }
-    }
-    
     function getAgent(uint256 id) external view returns (string memory name, string memory agentName, uint256 target, uint256 raised, bool bonded, address creator, address token, address lp, string memory config) {
         Agent storage agent = agents[id];
         require(agent.creator != address(0));

@@ -127,8 +127,8 @@ module.exports = {
     },
     hederaTestnet: {
       url: process.env.HEDERA_TESTNET_RPC_URL || "https://testnet.hashio.io/api",
-      accounts: getAccounts('hederaTestnet'), // Reverted to use getAccounts
-      // accounts: ["0x0875b8539d320e0c8ab10930c25fac9349b6a43d056546f43dd6dcff0164fb81"], // DEBUG: Hardcoded PK with 0x
+      // accounts: getAccounts('hederaTestnet'), // Temporarily commented out due to Node.js v23 compatibility issues
+      accounts: ["0x0875b8539d320e0c8ab10930c25fac9349b6a43d056546f43dd6dcff0164fb81"], // Original key with 996 HBAR
       chainId: 296,
       gasPrice: 530000000000, // 530 Gwei - Hedera minimum requirement
       timeout: 60000,

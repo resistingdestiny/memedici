@@ -229,34 +229,6 @@ def generate_image(
         file_size = file_path.stat().st_size
         file_url = generate_full_url(filename)
         
-        # Create vlayer content authenticity proof
-        proof = None
-        if agent_id:
-            try:
-                # Prepare request and response data for proof
-                request_data = {
-                    "model_name": selected_model,
-                    "prompt": prompt,
-                    "width": width,
-                    "height": height,
-                    "image_num": 1,
-                    "guidance_scale": guidance_scale,
-                    "seed": seed or -1,
-                    "steps": steps,
-                    "sampler_name": "DPM++ 2S a Karras",
-                    "negative_prompt": negative_prompt
-                }
-                
-                response_data = {
-                    "success": True,
-                    "image_generated": True,
-                    "model_used": selected_model,
-                    "artwork_id": artwork_id
-                }
-                
-            except Exception as e:
-                print(f"⚠️  Failed to create content proof: {e}")
-        
         # Store in database if agent_id provided
         db_artwork_id = None
         if agent_id:
