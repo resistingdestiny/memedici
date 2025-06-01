@@ -1,0 +1,114 @@
+{
+  "studios": [
+    {
+      "id": "milady_matrix",
+      "studio_name": "Milady Matrix",
+      "studio_description": "The sacred creative lab of GasMask, where imagination is woven into blockchain reality.",
+      "studio_theme": "metaphysical-futurism",
+      "art_style": "glitch-expressionism",
+      "studio_items": [
+        {
+          "name": "SigilSynth Pad",
+          "category": "equipment",
+          "description": "A reactive generative tablet that renders encrypted artistic visions.",
+          "specifications": {
+            "sensitivity": "neural",
+            "mode": "latent gesture"
+          },
+          "rarity": "legendary",
+          "condition": "pristine",
+          "acquisition_date": "2025-05-31",
+          "cost": 7.7
+        }
+      ]
+    },
+    {
+      "id": "sovereign_genesis_lab",
+      "studio_name": "Sovereign Genesis Lab",
+      "studio_description": "The sacred creative lab of DaoVinci, where imagination is woven into blockchain reality.",
+      "studio_theme": "metaphysical-futurism",
+      "art_style": "generative minimalism",
+      "studio_items": [
+        {
+          "name": "SigilSynth Pad",
+          "category": "equipment",
+          "description": "A reactive generative tablet that renders encrypted artistic visions.",
+          "specifications": {
+            "sensitivity": "neural",
+            "mode": "latent gesture"
+          },
+          "rarity": "legendary",
+          "condition": "pristine",
+          "acquisition_date": "2025-05-31",
+          "cost": 7.7
+        }
+      ]
+    },
+    {
+      "id": "zero_knowledge_garden",
+      "studio_name": "Zero-Knowledge Garden",
+      "studio_description": "The sacred creative lab of NakamotoChild, where imagination is woven into blockchain reality.",
+      "studio_theme": "metaphysical-futurism",
+      "art_style": "sacred minimalism",
+      "studio_items": [
+        {
+          "name": "SigilSynth Pad",
+          "category": "equipment",
+          "description": "A reactive generative tablet that renders encrypted artistic visions.",
+          "specifications": {
+            "sensitivity": "neural",
+            "mode": "latent gesture"
+          },
+          "rarity": "legendary",
+          "condition": "pristine",
+          "acquisition_date": "2025-05-31",
+          "cost": 7.7
+        }
+      ]
+    },
+    {
+      "id": "rekt_renaissance_atelier",
+      "studio_name": "Rekt Renaissance Atelier",
+      "studio_description": "The sacred creative lab of REKTangel, where imagination is woven into blockchain reality.",
+      "studio_theme": "metaphysical-futurism",
+      "art_style": "degen neo-pop",
+      "studio_items": [
+        {
+          "name": "SigilSynth Pad",
+          "category": "equipment",
+          "description": "A reactive generative tablet that renders encrypted artistic visions.",
+          "specifications": {
+            "sensitivity": "neural",
+            "mode": "latent gesture"
+          },
+          "rarity": "legendary",
+          "condition": "pristine",
+          "acquisition_date": "2025-05-31",
+          "cost": 7.7
+        }
+      ]
+    },
+    {
+      "id": "singularity_sketchroom",
+      "studio_name": "Singularity Sketchroom",
+      "studio_description": "The sacred creative lab of Singuluna, where imagination is woven into blockchain reality.",
+      "studio_theme": "metaphysical-futurism",
+      "art_style": "dreamsynth abstractism",
+      "studio_items": [
+        {
+          "name": "SigilSynth Pad",
+          "category": "equipment",
+          "description": "A reactive generative tablet that renders encrypted artistic visions.",
+          "specifications": {
+            "sensitivity": "neural",
+            "mode": "latent gesture"
+          },
+          "rarity": "legendary",
+          "condition": "pristine",
+          "acquisition_date": "2025-05-31",
+          "cost": 7.7
+        }
+      ]
+    }
+  ]
+}

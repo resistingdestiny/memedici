@@ -180,8 +180,8 @@ class LangGraphAgentManager:
             if not config:
                 raise ValueError(f"Agent {agent_id} not found in registry")
             
-            logger.info(f"⚙️  Agent config: {config.agent_type} | Studio: {config.studio_name} | Memory: {config.memory_enabled}")
-            logger.info(f"🎨 Persona: {config.persona_name} | Art Style: {config.art_style}")
+            logger.info(f"⚙️  Agent config: {config.agent_type}")
+            logger.info(f"🎨 Identity: {config.display_name} | Archetype: {config.archetype}")
             
             # Create LLMs
             llm_with_tools = self._create_llm(config)
@@ -227,8 +227,8 @@ class LangGraphAgentManager:
             agent = agent_info['agent']
             config = agent_info['config']
             
-            logger.info(f"🎨 Using agent: {config.persona_name} ({config.agent_type})")
-            logger.info(f"🏛️  Studio: {config.studio_name} | Art Style: {config.art_style}")
+            logger.info(f"🎨 Using agent: {config.display_name} ({config.agent_type})")
+            logger.info(f"🏛️  Identity: {config.archetype} | Studio ID: {getattr(config, 'studio_id', 'No Studio')}")
             logger.info(f"🔧 Available tools: {agent_info['tools']}")
             
             # Create the conversation state

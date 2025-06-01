@@ -4,7 +4,14 @@ services:
     env: python
     plan: starter
     rootDir: ./backend
-    buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install --only=main
+    buildCommand: |
+      # Install Node.js and npm
+      curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+      # Install Python dependencies
+      pip install poetry && poetry config virtualenvs.create false && poetry install --only=main
+      # Install Lighthouse CLI
+      npm install -g @lighthouse-web3/sdk
     startCommand: poetry run uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
@@ -12,6 +19,10 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: NOVITA_API_KEY
+        sync: false
+      - key: LIGHTHOUSE_API_KEY
+        sync: false
+      - key: LIGHTHOUSE_CLI_PWD
         sync: false
       - key: DATABASE_URL
         fromDatabase:

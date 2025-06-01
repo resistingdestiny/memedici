@@ -1033,26 +1033,29 @@
             <div class="agent-selection">
                 <div class="agent-header">
                     <h3>🏛️ Select Your Creative Agent</h3>
-                    <button id="createAgentBtn" class="create-agent-btn">+ Create New Agent</button>
+                    <div>
+                        <button id="createStudioBtn" class="create-agent-btn" style="margin-right: 10px;">+ Create Studio</button>
+                        <button id="createAgentBtn" class="create-agent-btn">+ Create Agent</button>
+                    </div>
                 </div>
                 <div class="agent-grid" id="agentGrid">
                     <!-- Agents will be loaded here -->
-                </div>
-            </div>
-
+                        </div>
+                    </div>
+                    
             <div class="chat-section">
                 <div class="chat-header">
                     <h3 id="chatTitle">
                         <span class="status-indicator status-offline"></span>
                         Select an agent to begin creating
                     </h3>
-                </div>
+                        </div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="message system">
                         Welcome to Memedici! Select an agent from the left to start your artistic journey.
                         <br><small>Connected to: <span id="initialServerInfo">Loading...</span></small>
                     </div>
-                </div>
+                    </div>
                 <div class="chat-input">
                     <div class="input-container">
                         <textarea 
@@ -1063,26 +1066,26 @@
                             disabled
                         ></textarea>
                         <button id="sendBtn" class="send-btn" disabled>Create</button>
-                    </div>
                 </div>
-            </div>
-        </div>
-
+                </div>
+                        </div>
+                    </div>
+                    
         <div class="tools-section">
             <h3>🛠️ Available Creative Tools</h3>
             <div class="tools-grid" id="toolsGrid">
                 <!-- Tools will be loaded here -->
             </div>
-        </div>
-    </div>
-
+                        </div>
+                    </div>
+                    
     <!-- Agent Creation Modal -->
     <div id="createAgentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>🎨 Create New Creative Agent</h2>
                 <span class="close">&times;</span>
-            </div>
+                    </div>
             <form id="createAgentForm" class="agent-form">
                 <div class="form-section">
                     <h3>🆔 Core Identity</h3>
@@ -1090,17 +1093,17 @@
                         <label for="agentId">Agent ID *</label>
                         <input type="text" id="agentId" required placeholder="e.g., cosmic_painter">
                         <small class="auth-help">Unique identifier (alphanumeric and underscores only)</small>
-                    </div>
+                </div>
                     <div class="form-group">
                         <label for="displayName">Display Name *</label>
                         <input type="text" id="displayName" required maxlength="60" placeholder="e.g., Cosmic the Ethereal">
                         <small class="auth-help">Human-readable name (max 60 characters)</small>
-                    </div>
+            </div>
                     <div class="form-group">
                         <label for="avatarUrl">Avatar URL (Optional)</label>
                         <input type="url" id="avatarUrl" placeholder="https://example.com/avatar.jpg or ipfs://...">
                         <small class="auth-help">Supports http://, https://, or ipfs:// URLs</small>
-                    </div>
+                </div>
                     <div class="form-group">
                         <label for="archetype">Creative Archetype *</label>
                         <input type="text" id="archetype" required placeholder="e.g., Neo-Mystical Digital Painter">
@@ -1117,7 +1120,7 @@
                         <small class="auth-help">Brief background story about the agent's creative origins</small>
                     </div>
                 </div>
-
+                
                 <div class="form-section">
                     <h3>🎨 Artistic Specialization</h3>
                     <div class="form-group">
@@ -1160,8 +1163,8 @@
                         <input type="text" id="collabAffinity" placeholder="e.g., surrealism, meditation, cosmic-art">
                         <small class="auth-help">Collaboration styles and genres the agent enjoys</small>
                     </div>
-                </div>
-
+                    </div>
+                    
                 <div class="form-section">
                     <h3>⚙️ Technical Configuration</h3>
                     <div class="form-group">
@@ -1190,7 +1193,7 @@
                         <span id="temperatureValue">0.7</span>
                     </div>
                 </div>
-        
+                
                 <div class="form-section">
                     <h3>🏛️ Studio Environment</h3>
                     <div class="form-group">
@@ -1228,8 +1231,26 @@
                             </button>
                         </div>
                     </div>
+                    </div>
+                    
+                <div class="form-section">
+                    <h3>🏛️ Studio Assignment</h3>
+                    <div class="form-group">
+                        <label for="studioId">Select Studio *</label>
+                        <select id="studioId" required>
+                            <option value="">Select a studio...</option>
+                            <!-- Studios will be loaded here -->
+                        </select>
+                        <small class="auth-help">You must select an existing studio. Create a studio first if needed.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="studioDetails">Selected Studio Details</label>
+                        <div id="studioDetails" style="padding: 10px; background: var(--bg-dark); border-radius: 6px; min-height: 50px; color: var(--text-muted);">
+                            Select a studio to see details...
+                        </div>
+                    </div>
                 </div>
-        
+                    
                 <div class="form-section">
                     <h3>🛠️ Tools & Capabilities</h3>
                     <div class="form-group">
@@ -1244,8 +1265,8 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" name="tools" value="list_available_models" checked> List Available Models
                             </label>
-                        </div>
                     </div>
+                </div>
                     
                     <div class="form-group">
                         <label>Custom Tools</label>
@@ -1256,21 +1277,21 @@
                             <button type="button" class="btn btn-secondary" id="addCustomToolBtn">
                                 + Create Custom Tool
                             </button>
-                        </div>
+                            </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="customInstructions">Custom Instructions (Optional)</label>
                         <textarea id="customInstructions" placeholder="Additional creative instructions for this agent..."></textarea>
-                    </div>
-                </div>
+                            </div>
+                            </div>
 
                 <div class="form-section">
                     <h3>🎭 Legacy Persona (Compatibility)</h3>
                     <div class="form-group">
                         <label for="personaName">Legacy Persona Name</label>
                         <input type="text" id="personaName" placeholder="Will default to display name if not specified">
-                    </div>
+                        </div>
                     <div class="form-group">
                         <label for="personaBackground">Legacy Background</label>
                         <textarea id="personaBackground" placeholder="Will default to origin story if not specified"></textarea>
@@ -1282,21 +1303,21 @@
                     <div class="form-group">
                         <label for="artisticInfluences">Legacy Artistic Influences</label>
                         <input type="text" id="artisticInfluences" placeholder="Will default to influences if not specified">
-                    </div>
+                </div>
                     <div class="form-group">
                         <label for="preferredMediums">Legacy Preferred Mediums</label>
                         <input type="text" id="preferredMediums" placeholder="Will default to primary mediums if not specified">
-                    </div>
-                </div>
-
+            </div>
+        </div>
+        
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Agent</button>
                 </div>
             </form>
         </div>
-    </div>
-
+            </div>
+            
     <!-- Custom Tool Creation Modal -->
     <div id="customToolModal" class="modal">
         <div class="modal-content">
@@ -1316,9 +1337,9 @@
                             <input type="radio" name="inputMethod" value="upload">
                             <span>Upload API Spec</span>
                         </label>
-                    </div>
                 </div>
-
+            </div>
+            
                 <!-- Manual Entry Section -->
                 <div id="manualEntry" class="input-section">
                     <div class="form-section">
@@ -1340,23 +1361,23 @@
                                 <option value="blockchain">Blockchain</option>
                                 <option value="utility">Utility</option>
                             </select>
-                        </div>
-                    </div>
-
+                </div>
+            </div>
+            
                     <div class="form-section">
                         <h3>🌐 API Configuration</h3>
-                        <div class="form-group">
+                <div class="form-group">
                             <label for="apiEndpoint">API Endpoint URL *</label>
                             <input type="url" id="apiEndpoint" required placeholder="https://api.example.com/v1/generate">
                         </div>
                         <div class="form-group">
                             <label for="httpMethod">HTTP Method</label>
                             <select id="httpMethod">
-                                <option value="GET">GET</option>
+                        <option value="GET">GET</option>
                                 <option value="POST" selected>POST</option>
-                                <option value="PUT">PUT</option>
-                                <option value="DELETE">DELETE</option>
-                            </select>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
                         </div>
                         <div class="form-group">
                             <label for="contentType">Content Type</label>
@@ -1366,11 +1387,11 @@
                                 <option value="multipart/form-data">multipart/form-data</option>
                             </select>
                         </div>
-                    </div>
-
+                </div>
+                
                     <div class="form-section">
                         <h3>🔑 Authentication (Optional)</h3>
-                        <div class="form-group">
+                <div class="form-group">
                             <label for="authType">Authentication Type</label>
                             <select id="authType">
                                 <option value="none">None</option>
@@ -1384,11 +1405,11 @@
                             <input type="text" id="authValue" placeholder="Enter API key, token, or credentials">
                             <small class="auth-help">This will be stored securely and used for API calls</small>
                         </div>
-                    </div>
-
+                </div>
+                
                     <div class="form-section">
                         <h3>📝 Parameters & Schema</h3>
-                        <div class="form-group">
+                <div class="form-group">
                             <label for="requestSchema">Request Parameters (JSON Schema)</label>
                             <textarea id="requestSchema" rows="6" placeholder='{
   "type": "object",
@@ -1431,7 +1452,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- File Upload Section -->
                 <div id="uploadEntry" class="input-section" style="display: none;">
                     <div class="form-section">
@@ -1444,8 +1465,8 @@
                                     <div class="upload-icon">📁</div>
                                     <p>Click to upload or drag & drop</p>
                                     <small>Supports OpenAPI, Swagger, or custom JSON/YAML specs</small>
-                                </div>
-                            </div>
+                </div>
+            </div>
                         </div>
                         <div class="form-group">
                             <label for="specPreview">Specification Preview</label>
@@ -1457,6 +1478,73 @@
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancelToolBtn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Tool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Studio Creation Modal -->
+    <div id="createStudioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏛️ Create New Studio</h2>
+                <span class="close-studio">&times;</span>
+            </div>
+            <form id="createStudioForm" class="agent-form">
+                <div class="form-section">
+                    <h3>🏛️ Studio Information</h3>
+                    <div class="form-group">
+                        <label for="newStudioId">Studio ID *</label>
+                        <input type="text" id="newStudioId" required placeholder="e.g., ethereal_visions_lab">
+                        <small class="auth-help">Unique identifier (alphanumeric and underscores only)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newStudioName">Studio Name *</label>
+                        <input type="text" id="newStudioName" required placeholder="e.g., Ethereal Visions Lab">
+                        <small class="auth-help">Human-readable name for the studio</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newStudioDescription">Studio Description *</label>
+                        <textarea id="newStudioDescription" required placeholder="A mystical studio where digital dreams become reality..."></textarea>
+                        <small class="auth-help">Brief description of the studio's purpose and atmosphere</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newStudioTheme">Studio Theme</label>
+                        <select id="newStudioTheme" required>
+                            <option value="ethereal">Ethereal</option>
+                            <option value="futuristic">Futuristic</option>
+                            <option value="minimalist">Minimalist</option>
+                            <option value="cyberpunk">Cyberpunk</option>
+                            <option value="abstract">Abstract</option>
+                            <option value="vintage">Vintage</option>
+                            <option value="organic">Organic</option>
+                            <option value="metaphysical-futurism">Metaphysical Futurism</option>
+                            <option value="testing">Testing</option>
+                        </select>
+                        <small class="auth-help">Overall aesthetic theme of the studio</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newArtStyle">Primary Art Style *</label>
+                        <input type="text" id="newArtStyle" required placeholder="e.g., surreal_digital, crypto_sculpture, glitch-expressionism">
+                        <small class="auth-help">Primary artistic style or technique used in this studio</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Studio Items</label>
+                        <div class="custom-tools-section">
+                            <div id="selectedNewStudioItems" class="selected-tools">
+                                <!-- Selected studio items will appear here -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="addNewStudioItemBtn">
+                                + Add Studio Item
+                            </button>
+                        </div>
+                        <small class="auth-help">Equipment, tools, and materials available in this studio</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelStudioBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Studio</button>
                 </div>
             </form>
         </div>
@@ -1663,9 +1751,11 @@
             const closeBtn = document.querySelector('.close');
             const cancelBtn = document.getElementById('cancelBtn');
 
+            // Agent Modal handlers
             createBtn.addEventListener('click', function() {
                 modal.style.display = 'block';
                 resetForm();
+                loadStudiosForSelection(); // Load studios for dropdown
             });
 
             closeBtn.addEventListener('click', function() {
@@ -1676,9 +1766,35 @@
                 modal.style.display = 'none';
             });
 
+            // Studio Modal handlers
+            const studioModal = document.getElementById('createStudioModal');
+            const createStudioBtn = document.getElementById('createStudioBtn');
+            const closeStudioBtn = document.querySelector('.close-studio');
+            const cancelStudioBtn = document.getElementById('cancelStudioBtn');
+
+            createStudioBtn.addEventListener('click', function() {
+                studioModal.style.display = 'block';
+                resetStudioForm();
+            });
+
+            closeStudioBtn.addEventListener('click', function() {
+                studioModal.style.display = 'none';
+            });
+
+            cancelStudioBtn.addEventListener('click', function() {
+                studioModal.style.display = 'none';
+            });
+
+            // Studio form submission
+            const studioForm = document.getElementById('createStudioForm');
+            studioForm.addEventListener('submit', handleStudioFormSubmit);
+
             window.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     modal.style.display = 'none';
+                }
+                if (e.target === studioModal) {
+                    studioModal.style.display = 'none';
                 }
             });
         }
@@ -1778,12 +1894,8 @@
                     memory_enabled: true,
                     structured_output: false,
                     
-                    // Studio fields
-                    studio_name: document.getElementById('studioName').value.trim(),
-                    studio_description: document.getElementById('studioDescription').value.trim(),
-                    studio_theme: document.getElementById('studioTheme').value,
-                    art_style: document.getElementById('artStyle').value.trim(),
-                    studio_items: studioItems,
+                    // Studio assignment (NEW - replaces embedded studio fields)
+                    studio_id: document.getElementById('studioId').value,
                     
                     // Tools
                     tools_enabled: Array.from(document.querySelectorAll('input[name="tools"]:checked'))
@@ -2073,8 +2185,8 @@
                                 <div class="asset-metadata">
                                     <span class="asset-type">Image</span>
                                     <span class="asset-model">${assetInfo.model}</span>
-                                </div>
-                            </div>
+                    </div>
+                </div>
                             <div class="asset-content">
                                 <img src="${assetInfo.url}" alt="${assetInfo.prompt}" class="asset-image" loading="lazy">
                                 <div class="asset-details">
@@ -2610,6 +2722,175 @@
             studioItems.splice(index, 1);
             updateSelectedStudioItems();
         }
+
+        // NEW STUDIO FUNCTIONS
+        let newStudioItems = []; // Store studio items for new studio creation
+
+        function resetStudioForm() {
+            const form = document.getElementById('createStudioForm');
+            form.reset();
+            newStudioItems = [];
+            updateSelectedNewStudioItems();
+        }
+
+        async function handleStudioFormSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            try {
+                submitBtn.textContent = 'Creating...';
+                submitBtn.disabled = true;
+                
+                const studioData = collectStudioFormData();
+                const result = await createStudio(studioData);
+                
+                if (result.success) {
+                    addMessage('system', `✅ Created new studio: ${result.studio.name}`);
+                    document.getElementById('createStudioModal').style.display = 'none';
+                    await loadStudiosForSelection(); // Refresh studio dropdown
+                } else {
+                    addMessage('system', `❌ Error creating studio: ${result.error || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                addMessage('system', `❌ Error: ${error.message}`);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function collectStudioFormData() {
+            return {
+                studio_id: document.getElementById('newStudioId').value.trim(),
+                studio: {
+                    id: document.getElementById('newStudioId').value.trim(),
+                    name: document.getElementById('newStudioName').value.trim(),
+                    description: document.getElementById('newStudioDescription').value.trim(),
+                    theme: document.getElementById('newStudioTheme').value,
+                    art_style: document.getElementById('newArtStyle').value.trim(),
+                    studio_items: newStudioItems
+                }
+            };
+        }
+
+        async function createStudio(studioData) {
+            const response = await fetch(getApiUrl('/studios'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(studioData)
+            });
+            
+            return await response.json();
+        }
+
+        async function loadStudiosForSelection() {
+            try {
+                const response = await fetch(getApiUrl('/studios'));
+                const data = await response.json();
+                populateStudioDropdown(data.studios);
+            } catch (error) {
+                console.error('Error loading studios:', error);
+                addMessage('system', `❌ Failed to load studios from ${currentServer} server`);
+            }
+        }
+
+        function populateStudioDropdown(studios) {
+            const studioSelect = document.getElementById('studioId');
+            const studioDetails = document.getElementById('studioDetails');
+            
+            // Clear existing options except the first one
+            studioSelect.innerHTML = '<option value="">Select a studio...</option>';
+            
+            studios.forEach(studioInfo => {
+                const option = document.createElement('option');
+                option.value = studioInfo.studio_id;
+                option.textContent = `${studioInfo.studio.name} (${studioInfo.studio.theme})`;
+                option.dataset.studio = JSON.stringify(studioInfo);
+                studioSelect.appendChild(option);
+            });
+
+            // Add change handler to show studio details
+            studioSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const studioInfo = JSON.parse(selectedOption.dataset.studio);
+                    showStudioDetails(studioInfo);
+                } else {
+                    studioDetails.innerHTML = 'Select a studio to see details...';
+                }
+            });
+        }
+
+        function showStudioDetails(studioInfo) {
+            const studioDetails = document.getElementById('studioDetails');
+            const studio = studioInfo.studio;
+            const itemCount = studio.items_count || 0;
+            
+            studioDetails.innerHTML = `
+                <strong>${studio.name}</strong><br>
+                <em>Theme:</em> ${studio.theme}<br>
+                <em>Art Style:</em> ${studio.art_style}<br>
+                <em>Description:</em> ${studio.description}<br>
+                <em>Studio Items:</em> ${itemCount} items<br>
+                <em>Assigned Agents:</em> ${studioInfo.agent_count || 0} agents
+            `;
+        }
+
+        // Studio item management for new studio creation
+        function setupNewStudioItemHandlers() {
+            const addNewStudioItemBtn = document.getElementById('addNewStudioItemBtn');
+            if (addNewStudioItemBtn) {
+                addNewStudioItemBtn.addEventListener('click', function() {
+                    addNewStudioItemInput();
+                });
+            }
+        }
+
+        function addNewStudioItemInput() {
+            const studioItem = {
+                name: prompt('Studio Item Name:') || '',
+                category: prompt('Category (tool/material/equipment/software):') || 'tool',
+                description: prompt('Description:') || '',
+                rarity: prompt('Rarity (common/uncommon/rare/legendary):') || 'common',
+                condition: prompt('Condition (poor/fair/good/excellent/pristine):') || 'excellent'
+            };
+            
+            if (studioItem.name) {
+                newStudioItems.push(studioItem);
+                updateSelectedNewStudioItems();
+            }
+        }
+
+        function updateSelectedNewStudioItems() {
+            const selectedItemsDiv = document.getElementById('selectedNewStudioItems');
+            selectedItemsDiv.innerHTML = '';
+            
+            newStudioItems.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'selected-tool';
+                itemElement.innerHTML = `
+                    <span class="tool-category-badge ${item.category}">${item.rarity}</span>
+                    <span>${item.name}</span>
+                    <span class="remove-tool" onclick="removeNewStudioItem(${index})">×</span>
+                `;
+                selectedItemsDiv.appendChild(itemElement);
+            });
+        }
+
+        function removeNewStudioItem(index) {
+            newStudioItems.splice(index, 1);
+            updateSelectedNewStudioItems();
+        }
+
+        // Initialize new studio item handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            setupNewStudioItemHandlers();
+        });
     </script>
 </body>
 </html> 
