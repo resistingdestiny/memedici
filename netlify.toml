@@ -24,7 +24,32 @@
 [context.branch-deploy]
   command = "npm run clean && npm run build"
 
-# Redirect rules for SPA
+# Redirect rules for SPA - exclude static assets from SPA redirects
+[[redirects]]
+  from = "/glb/*"
+  to = "/glb/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/hdr/*"
+  to = "/hdr/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/_next/*"
+  to = "/_next/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
+  status = 200
+  force = false
+
+# SPA fallback - must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -38,6 +63,13 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache and serve GLB files correctly
+[[headers]]
+  for = "/glb/*"
+  [headers.values]
+    Content-Type = "model/gltf-binary"
+    Cache-Control = "public, max-age=31536000, immutable"
     
 # Cache static assets
 [[headers]]
