@@ -5,6 +5,7 @@ const nextConfig = {
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   
+  // Force fresh build to clear Netlify cache - 2024-12-19
   images: {
     domains: [
       'images.pexels.com', 
