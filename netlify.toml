@@ -24,11 +24,11 @@
 [context.branch-deploy]
   command = "npm run clean && npm run build && echo 'GLB files in build:' && ls -la out/glb/"
 
-# SPA redirect for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# SPA redirect for client-side routing - DISABLED FOR TESTING
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
 
 # Headers for security and performance
 [[headers]]
