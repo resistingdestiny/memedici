@@ -33,6 +33,9 @@ alembic = "1.13.1"
 asyncpg = "0.29.0"
 langchain-anthropic = ">=0.2.0"
 novita-client = "^0.7.1"
+lighthouseweb3="0.1.4"
+web3 = "^6.15.1"
+eth-account = "^0.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"

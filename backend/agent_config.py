@@ -1,14 +1,29 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Dict, Any, Optional, List
 from datetime import datetime
-from sqlalchemy import create_engine, Column, String, Float, Boolean, Text, DateTime, Integer, JSON
+from sqlalchemy import create_engine, Column, String, Float, Boolean, Text, DateTime, Integer, JSON, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 import json
 import os
 from prompts.system_prompts import get_comprehensive_system_prompt
 
 Base = declarative_base()
+
+class StudioDB(Base):
+    __tablename__ = "studios"
+    
+    id = Column(String, primary_key=True)
+    studio_name = Column(String, nullable=False)
+    studio_description = Column(Text, default="A creative space for artistic expression")
+    studio_theme = Column(String, default="abstract")
+    art_style = Column(String, default="digital")
+    studio_items = Column(JSON, default=[])
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to agents
+    agents = relationship("AgentDB", back_populates="studio")
 
 class CustomToolDB(Base):
     __tablename__ = "custom_tools"
@@ -41,6 +56,30 @@ class GeneratedArtworkDB(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class StudioItem(BaseModel):
+    """A comprehensive studio item with specifications."""
+    name: str
+    category: str  # e.g., "tool", "material", "equipment", "software"
+    description: str
+    specifications: Dict[str, Any] = {}
+    rarity: str = "common"  # common, uncommon, rare, legendary
+    condition: str = "excellent"  # poor, fair, good, excellent, pristine
+    acquisition_date: Optional[str] = None
+    cost: Optional[float] = None
+    notes: Optional[str] = None
+
+class Studio(BaseModel):
+    """Configuration for a creative studio."""
+    
+    model_config = ConfigDict(protected_namespaces=())
+    
+    id: str = Field(description="Unique studio identifier")
+    name: str = Field(description="Studio name")
+    description: str = Field(default="A creative space for artistic expression", description="Studio description")
+    theme: str = Field(default="abstract", description="Studio theme")
+    art_style: str = Field(default="digital", description="Primary art style")
+    studio_items: List[StudioItem] = Field(default=[], description="Comprehensive list of studio items")
+
 class AgentDB(Base):
     __tablename__ = "agents"
     
@@ -60,6 +99,9 @@ class AgentDB(Base):
     creation_rate = Column(Integer, default=4)
     collab_affinity = Column(JSON, default=[])
     
+    # Studio Association
+    studio_id = Column(String, ForeignKey('studios.id'), nullable=True)
+    
     # Technical Configuration
     agent_type = Column(String, default="creative_artist")
     model_name = Column(String, default="gpt-3.5-turbo")
@@ -71,40 +113,20 @@ class AgentDB(Base):
     structured_output = Column(Boolean, default=False)
     custom_instructions = Column(Text, nullable=True)
     
-    # Studio Fields (Preserved)
-    studio_name = Column(String, default="Untitled Studio")
-    studio_description = Column(Text, default="A creative space for artistic expression")
-    studio_theme = Column(String, default="abstract")
-    art_style = Column(String, default="digital")
-    studio_items = Column(JSON, default=[])  # Comprehensive list of studio items with specs
-    
-    # Legacy Persona Fields (Kept for compatibility)
-    persona_name = Column(String, default="Creative Soul")
-    persona_background = Column(Text, default="An emerging digital artist exploring the intersection of technology and creativity")
-    personality_traits = Column(JSON, default=[])
-    artistic_influences = Column(JSON, default=[])
-    preferred_mediums = Column(JSON, default=["digital", "generative"])
-    
     # Dynamic Evolution
     interaction_count = Column(Integer, default=0)
     artworks_created = Column(Integer, default=0)
     artwork_ids = Column(JSON, default=[])  # List of artwork IDs created by this agent
     persona_evolution_history = Column(JSON, default=[])
     
+    # Blockchain Integration
+    blockchain_seed = Column(String, nullable=True)  # Random seed from blockchain
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-class StudioItem(BaseModel):
-    """A comprehensive studio item with specifications."""
-    name: str
-    category: str  # e.g., "tool", "material", "equipment", "software"
-    description: str
-    specifications: Dict[str, Any] = {}
-    rarity: str = "common"  # common, uncommon, rare, legendary
-    condition: str = "excellent"  # poor, fair, good, excellent, pristine
-    acquisition_date: Optional[str] = None
-    cost: Optional[float] = None
-    notes: Optional[str] = None
+    
+    # Relationship to studio
+    studio = relationship("StudioDB", back_populates="agents")
 
 class AgentConfig(BaseModel):
     """Configuration for an artistic agent instance with comprehensive specifications."""
@@ -127,6 +149,9 @@ class AgentConfig(BaseModel):
     creation_rate: int = Field(default=4, description="Times per day agent creates/publishes")
     collab_affinity: List[str] = Field(default=[], description="Collaboration tags/genres")
     
+    # Studio Association
+    studio_id: Optional[str] = Field(None, description="ID of the studio this agent belongs to")
+    
     # Technical Configuration
     agent_type: str = "creative_artist"
     model_name: str = "gpt-3.5-turbo"
@@ -144,40 +169,47 @@ class AgentConfig(BaseModel):
     structured_output: bool = False
     custom_instructions: Optional[str] = None
     
-    # Studio Fields (Preserved and Enhanced)
-    studio_name: str = "Untitled Studio"
-    studio_description: str = "A creative space for artistic expression"
-    studio_theme: str = "abstract"
-    art_style: str = "digital"
-    studio_items: List[StudioItem] = Field(default=[], description="Comprehensive list of studio items with specs")
-    
-    # Legacy Fields (Kept for compatibility)
-    persona_name: str = "Creative Soul"
-    persona_background: str = "An emerging digital artist exploring the intersection of technology and creativity"
-    personality_traits: List[str] = ["curious", "experimental", "intuitive"]
-    artistic_influences: List[str] = ["Van Gogh", "Basquiat", "AI-generated art"]
-    preferred_mediums: List[str] = ["digital", "generative"]
-    
     # Dynamic Evolution
     interaction_count: int = 0
     artworks_created: int = 0
     artwork_ids: List[str] = []  # List of artwork IDs created by this agent
     persona_evolution_history: List[Dict[str, Any]] = []
     
+    # Blockchain Integration
+    blockchain_seed: Optional[str] = None  # Random seed from blockchain
+    
     def get_system_prompt(self) -> str:
         """Get the comprehensive system prompt for this artistic agent configuration."""
         
-        # Use new comprehensive fields if available, fallback to legacy
-        agent_name = self.display_name if hasattr(self, 'display_name') and self.display_name else self.persona_name
-        traits = ', '.join(self.core_traits) if self.core_traits else ', '.join(self.personality_traits)
-        mediums = ', '.join(self.primary_mediums) if self.primary_mediums else ', '.join(self.preferred_mediums)
-        agent_influences = ', '.join(self.influences) if self.influences else ', '.join(self.artistic_influences)
+        # Use comprehensive fields
+        agent_name = self.display_name
+        traits = ', '.join(self.core_traits)
+        mediums = ', '.join(self.primary_mediums)
+        agent_influences = ', '.join(self.influences)
+        
+        # Get studio information if studio_id is set
+        studio_name = "Untitled Studio"
+        studio_description = "A creative space for artistic expression"
+        studio_theme = "abstract"
+        art_style = "digital"
+        studio_items = []
+        
+        if self.studio_id:
+            # Try to get studio info from registry
+            from agent_config import agent_registry
+            studio = agent_registry.get_studio(self.studio_id)
+            if studio:
+                studio_name = studio.name
+                studio_description = studio.description
+                studio_theme = studio.theme
+                art_style = studio.art_style
+                studio_items = studio.studio_items
         
         # Comprehensive base system prompt
         base_prompt = get_comprehensive_system_prompt(
             agent_name=agent_name,
             archetype=self.archetype,
-            origin_story=self.origin_story if self.origin_story else self.persona_background,
+            origin_story=self.origin_story,
             traits=traits,
             voice_style=self.voice_style if self.voice_style else "Creative and expressive",
             mediums=mediums,
@@ -185,26 +217,15 @@ class AgentConfig(BaseModel):
             influences=agent_influences,
             colour_palette=', '.join(self.colour_palette) if self.colour_palette else "Vibrant and varied",
             collab_affinity=', '.join(self.collab_affinity) if self.collab_affinity else "Open to all creative styles",
-            studio_name=self.studio_name,
-            studio_description=self.studio_description,
-            studio_theme=self.studio_theme,
-            art_style=self.art_style,
+            studio_name=studio_name,
+            studio_description=studio_description,
+            studio_theme=studio_theme,
+            art_style=art_style,
             creation_rate=self.creation_rate,
             interaction_count=self.interaction_count,
-            artworks_created=self.artworks_created
+            artworks_created=self.artworks_created,
+            studio_items=studio_items
         )
-
-        # Add studio items information
-        if self.studio_items:
-            studio_info = "\n\nSTUDIO INVENTORY:"
-            studio_info += f"\nYou have access to {len(self.studio_items)} specialized studio items:"
-            for item in self.studio_items[:8]:  # Show first 8 items
-                studio_info += f"\n• {item.name} ({item.category}, {item.rarity}): {item.description}"
-            if len(self.studio_items) > 8:
-                studio_info += f"\n• ... and {len(self.studio_items) - 8} more specialized items"
-            studio_info += "\n\nUse these items creatively in your artistic process and mention them when relevant to your work."
-            base_prompt += studio_info
-
 
         return base_prompt
     
@@ -244,7 +265,34 @@ class AgentRegistry:
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         self.agents: Dict[str, AgentConfig] = {}
+        self.studios: Dict[str, Studio] = {}
+        self._load_studios_from_db()
         self._load_agents_from_db()
+    
+    def _load_studios_from_db(self):
+        """Load studios from database."""
+        session = self.SessionLocal()
+        try:
+            db_studios = session.query(StudioDB).all()
+            for db_studio in db_studios:
+                # Convert studio_items from JSON to StudioItem objects
+                studio_items = []
+                if db_studio.studio_items:
+                    for item_data in db_studio.studio_items:
+                        if isinstance(item_data, dict):
+                            studio_items.append(StudioItem(**item_data))
+                
+                studio = Studio(
+                    id=db_studio.id,
+                    name=db_studio.studio_name,
+                    description=db_studio.studio_description,
+                    theme=db_studio.studio_theme,
+                    art_style=db_studio.art_style,
+                    studio_items=studio_items
+                )
+                self.studios[db_studio.id] = studio
+        finally:
+            session.close()
     
     def _load_agents_from_db(self):
         """Load agents from database."""
@@ -252,29 +300,25 @@ class AgentRegistry:
         try:
             db_agents = session.query(AgentDB).all()
             for db_agent in db_agents:
-                # Convert studio_items from JSON to StudioItem objects
-                studio_items = []
-                if db_agent.studio_items:
-                    for item_data in db_agent.studio_items:
-                        if isinstance(item_data, dict):
-                            studio_items.append(StudioItem(**item_data))
-                
                 config = AgentConfig(
                     # Core Identity Fields
                     id=db_agent.id,
-                    display_name=getattr(db_agent, 'display_name', db_agent.persona_name),
-                    avatar_url=getattr(db_agent, 'avatar_url', None),
-                    archetype=getattr(db_agent, 'archetype', "Creative Artist"),
-                    core_traits=getattr(db_agent, 'core_traits', []) or ["creative", "innovative", "expressive"],
-                    origin_story=getattr(db_agent, 'origin_story', db_agent.persona_background)[:240],
-                    primary_mediums=getattr(db_agent, 'primary_mediums', []) or db_agent.preferred_mediums or ["digital", "generative"],
-                    signature_motifs=getattr(db_agent, 'signature_motifs', []) or ["abstract", "expressive"],
-                    influences=getattr(db_agent, 'influences', []) or db_agent.artistic_influences or ["modern", "digital"],
-                    colour_palette=getattr(db_agent, 'colour_palette', []) or ["#FF6B6B", "#4ECDC4", "#45B7D1"],
-                    prompt_formula=getattr(db_agent, 'prompt_formula', None),
-                    voice_style=getattr(db_agent, 'voice_style', None),
-                    creation_rate=getattr(db_agent, 'creation_rate', 4),
-                    collab_affinity=getattr(db_agent, 'collab_affinity', []) or ["creative", "artistic"],
+                    display_name=db_agent.display_name,
+                    avatar_url=db_agent.avatar_url,
+                    archetype=db_agent.archetype,
+                    core_traits=db_agent.core_traits or [],
+                    origin_story=db_agent.origin_story or "",
+                    primary_mediums=db_agent.primary_mediums or [],
+                    signature_motifs=db_agent.signature_motifs or [],
+                    influences=db_agent.influences or [],
+                    colour_palette=db_agent.colour_palette or [],
+                    prompt_formula=db_agent.prompt_formula,
+                    voice_style=db_agent.voice_style,
+                    creation_rate=db_agent.creation_rate,
+                    collab_affinity=db_agent.collab_affinity or [],
+                    
+                    # Studio Association
+                    studio_id=db_agent.studio_id,
                     
                     # Technical Configuration
                     agent_type=db_agent.agent_type,
@@ -287,25 +331,14 @@ class AgentRegistry:
                     structured_output=db_agent.structured_output,
                     custom_instructions=db_agent.custom_instructions,
                     
-                    # Studio Fields
-                    studio_name=db_agent.studio_name,
-                    studio_description=db_agent.studio_description,
-                    studio_theme=db_agent.studio_theme,
-                    art_style=db_agent.art_style,
-                    studio_items=studio_items,
-                    
-                    # Legacy Fields
-                    persona_name=db_agent.persona_name,
-                    persona_background=db_agent.persona_background,
-                    personality_traits=db_agent.personality_traits or [],
-                    artistic_influences=db_agent.artistic_influences or [],
-                    preferred_mediums=db_agent.preferred_mediums or [],
-                    
                     # Evolution
                     interaction_count=db_agent.interaction_count,
                     artworks_created=db_agent.artworks_created,
                     artwork_ids=db_agent.artwork_ids or [],
-                    persona_evolution_history=db_agent.persona_evolution_history or []
+                    persona_evolution_history=db_agent.persona_evolution_history or [],
+                    
+                    # Blockchain Integration
+                    blockchain_seed=db_agent.blockchain_seed
                 )
                 self.agents[db_agent.id] = config
         finally:
@@ -338,14 +371,6 @@ class AgentRegistry:
         """Save agent configuration to database."""
         session = self.SessionLocal()
         try:
-            # Convert StudioItem objects to dict for JSON storage
-            studio_items_json = []
-            for item in config.studio_items:
-                if isinstance(item, StudioItem):
-                    studio_items_json.append(item.model_dump())
-                elif isinstance(item, dict):
-                    studio_items_json.append(item)
-            
             db_agent = session.query(AgentDB).filter(AgentDB.id == agent_id).first()
             if db_agent:
                 # Update existing agent with all new fields
@@ -364,6 +389,9 @@ class AgentRegistry:
                 db_agent.creation_rate = config.creation_rate
                 db_agent.collab_affinity = config.collab_affinity
                 
+                # Studio Association
+                db_agent.studio_id = config.studio_id
+                
                 # Technical Configuration
                 db_agent.agent_type = config.agent_type
                 db_agent.model_name = config.model_name
@@ -375,26 +403,15 @@ class AgentRegistry:
                 db_agent.structured_output = config.structured_output
                 db_agent.custom_instructions = config.custom_instructions
                 
-                # Studio Fields
-                db_agent.studio_name = config.studio_name
-                db_agent.studio_description = config.studio_description
-                db_agent.studio_theme = config.studio_theme
-                db_agent.art_style = config.art_style
-                db_agent.studio_items = studio_items_json
-                
-                # Legacy Fields
-                db_agent.persona_name = config.persona_name
-                db_agent.persona_background = config.persona_background
-                db_agent.personality_traits = config.personality_traits
-                db_agent.artistic_influences = config.artistic_influences
-                db_agent.preferred_mediums = config.preferred_mediums
-                
                 # Evolution
                 db_agent.interaction_count = config.interaction_count
                 db_agent.artworks_created = config.artworks_created
                 db_agent.artwork_ids = config.artwork_ids
                 db_agent.persona_evolution_history = config.persona_evolution_history
                 db_agent.updated_at = datetime.utcnow()
+                
+                # Blockchain Integration
+                db_agent.blockchain_seed = config.blockchain_seed
             else:
                 # Create new agent with all fields
                 db_agent = AgentDB(
@@ -414,6 +431,9 @@ class AgentRegistry:
                     creation_rate=config.creation_rate,
                     collab_affinity=config.collab_affinity,
                     
+                    # Studio Association
+                    studio_id=config.studio_id,
+                    
                     # Technical Configuration
                     agent_type=config.agent_type,
                     model_name=config.model_name,
@@ -425,26 +445,19 @@ class AgentRegistry:
                     structured_output=config.structured_output,
                     custom_instructions=config.custom_instructions,
                     
-                    # Studio Fields
-                    studio_name=config.studio_name,
-                    studio_description=config.studio_description,
-                    studio_theme=config.studio_theme,
-                    art_style=config.art_style,
-                    studio_items=studio_items_json,
-                    
-                    # Legacy Fields
-                    persona_name=config.persona_name,
-                    persona_background=config.persona_background,
-                    personality_traits=config.personality_traits,
-                    artistic_influences=config.artistic_influences,
-                    preferred_mediums=config.preferred_mediums,
-                    
                     # Evolution
                     interaction_count=config.interaction_count,
                     artworks_created=config.artworks_created,
                     artwork_ids=config.artwork_ids,
-                    persona_evolution_history=config.persona_evolution_history
+                    persona_evolution_history=config.persona_evolution_history,
+                    
+                    # Blockchain Integration
+                    blockchain_seed=config.blockchain_seed
                 )
+                
+                # Blockchain Integration
+                db_agent.blockchain_seed = config.blockchain_seed
+                
                 session.add(db_agent)
             session.commit()
         finally:
@@ -492,6 +505,37 @@ class AgentRegistry:
     def get_agent_info(self, agent_id: str) -> Dict[str, Any]:
         """Get detailed information about an agent."""
         config = self.get_agent_config(agent_id)
+        
+        # Get studio information if agent has a studio assigned
+        studio_info = {}
+        if config.studio_id:
+            studio = self.get_studio(config.studio_id)
+            if studio:
+                studio_info = {
+                    "name": studio.name,
+                    "description": studio.description,
+                    "theme": studio.theme,
+                    "art_style": studio.art_style,
+                    "featured_items": [
+                        {
+                            "name": item.name,
+                            "category": item.category,
+                            "description": item.description,
+                            "rarity": item.rarity
+                        } for item in studio.studio_items[:5]
+                    ]
+                }
+            else:
+                studio_info = {
+                    "name": f"Studio {config.studio_id} (Not Found)",
+                    "description": "Studio configuration not found"
+                }
+        else:
+            studio_info = {
+                "name": "No Studio Assigned",
+                "description": "Agent has no studio assignment"
+            }
+        
         return {
             "agent_id": agent_id,
             
@@ -527,40 +571,98 @@ class AgentRegistry:
             },
             
             # Studio Information
+            "studio": studio_info,
+            
+            # Evolution & Stats
+            "evolution": {
+                "interaction_count": config.interaction_count,
+                "artworks_created": config.artworks_created,
+                "evolution_history": config.persona_evolution_history[-5:] if config.persona_evolution_history else [],
+                "blockchain_seed": config.blockchain_seed
+            },
+            
+            # System
+            "system_prompt_preview": config.get_system_prompt()[:300] + "..." if len(config.get_system_prompt()) > 300 else config.get_system_prompt()
+        }
+
+    # Studio Management Methods
+    def create_studio(self, studio_id: str, studio: Studio):
+        """Create or update a studio configuration with database persistence."""
+        self.studios[studio_id] = studio
+        self._save_studio_to_db(studio_id, studio)
+    
+    def _save_studio_to_db(self, studio_id: str, studio: Studio):
+        """Save studio configuration to database."""
+        session = self.SessionLocal()
+        try:
+            # Convert StudioItem objects to dict for JSON storage
+            studio_items_json = []
+            for item in studio.studio_items:
+                if isinstance(item, StudioItem):
+                    studio_items_json.append(item.model_dump())
+                elif isinstance(item, dict):
+                    studio_items_json.append(item)
+            
+            db_studio = session.query(StudioDB).filter(StudioDB.id == studio_id).first()
+            if db_studio:
+                # Update existing studio
+                db_studio.studio_name = studio.name
+                db_studio.studio_description = studio.description
+                db_studio.studio_theme = studio.theme
+                db_studio.art_style = studio.art_style
+                db_studio.studio_items = studio_items_json
+                db_studio.updated_at = datetime.utcnow()
+            else:
+                # Create new studio
+                db_studio = StudioDB(
+                    id=studio_id,
+                    studio_name=studio.name,
+                    studio_description=studio.description,
+                    studio_theme=studio.theme,
+                    art_style=studio.art_style,
+                    studio_items=studio_items_json
+                )
+                session.add(db_studio)
+            session.commit()
+        finally:
+            session.close()
+    
+    def get_studio(self, studio_id: str) -> Optional[Studio]:
+        """Get studio by ID."""
+        return self.studios.get(studio_id)
+    
+    def list_studios(self) -> List[str]:
+        """List all available studio IDs."""
+        return list(self.studios.keys())
+    
+    def get_studio_info(self, studio_id: str) -> Dict[str, Any]:
+        """Get detailed information about a studio."""
+        studio = self.get_studio(studio_id)
+        if not studio:
+            return {}
+        
+        # Get agents assigned to this studio
+        assigned_agents = [agent_id for agent_id, config in self.agents.items() if config.studio_id == studio_id]
+        
+        return {
+            "studio_id": studio_id,
             "studio": {
-                "name": config.studio_name,
-                "description": config.studio_description,
-                "theme": config.studio_theme,
-                "art_style": config.art_style,
-                "items_count": len(config.studio_items),
+                "name": studio.name,
+                "description": studio.description,
+                "theme": studio.theme,
+                "art_style": studio.art_style,
+                "items_count": len(studio.studio_items),
                 "featured_items": [
                     {
                         "name": item.name,
                         "category": item.category,
                         "description": item.description,
                         "rarity": item.rarity
-                    } for item in config.studio_items[:5]  # Show first 5 items
+                    } for item in studio.studio_items[:5]
                 ]
             },
-            
-            # Legacy Persona (for compatibility)
-            "persona": {
-                "name": config.persona_name,
-                "background": config.persona_background,
-                "personality_traits": config.personality_traits,
-                "artistic_influences": config.artistic_influences,
-                "preferred_mediums": config.preferred_mediums
-            },
-            
-            # Evolution & Stats
-            "evolution": {
-                "interaction_count": config.interaction_count,
-                "artworks_created": config.artworks_created,
-                "evolution_history": config.persona_evolution_history[-5:] if config.persona_evolution_history else []
-            },
-            
-            # System
-            "system_prompt_preview": config.get_system_prompt()[:300] + "..." if len(config.get_system_prompt()) > 300 else config.get_system_prompt()
+            "assigned_agents": assigned_agents,
+            "agent_count": len(assigned_agents)
         }
 
 # Global agent registry instance

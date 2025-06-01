@@ -1,0 +1,41 @@
+{
+  "id": "memedici_96b52e53e86c",
+  "timestamp": "2025-06-01T00:04:43.735520",
+  "session_id": "test_chat",
+  "input": {
+    "prompt": "Create a futuristic digital artwork",
+    "agent_id": "test_artist_002",
+    "agent_name": "Unknown Agent",
+    "model_parameters": {
+      "agent_type": "",
+      "style_influences": [],
+      "studio_theme": "futuristic"
+    },
+    "interaction_type": "chat_generation"
+  },
+  "output": {
+    "response": "\u274c Error: 'AgentConfig' object has no attribute 'persona_name'",
+    "assets": {},
+    "success": true,
+    "generation_time_ms": 0,
+    "tools_used": [],
+    "artworks_created": 0
+  },
+  "feedback": null,
+  "provenance": {
+    "consent_given": true,
+    "data_usage_rights": "ai_training",
+    "attribution_required": false,
+    "commercial_use": true,
+    "platform": "MemeDici",
+    "agent_creator_permission": true
+  },
+  "metadata": {
+    "platform": "MemeDici",
+    "version": "2.0.0",
+    "content_hash": "95cf653371abba56ccd26825969d3f836e410d32817ebfabe40bfb098d58087e",
+    "filecoin_cid": null,
+    "lighthouse_deal_id": null,
+    "dataset_schema_version": "1.0"
+  }
+}
