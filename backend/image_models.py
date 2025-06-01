@@ -81,16 +81,15 @@ class ImageModelRegistry:
         ),
         
         ImageModelCategory.DREAMY: ModelInfo(
-            model_name="Dreamyvibes artstyle SDXL - Trigger with dreamyvibes artstyle_225787.safetensors",
-            display_name="Dreamy Vibes Art Style",
-            model_type="lora",
-            base_model="SDXL 1.0", 
-            description="Creates ethereal, dreamy artwork with pastel colors and soft aesthetics",
-            tags=["pastel", "style", "artstyle", "dreamy", "ethereal", "soft"],
-            best_for=["dreamy landscapes", "ethereal portraits", "pastel art", "fantasy scenes"],
-            trigger_words="dreamyvibes artstyle",
+            model_name="dreamshaper_8_93211.safetensors",
+            display_name="DreamShaper V8",
+            model_type="checkpoint",
+            base_model="SD 1.5",
+            description="Creates dreamy, ethereal artwork with soft aesthetics and fantasy elements",
+            tags=["dreamy", "ethereal", "soft", "fantasy", "artistic"],
+            best_for=["dreamy landscapes", "ethereal portraits", "fantasy art", "atmospheric scenes"],
             is_nsfw=False,
-            is_sdxl=True
+            is_sdxl=False
         ),
         
     }

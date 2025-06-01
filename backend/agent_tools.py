@@ -27,6 +27,7 @@ import time
 from pathlib import Path
 from openai import OpenAI
 from enum import Enum
+from vlayer_verification import create_content_proof, VlayerWebProof
 
 class ImageSize(Enum):
     """Supported image sizes."""
@@ -49,14 +50,14 @@ engine = create_engine("sqlite:///agents.db")
 Base.metadata.create_all(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def generate_full_url(filename: str, base_url: str = "http://localhost:8000") -> str:
+def generate_full_url(filename: str, base_url: str = "https://memedici-backend.onrender.com") -> str:
     """Generate a full URL for a static file."""
     return f"{get_base_url()}/static/artworks/{filename}"
 
 def get_base_url() -> str:
-    """Get the base URL for the server. In production, this should be configurable."""
-    # In production, this should come from environment variables or config
-    return os.getenv("BASE_URL", "http://localhost:8000")
+    """Get the base URL for the server. Defaults to production URL."""
+    # Default to production URL, can be overridden with environment variable for local development
+    return os.getenv("BASE_URL", "https://memedici-backend.onrender.com")
 
 @tool
 def generate_image(
@@ -102,12 +103,11 @@ def generate_image(
       Example: "cartoon character, anime style, bright colors, expressive eyes"
       
     • ImageModelCategory.DREAMY
-      Model: Dreamy Vibes Art Style (SDXL LoRA)
-      Type: LoRA (Stable Diffusion XL 1.0)
-      Best for: Ethereal portraits, pastel art, fantasy scenes, dreamy landscapes
-      ⚠️  CRITICAL: ALWAYS include "dreamyvibes artstyle" in your prompt
-      Prompt style: Soft descriptions, ethereal qualities, pastel colors
-      Example: "dreamyvibes artstyle, ethereal portrait, soft pastels, fantasy"
+      Model: DreamShaper V8
+      Type: Checkpoint (Stable Diffusion 1.5)
+      Best for: Dreamy landscapes, ethereal portraits, fantasy art, atmospheric scenes
+      Prompt style: Soft descriptions, ethereal qualities, fantasy elements
+      Example: "ethereal portrait, soft lighting, fantasy atmosphere, dreamy landscape"
       
     • ImageModelCategory.ARTISTIC
       Model: Line Art Style LoRA XL
@@ -118,10 +118,10 @@ def generate_image(
     
     🚨 CRITICAL PROMPT CRAFTING RULES:
     1. YOU must write detailed, descriptive prompts yourself
-    2. For DREAMY category: MANDATORY to include "dreamyvibes artstyle" in prompt
-    3. For LoRA models (DREAMY, ARTISTIC): Be specific about style and composition
-    4. For REALISTIC: Include lighting, camera angle, quality descriptors like "4k", "detailed"
-    5. For ANIMATION: Describe character features, art style, color scheme clearly
+    2. For LoRA models (ARTISTIC): Be specific about style and composition
+    3. For REALISTIC: Include lighting, camera angle, quality descriptors like "4k", "detailed"
+    4. For ANIMATION: Describe character features, art style, color scheme clearly
+    5. For DREAMY: Focus on ethereal qualities, soft lighting, fantasy elements
     6. Always use the model parameter with ImageModelCategory enum values
     
     📝 EXAMPLE USAGE:
@@ -135,9 +135,9 @@ def generate_image(
         model=ImageModelCategory.REALISTIC
     )
     
-    # Generate dreamy image (note required trigger words)
+    # Generate dreamy image (new prompt style)
     result = generate_image(
-        prompt="dreamyvibes artstyle, ethereal landscape, soft pastels",
+        prompt="ethereal portrait, soft lighting, fantasy atmosphere, dreamy landscape",
         model=ImageModelCategory.DREAMY
     )
     ```
@@ -229,6 +229,47 @@ def generate_image(
         file_size = file_path.stat().st_size
         file_url = generate_full_url(filename)
         
+        # Create vlayer content authenticity proof
+        proof = None
+        if agent_id:
+            try:
+                # Prepare request and response data for proof
+                request_data = {
+                    "model_name": selected_model,
+                    "prompt": prompt,
+                    "width": width,
+                    "height": height,
+                    "image_num": 1,
+                    "guidance_scale": guidance_scale,
+                    "seed": seed or -1,
+                    "steps": steps,
+                    "sampler_name": "DPM++ 2S a Karras",
+                    "negative_prompt": negative_prompt
+                }
+                
+                response_data = {
+                    "success": True,
+                    "image_generated": True,
+                    "model_used": selected_model,
+                    "artwork_id": artwork_id
+                }
+                
+                proof = create_content_proof(
+                    agent_id=agent_id,
+                    api_endpoint="https://api.novita.ai/v3/async/txt2img",
+                    request_data=request_data,
+                    response_data=response_data,
+                    prompt=prompt,
+                    model_name=selected_model,
+                    generation_type="image"
+                )
+                
+                if proof:
+                    print(f"🔐 Content authenticity proof created: {proof.session_id}")
+                
+            except Exception as e:
+                print(f"⚠️  Failed to create content proof: {e}")
+        
         # Store in database if agent_id provided
         db_artwork_id = None
         if agent_id:
@@ -248,7 +289,8 @@ def generate_image(
                 },
                 file_path=str(file_path),
                 file_url=file_url,
-                file_size=file_size
+                file_size=file_size,
+                vlayer_proof_id=proof.session_id if proof else None
             )
         
         return {
@@ -276,7 +318,8 @@ def generate_image(
                     "seed": seed or -1
                 }
             },
-            "message": f"✨ Image generated successfully using {model_info.display_name}! Database URL: /api/artworks/{db_artwork_id}" if db_artwork_id else f"✨ Image generated successfully using {model_info.display_name}!"
+            "message": f"✨ Image generated successfully using {model_info.display_name}! Database URL: /api/artworks/{db_artwork_id}",
+            "proof": proof
         }
         
     except Exception as e:
@@ -293,6 +336,7 @@ def generate_video(
     height: int = 480,
     frames: int = 16,
     negative_prompt: str = "",
+    seed: Optional[int] = None,
     agent_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -449,7 +493,9 @@ def generate_video(
         # Hardcoded parameters as requested
         guidance_scale = 7.5
         steps = 20
-        seed = -1
+        
+        if seed is None:
+            seed = -1
         
         # Generate video with single prompt structure
         res = client.txt2video(
@@ -476,6 +522,45 @@ def generate_video(
         file_size = len(video_bytes)
         file_url = generate_full_url(filename)
         
+        # Create vlayer content authenticity proof
+        proof = None
+        if agent_id:
+            try:
+                # Prepare request and response data for proof
+                request_data = {
+                    "model_name": selected_model,
+                    "width": width,
+                    "height": height,
+                    "guidance_scale": guidance_scale,
+                    "steps": steps,
+                    "seed": seed,
+                    "prompts": [{"prompt": prompt, "frames": frames}],
+                    "negative_prompt": negative_prompt
+                }
+                
+                response_data = {
+                    "success": True,
+                    "video_generated": True,
+                    "model_used": selected_model,
+                    "artwork_id": artwork_id
+                }
+                
+                proof = create_content_proof(
+                    agent_id=agent_id,
+                    api_endpoint="https://api.novita.ai/v3/async/txt2video",
+                    request_data=request_data,
+                    response_data=response_data,
+                    prompt=prompt,
+                    model_name=selected_model,
+                    generation_type="video"
+                )
+                
+                if proof:
+                    print(f"🔐 Content authenticity proof created: {proof.session_id}")
+                
+            except Exception as e:
+                print(f"⚠️  Failed to create content proof: {e}")
+        
         # Store in database if agent_id provided
         db_artwork_id = None
         if agent_id:
@@ -497,7 +582,8 @@ def generate_video(
                 file_path=str(file_path),
                 file_url=file_url,
                 file_size=file_size,
-                artwork_type="video"
+                artwork_type="video",
+                vlayer_proof_id=proof.session_id if proof else None
             )
         
         return {
@@ -718,6 +804,42 @@ def generate_images_advanced(
         
         file_url = generate_full_url(filename)
         
+        # Create vlayer content authenticity proof
+        proof = None
+        if agent_id:
+            try:
+                # Prepare request and response data for proof
+                request_data = {
+                    "model": "gpt-image-1",
+                    "prompt": prompt,
+                    "n": 1,
+                    "size": size.value,
+                    "quality": quality.value
+                }
+                
+                response_data = {
+                    "success": True,
+                    "image_generated": True,
+                    "model_used": "gpt-image-1",
+                    "artwork_id": artwork_id
+                }
+                
+                proof = create_content_proof(
+                    agent_id=agent_id,
+                    api_endpoint="https://api.openai.com/v1/images/generations",
+                    request_data=request_data,
+                    response_data=response_data,
+                    prompt=prompt,
+                    model_name="gpt-image-1",
+                    generation_type="image"
+                )
+                
+                if proof:
+                    print(f"🔐 Content authenticity proof created: {proof.session_id}")
+                
+            except Exception as e:
+                print(f"⚠️  Failed to create content proof: {e}")
+        
         # Store in database if agent_id provided
         db_artwork_id = None
         if agent_id:
@@ -735,7 +857,8 @@ def generate_images_advanced(
                 file_path=str(file_path),
                 file_url=file_url,
                 file_size=file_size,
-                artwork_type="image"
+                artwork_type="image",
+                vlayer_proof_id=proof.session_id if proof else None
             )
         
         return {
@@ -928,11 +1051,13 @@ def get_tools_by_names(tool_names: List[str]):
     return [tool_dict[name] for name in tool_names if name in tool_dict]
 
 
-def get_agent_aware_tools(agent_id: str) -> List[Any]:
+def get_agent_aware_tools(agent_id: str, blockchain_seed: Optional[int] = None) -> List[Any]:
     """Get tools that are aware of the agent context with automatic agent_id injection."""
     logger.info(f"🔧 Creating agent-aware tools for agent: {agent_id}")
+    if blockchain_seed is not None:
+        logger.info(f"🔗 Using blockchain seed for deterministic generation: {blockchain_seed}")
     
-    # Create wrapped versions that auto-inject agent_id
+    # Create wrapped versions that auto-inject agent_id and blockchain_seed
     def agent_aware_generate_image(
         prompt: str,
         model: ImageModelCategory = ImageModelCategory.REALISTIC,
@@ -943,7 +1068,14 @@ def get_agent_aware_tools(agent_id: str) -> List[Any]:
         negative_prompt: str = "",
         seed: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Agent-aware generate_image that automatically injects agent_id."""
+        """Agent-aware generate_image that automatically injects agent_id and blockchain_seed."""
+        # Use blockchain_seed if no specific seed is provided
+        if seed is None and blockchain_seed is not None:
+            seed = blockchain_seed
+            if seed > 10000:
+                 seed = seed % 10000
+            logger.info(f"🔗 Using blockchain seed for image generation: {seed}")
+        
         logger.info(f"✅ Auto-injecting agent_id '{agent_id}' into generate_image call")
         return generate_image.invoke({
             'prompt': prompt,
@@ -977,9 +1109,17 @@ def get_agent_aware_tools(agent_id: str) -> List[Any]:
         width: int = 640,
         height: int = 480,
         frames: int = 16,
-        negative_prompt: str = ""
+        negative_prompt: str = "",
+        seed: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Agent-aware generate_video that automatically injects agent_id."""
+        """Agent-aware generate_video that automatically injects agent_id and blockchain_seed."""
+        # Use blockchain_seed if no specific seed is provided
+        if seed is None and blockchain_seed is not None:
+            seed = blockchain_seed
+            if seed > 10000:
+                 seed = seed % 10000
+            logger.info(f"🔗 Using blockchain seed for video generation: {seed}")
+        
         logger.info(f"✅ Auto-injecting agent_id '{agent_id}' into generate_video call")
         return generate_video.invoke({
             'prompt': prompt,
@@ -988,6 +1128,7 @@ def get_agent_aware_tools(agent_id: str) -> List[Any]:
             'height': height,
             'frames': frames,
             'negative_prompt': negative_prompt,
+            'seed': seed,
             'agent_id': agent_id
         })
     
@@ -1036,29 +1177,57 @@ def store_artwork_in_db(
     file_path: str,
     file_url: str,
     file_size: int,
-    artwork_type: str = "image"
+    artwork_type: str = "image",
+    vlayer_proof_id: Optional[str] = None
 ) -> str:
     """Store generated artwork (image or video) in database and return the database ID."""
     session = SessionLocal()
     try:
+        # Validate required fields
+        if not agent_id or not artwork_id:
+            raise ValueError("agent_id and artwork_id are required")
+        
+        if not file_path or not file_url:
+            raise ValueError("file_path and file_url are required")
+            
+        if file_size is None or file_size <= 0:
+            logger.warning(f"⚠️  Invalid file_size {file_size} for artwork {artwork_id}")
+            file_size = 0
+        
+        # Validate file exists if it's a local path
+        if file_path.startswith('static/') or not file_path.startswith('http'):
+            if not os.path.exists(file_path):
+                logger.warning(f"⚠️  File does not exist at path: {file_path}")
+        
+        logger.info(f"💾 Storing artwork in database: {artwork_id}")
+        logger.info(f"   Agent: {agent_id}")
+        logger.info(f"   Type: {artwork_type}")
+        logger.info(f"   Model: {model_name} ({model_type})")
+        logger.info(f"   File: {file_path} ({file_size} bytes)")
+        logger.info(f"   URL: {file_url}")
+        
         db_artwork = GeneratedArtworkDB(
             id=artwork_id,
             agent_id=agent_id,
             artwork_type=artwork_type,
             prompt=prompt,
-            negative_prompt=negative_prompt,
+            negative_prompt=negative_prompt or "",
             model_name=model_name,
             model_type=model_type,
-            parameters=parameters,
+            parameters=parameters or {},
             file_path=file_path,
             file_url=file_url,
             file_size=file_size,
             artwork_metadata={
-                "generation_timestamp": datetime.utcnow().isoformat()
-            }
+                "generation_timestamp": datetime.utcnow().isoformat(),
+                "file_validated": os.path.exists(file_path) if not file_path.startswith('http') else True,
+                "storage_backend": "local" if file_path.startswith('static/') else "remote"
+            },
+            vlayer_proof_id=vlayer_proof_id
         )
         session.add(db_artwork)
         session.commit()
+        logger.info(f"✅ Artwork stored in database: {artwork_id}")
         
         # Update agent's artwork count and add artwork to their list
         from agent_config import agent_registry
@@ -1075,5 +1244,10 @@ def store_artwork_in_db(
         logger.info(f"✅ Updated agent {agent_id}: {agent_config.artworks_created} total artworks, {len(agent_config.artwork_ids)} tracked IDs")
         
         return artwork_id
+        
+    except Exception as e:
+        logger.error(f"❌ Error storing artwork {artwork_id}: {str(e)}")
+        session.rollback()
+        raise
     finally:
         session.close() 

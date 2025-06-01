@@ -27,6 +27,7 @@ class ChatResponse(BaseModel):
     tools_used: Optional[List[str]] = None
     artworks_created: int = 0
     persona_evolved: bool = False
+    dataset_entry_id: Optional[str] = Field(None, description="ID for submitting feedback to decentralized dataset")
 
 @router.post("", response_model=ChatResponse)
 async def chat_with_agent(request: ChatRequest):
@@ -94,10 +95,29 @@ async def chat_with_agent(request: ChatRequest):
                 logger.info(f"🎭 Persona evolved due to custom tool usage: {custom_tools_used}")
         
         # 🚀 CAPTURE FOR DECENTRALIZED DATASET
+        dataset_entry_id = None
         try:
             # Get agent info for dataset entry
             agent_info = agent_registry.get_agent_info(request.agent_id)
             agent_name = agent_info.get("name", "Unknown Agent")
+            
+            # Serialize assets to ensure JSON compatibility
+            serialized_assets = {}
+            if isinstance(assets, dict):
+                for asset_id, asset_info in assets.items():
+                    if hasattr(asset_info, 'model_dump'):
+                        # It's a Pydantic model (AssetInfo)
+                        serialized_assets[asset_id] = asset_info.model_dump()
+                    elif isinstance(asset_info, dict):
+                        # It's already a dict
+                        serialized_assets[asset_id] = asset_info
+                    else:
+                        # Convert to dict if possible
+                        try:
+                            serialized_assets[asset_id] = asset_info.__dict__ if hasattr(asset_info, '__dict__') else asset_info
+                        except:
+                            # Fallback: convert to string
+                            serialized_assets[asset_id] = str(asset_info)
             
             # Create dataset entry for this interaction
             dataset_entry = dataset_manager.create_dataset_entry(
@@ -106,7 +126,7 @@ async def chat_with_agent(request: ChatRequest):
                 agent_name=agent_name,
                 response_data={
                     "response": response_message,
-                    "assets": assets,
+                    "assets": serialized_assets,  # Use serialized assets
                     "success": True,
                     "tools_used": tools_used,
                     "artworks_created": artworks_created,
@@ -121,22 +141,42 @@ async def chat_with_agent(request: ChatRequest):
                 generation_time_ms=generation_time_ms
             )
             
-            logger.info(f"💾 Dataset entry created: {dataset_entry.id} (will upload after 2 minutes or on feedback)")
+            dataset_entry_id = dataset_entry.id
+            logger.info(f"💾 Dataset entry created: {dataset_entry_id} (will upload after 2 minutes or on feedback)")
             
         except Exception as dataset_e:
             logger.warning(f"⚠️  Dataset capture failed (continuing): {dataset_e}")
         
         logger.info(f"✅ Chat successful for agent {request.agent_id}")
+        
+        # Ensure assets are serialized for the response as well
+        response_assets = {}
+        if isinstance(assets, dict):
+            for asset_id, asset_info in assets.items():
+                if hasattr(asset_info, 'model_dump'):
+                    # It's a Pydantic model (AssetInfo)
+                    response_assets[asset_id] = asset_info.model_dump()
+                elif isinstance(asset_info, dict):
+                    # It's already a dict
+                    response_assets[asset_id] = asset_info
+                else:
+                    # Convert to dict if possible
+                    try:
+                        response_assets[asset_id] = asset_info.__dict__ if hasattr(asset_info, '__dict__') else asset_info
+                    except:
+                        # Fallback: convert to string
+                        response_assets[asset_id] = str(asset_info)
             
         return ChatResponse(
             success=True,
             response=response_message,
-            assets=assets,
+            assets=response_assets,  # Use serialized assets
             agent_id=request.agent_id,
             thread_id=request.thread_id,
             tools_used=tools_used,
             artworks_created=artworks_created,
-            persona_evolved=persona_evolved
+            persona_evolved=persona_evolved,
+            dataset_entry_id=dataset_entry_id
         )
     except Exception as e:
         logger.error(f"❌ Exception in chat endpoint: {str(e)}")
