@@ -154,7 +154,7 @@ class AgentConfig(BaseModel):
     
     # Technical Configuration
     agent_type: str = "creative_artist"
-    model_name: str = "gpt-3.5-turbo"
+    model_name: str = "gpt-4.1"
     temperature: float = 0.7
     max_tokens: Optional[int] = None
     tools_enabled: List[str] = Field(
