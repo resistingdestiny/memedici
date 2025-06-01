@@ -52,6 +52,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     // Configuration
     uint256 public constant MAX_BATCH_SIZE = 100;
     uint256 public qualityThreshold = 7; // Out of 10 rating scale
+    bool public skipVerification = false; // Global flag to skip verification (owner only)
     
     // Current network config (set at deployment)
     NetworkConfig public currentConfig;
@@ -92,6 +93,7 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
     event QualityThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
     event NetworkConfigUpdated(uint256 chainId, NetworkConfig config);
     event NativeRewardSent(address indexed user, uint256 amount);
+    event VerificationSkipUpdated(bool skipVerification, address updatedBy);
     
     // Errors
     error UnauthorizedSigner();
@@ -398,6 +400,11 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         FeedbackProof calldata proof,
         bytes32 feedbackHash
     ) internal view {
+        // Skip verification if flag is set
+        if (skipVerification) {
+            return;
+        }
+        
         bytes32 messageHash = feedbackHash.toEthSignedMessageHash();
         address signer = messageHash.recover(proof.signature);
         
@@ -408,6 +415,11 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
      * @dev Verify batch signature
      */
     function _verifyBatchSignature(bytes32 batchHash, bytes memory signature) internal view {
+        // Skip verification if flag is set
+        if (skipVerification) {
+            return;
+        }
+        
         bytes32 messageHash = batchHash.toEthSignedMessageHash();
         address signer = messageHash.recover(signature);
         
@@ -732,5 +744,14 @@ contract FeedbackOracle is Ownable, ReentrancyGuard {
         uint256 balance = address(this).balance;
         (bool success, ) = payable(owner()).call{value: balance}("");
         if (!success) revert NativeTransferFailed();
+    }
+    
+    /**
+     * @dev Update verification skip flag
+     */
+    function updateVerificationSkip(bool skipVerification_) external onlyOwner {
+        bool oldSkipVerification = skipVerification;
+        skipVerification = skipVerification_;
+        emit VerificationSkipUpdated(oldSkipVerification, msg.sender);
     }
 } 
