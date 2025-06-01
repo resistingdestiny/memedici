@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Enhanced API client with better error handling and fallback
 export const api = axios.create({
-  baseURL: 'https://memedici-backend.onrender.com',
+  baseURL: process.env.NODE_ENV === 'development' 
+    ? '/api' // Use Next.js proxy in development
+    : 'https://memedici-backend.onrender.com',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000, // 30 second timeout for long-running operations
 });
@@ -101,12 +104,38 @@ export interface StudioItem {
   name: string;
   category: string;
   description: string;
+  rarity: string;
   specifications?: Record<string, any>;
-  rarity?: string;
   condition?: string;
   acquisition_date?: string | null;
   cost?: number | null;
   notes?: string | null;
+}
+
+export interface StudioData {
+  name: string;
+  description: string;
+  theme: string;
+  art_style: string;
+  items_count: number;
+  featured_items: StudioItem[];
+}
+
+export interface Studio {
+  studio_id: string;
+  studio: StudioData;
+  assigned_agents: string[];
+  agent_count: number;
+}
+
+// Legacy interface for compatibility
+export interface LegacyStudio {
+  id: string;
+  name: string;
+  description?: string;
+  theme?: string;
+  art_style?: string;
+  studio_items?: StudioItem[];
 }
 
 export interface PersonaEvolutionRequest {
@@ -310,7 +339,12 @@ export async function getStudios() {
   return res.data;
 }
 
-export async function createStudio(studioData: { studio_id: string; studio: Studio }) {
+export interface CreateStudioRequest {
+  studio_id: string;
+  studio: StudioData;
+}
+
+export async function createStudio(studioData: CreateStudioRequest) {
   const res = await api.post('/studios', studioData);
   return res.data;
 }
@@ -326,16 +360,6 @@ export async function assignAgentToStudio(agentId: string, studioId: string) {
     studio_id: studioId
   });
   return res.data;
-}
-
-// Studio types from OpenAPI spec
-export interface Studio {
-  id: string;
-  name: string;
-  description?: string;
-  theme?: string;
-  art_style?: string;
-  studio_items?: StudioItem[];
 }
 
 // Test interface (for debugging)
@@ -404,6 +428,43 @@ export interface AgentArtworksResponse {
     has_more: boolean;
     total_pages: number;
   };
+}
+
+export interface AllArtworksResponse {
+  success: boolean;
+  error?: string;
+  artworks: (ApiArtwork & {
+    agent_id: string;
+    agent_name: string;
+    agent_info?: {
+      display_name: string;
+      studio_name: string;
+      art_style: string;
+      avatar_url?: string;
+    };
+  })[];
+  pagination: {
+    limit: number;
+    offset: number;
+    has_more: boolean;
+    total_pages: number;
+    total_count: number;
+  };
+}
+
+export async function getAllArtworks(
+  limit: number = 20, 
+  offset: number = 0, 
+  includeDetails: boolean = false
+): Promise<AllArtworksResponse> {
+  const res = await api.get<AllArtworksResponse>(`/artworks/`, {
+    params: {
+      limit,
+      offset,
+      include_details: includeDetails
+    }
+  });
+  return res.data;
 }
 
 export async function getAgentArtworks(

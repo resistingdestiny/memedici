@@ -197,7 +197,9 @@ export function ScaledGLB({
   targetSizeOverride?: number;
   [key: string]: any;
 }) {
-  const gltfData = useGLTF(`/glb/${glbFile}`);
+  // Handle both local files and external URLs
+  const glbPath = glbFile.startsWith('http') ? glbFile : `/glb/${glbFile}`;
+  const gltfData = useGLTF(glbPath);
   const { scene } = gltfData;
   const groupRef = useRef<THREE.Group>(null);
 
@@ -274,7 +276,9 @@ export function AnimatedScaledGLB({
   [key: string]: any;
 }) {
   // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY EARLY RETURNS
-  const { scene, animations } = useGLTF(`/glb/${glbFile}`);
+  // Handle both local files and external URLs
+  const glbPath = glbFile.startsWith('http') ? glbFile : `/glb/${glbFile}`;
+  const { scene, animations } = useGLTF(glbPath);
   const groupRef = useRef<THREE.Group>(null);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
 
@@ -453,7 +457,9 @@ export function getTargetSize(glbFile: string): number {
 // Function to preload GLB files with console info
 export function preloadGLBFile(glbFile: string) {
   console.log(`🔄 Preloading GLB: ${glbFile}`);
-  useGLTF.preload(`/glb/${glbFile}`);
+  // Handle both local files and external URLs
+  const glbPath = glbFile.startsWith('http') ? glbFile : `/glb/${glbFile}`;
+  useGLTF.preload(glbPath);
 }
 
 // Preload all common GLB files

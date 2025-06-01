@@ -23,8 +23,9 @@ export function PastelHouse({ position = [0, 0, 0], rotation = [0, 0, 0] }: {
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
+      {/* PASTEL HOUSE GLB MODEL with automatic scaling */}
       <ScaledGLB 
-        glbFile="pastel_house.glb"
+        glbFile="https://siliconroads.com/pastel_house.glb"
         castShadow
         receiveShadow
       />

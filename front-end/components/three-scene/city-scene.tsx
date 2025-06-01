@@ -238,7 +238,7 @@ export function CityScene() {
 
   // Separate agents into assigned (to studios) and unassigned (roaming)
   const assignedAgentIds = new Set(
-    studios.flatMap(studio => studio.assigned_agents)
+    studios.flatMap(studio => (studio as any).assigned_agents || [])
   );
   
   const unassignedAgents = apiAgents.filter(agent => 
@@ -562,14 +562,14 @@ export function CityScene() {
                 {studios.map((studio, index) => {
                   // Available GLB files for studios - EXCLUDING exchange and agent builder buildings
                   const studioTypes = [
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/hw_4_cyberpunk_sci-fi_building.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/oriental_building.glb', 
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/mushroom_house.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/pastel_house.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/cyberpunk_bar.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/ams_s2.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/the_neko_stop-off__-_hand-painted_diorama.glb',
-                    'https://github.com/resistingdestiny/memedici/releases/download/files/cyberpunk_robot.glb'
+                    'https://siliconroads.com/hw_4_cyberpunk_sci-fi_building.glb',
+                    'https://siliconroads.com/oriental_building.glb', 
+                    'https://siliconroads.com/mushroom_house.glb',
+                    'https://siliconroads.com/pastel_house.glb',
+                    'https://siliconroads.com/cyberpunk_bar.glb',
+                    'https://siliconroads.com/ams_s2.glb',
+                    'https://siliconroads.com/the_neko_stop-off__-_hand-painted_diorama.glb',
+                    'https://siliconroads.com/cyberpunk_robot.glb'
                   ];
                   
                   // Use the studio's actual position and rotation from API data

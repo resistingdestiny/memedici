@@ -1,9 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static export for Netlify
-  output: 'export',
-  trailingSlash: true,
-  skipTrailingSlashRedirect: true,
+  // Add API rewrites to handle CORS issues (only in development)
+  ...(process.env.NODE_ENV === 'development' && {
+    async rewrites() {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'https://memedici-backend.onrender.com/:path*',
+        },
+      ];
+    },
+  }),
   
   // Force fresh build to clear Netlify cache - 2024-12-19
   images: {
@@ -56,6 +63,13 @@ const nextConfig = {
 
     return config;
   }
+}
+
+// Only add static export for production builds
+if (process.env.NODE_ENV === 'production') {
+  nextConfig.output = 'export';
+  nextConfig.trailingSlash = true;
+  nextConfig.skipTrailingSlashRedirect = true;
 }
 
 export default nextConfig;

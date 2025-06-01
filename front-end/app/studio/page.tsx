@@ -31,9 +31,14 @@ import {
   getStudio, 
   getAgents, 
   assignAgentToStudio,
+  getAgentArtworks,
+  getAllArtworks,
   Studio,
+  StudioData,
+  CreateStudioRequest,
   Agent,
-  StudioItem
+  StudioItem,
+  ApiArtwork
 } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -46,6 +51,8 @@ function StudioPageContent() {
   const [studios, setStudios] = useState<StudioWithAgents[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedStudio, setSelectedStudio] = useState<StudioWithAgents | null>(null);
+  const [studioArtworks, setStudioArtworks] = useState<ApiArtwork[]>([]);
+  const [loadingArtworks, setLoadingArtworks] = useState(false);
   const [isCreatingStudio, setIsCreatingStudio] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const { toast } = useToast();
@@ -79,31 +86,88 @@ function StudioPageContent() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [studiosResponse, agentsResponse] = await Promise.all([
-        getStudios(),
-        getAgents()
-      ]);
-      
-      setStudios(studiosResponse.studios || []);
-      setAgents(agentsResponse.agents || []);
-      
-      // Check if a specific studio is selected via URL parameter
       const selectedStudioId = searchParams.get('selected');
-      if (selectedStudioId && studiosResponse.studios) {
-        const studio = studiosResponse.studios.find((s: Studio) => s.id === selectedStudioId);
-        if (studio) {
-          setSelectedStudio(studio);
+      console.log('🏗️ Loading studio data...', { selectedStudioId });
+      
+      if (selectedStudioId) {
+        console.log('🎯 Loading specific studio:', selectedStudioId);
+        // If a specific studio is selected, fetch detailed studio info and all agents
+        const [studioResponse, agentsResponse] = await Promise.all([
+          getStudio(selectedStudioId),
+          getAgents()
+        ]);
+        
+        console.log('📥 Studio API response:', studioResponse);
+        console.log('👥 Agents API response:', agentsResponse);
+        
+        if (studioResponse.success && studioResponse.studio) {
+          console.log('✅ Setting selected studio:', studioResponse.studio);
+          setSelectedStudio(studioResponse.studio);
+          setStudios([studioResponse.studio]); // Set as single studio for consistency
+          
+          // Load artworks for this studio
+          loadStudioArtworks(studioResponse.studio, agentsResponse.agents || []);
+        } else {
+          console.error('❌ Studio not found or API error:', studioResponse);
+          toast({
+            title: "Error",
+            description: `Studio "${selectedStudioId}" not found`,
+            variant: "destructive"
+          });
         }
+        setAgents(agentsResponse.agents || []);
+      } else {
+        console.log('📋 Loading all studios');
+        // If no specific studio selected, load all studios and agents
+        const [studiosResponse, agentsResponse] = await Promise.all([
+          getStudios(),
+          getAgents()
+        ]);
+        
+        console.log('📥 All studios response:', studiosResponse);
+        console.log('👥 All agents response:', agentsResponse);
+        
+        setStudios(studiosResponse.studios || []);
+        setAgents(agentsResponse.agents || []);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('💥 Error loading studio data:', error);
       toast({
         title: "Error",
-        description: "Failed to load studios and agents",
+        description: "Failed to load studio data",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStudioArtworks = async (studio: Studio, allAgents: Agent[]) => {
+    try {
+      setLoadingArtworks(true);
+      
+      // Get agents that belong to this studio using studio_id
+      const studioAgents = allAgents.filter(agent => 
+        studio.assigned_agents.includes(agent.agent_id || agent.id)
+      );
+      
+      // Fetch artworks for each agent in the studio
+      const artworkPromises = studioAgents.map(agent => 
+        getAgentArtworks(agent.agent_id || agent.id, 10, 0, true)
+      );
+      
+      const artworkResponses = await Promise.all(artworkPromises);
+      
+      // Combine all artworks from studio agents
+      const allStudioArtworks = artworkResponses
+        .filter(response => response.success)
+        .flatMap(response => response.artworks || []);
+      
+      setStudioArtworks(allStudioArtworks);
+    } catch (error) {
+      console.error('Error loading studio artworks:', error);
+    } finally {
+      setLoadingArtworks(false);
     }
   };
 
@@ -124,12 +188,12 @@ function StudioPageContent() {
       await createStudio({
         studio_id: studioId,
         studio: {
-          id: studioId,
           name: studioForm.name,
           description: studioForm.description || "A creative space for artistic expression",
           theme: studioForm.theme,
           art_style: studioForm.art_style,
-          studio_items: studioForm.studio_items
+          items_count: studioForm.studio_items.length,
+          featured_items: studioForm.studio_items
         }
       });
 
@@ -225,16 +289,55 @@ function StudioPageContent() {
   };
 
   const getStudioAgents = (studioId: string) => {
-    return agents.filter(agent => agent.studio?.name === studioId || agent.collective === studioId);
+    const studio = studios.find(s => s.studio_id === studioId);
+    if (!studio) return [];
+    
+    return agents.filter(agent => 
+      studio.assigned_agents.includes(agent.agent_id || agent.id)
+    );
+  };
+
+  const getUnassignedAgents = () => {
+    // Get all agent IDs that are assigned to any studio
+    const assignedAgentIds = studios.flatMap(studio => studio.assigned_agents);
+    
+    console.log('🔍 Debug unassigned agents:', {
+      totalAgents: agents.length,
+      totalStudios: studios.length,
+      assignedAgentIds,
+      agentIds: agents.map(a => ({ id: a.id, agent_id: a.agent_id, name: a.name }))
+    });
+    
+    // Filter out agents that are already assigned
+    const unassigned = agents.filter(agent => {
+      const agentId = agent.agent_id || agent.id;
+      const isAssigned = assignedAgentIds.includes(agentId);
+      
+      console.log(`Agent ${agent.name} (${agentId}): ${isAssigned ? 'ASSIGNED' : 'UNASSIGNED'}`);
+      
+      return !isAssigned;
+    });
+    
+    console.log('📋 Unassigned agents result:', unassigned.map(a => a.name));
+    
+    return unassigned;
   };
 
   if (loading) {
+    console.log('⏳ Component is loading...');
     return (
       <div className="min-h-screen pt-16 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
+
+  console.log('🎬 Rendering studio page with state:', {
+    studiosCount: studios.length,
+    selectedStudio: selectedStudio ? selectedStudio.studio_id : null,
+    showCreateForm,
+    agentsCount: agents.length
+  });
 
   return (
     <div className="min-h-screen pt-16">
@@ -261,20 +364,20 @@ function StudioPageContent() {
               <CardContent>
                 <div className="space-y-2">
                   {studios.map((studio) => {
-                    const studioAgents = getStudioAgents(studio.id);
+                    const studioAgents = getStudioAgents(studio.studio_id);
                     return (
                       <div
-                        key={studio.id}
+                        key={studio.studio_id}
                         className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          selectedStudio?.id === studio.id
+                          selectedStudio?.studio_id === studio.studio_id
                             ? "bg-primary/10 border-primary"
                             : "hover:bg-muted"
                         }`}
                         onClick={() => setSelectedStudio(studio)}
                       >
-                        <h3 className="font-medium">{studio.name}</h3>
+                        <h3 className="font-medium">{studio.studio.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {studioAgents.length} agents • {studio.theme}
+                          {studioAgents.length} agents • {studio.studio.theme}
                         </p>
                       </div>
                     );
@@ -294,10 +397,13 @@ function StudioPageContent() {
                   <Users className="h-5 w-5 text-primary" />
                   Available Agents
                 </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {getUnassignedAgents().length} unassigned agents
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {agents.slice(0, 5).map((agent) => (
+                  {getUnassignedAgents().slice(0, 5).map((agent) => (
                     <div
                       key={agent.id}
                       className="p-3 rounded-lg hover:bg-muted"
@@ -320,6 +426,11 @@ function StudioPageContent() {
                       </div>
                     </div>
                   ))}
+                  {getUnassignedAgents().length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      All agents are assigned
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -493,115 +604,101 @@ function StudioPageContent() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building className="h-5 w-5 text-primary" />
-                      {selectedStudio.name}
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Building className="h-5 w-5 text-primary" />
+                        {selectedStudio.studio.name}
+                      </CardTitle>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Studio
+                      </Button>
+                    </div>
+                    <p className="text-muted-foreground">
+                      {selectedStudio.studio.description}
+                    </p>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <p className="text-muted-foreground">
-                        {selectedStudio.description}
-                      </p>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <label className="text-sm font-medium">Theme</label>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedStudio.theme}
-                          </p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Art Style</label>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedStudio.art_style}
-                          </p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Agents</label>
-                          <p className="text-sm text-muted-foreground">
-                            {getStudioAgents(selectedStudio.id).length}
-                          </p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Items</label>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedStudio.studio_items?.length || 0}
-                          </p>
-                        </div>
-                      </div>
+                </Card>
 
-                      {selectedStudio.studio_items && selectedStudio.studio_items.length > 0 && (
-                        <div>
-                          <h3 className="font-medium mb-2">Studio Items</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {selectedStudio.studio_items.map((item, index) => (
-                              <div key={index} className="p-3 bg-muted rounded-lg">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h4 className="font-medium">{item.name}</h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {item.category} • {item.rarity}
-                                    </p>
-                                  </div>
-                                  <Badge variant="outline">{item.condition}</Badge>
+                <Tabs defaultValue="overview" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="agents">Agents ({getStudioAgents(selectedStudio.studio_id).length})</TabsTrigger>
+                    <TabsTrigger value="artworks">Artworks ({studioArtworks.length})</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Studio Information</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">
+                              {selectedStudio.studio.theme}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Theme</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">
+                              {selectedStudio.studio.art_style}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Art Style</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">
+                              {getStudioAgents(selectedStudio.studio_id).length}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Agents</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">
+                              {selectedStudio.studio.items_count}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Items</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {selectedStudio.studio.featured_items && selectedStudio.studio.featured_items.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Studio Items</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {selectedStudio.studio.featured_items.map((item, index) => (
+                              <div key={index} className="p-4 bg-muted rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-medium">{item.name}</h4>
+                                  <Badge variant="outline">{item.condition || 'excellent'}</Badge>
                                 </div>
-                                <p className="text-sm mt-2">{item.description}</p>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {item.category} • {item.rarity}
+                                </p>
+                                <p className="text-sm">{item.description}</p>
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Studio Agents</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {getStudioAgents(selectedStudio.id).map((agent) => (
-                          <div key={agent.id} className="p-4 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                                <Image
-                                  src={agent.avatar}
-                                  alt={agent.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="flex-grow">
-                                <h3 className="font-medium">{agent.name}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {agent.description}
-                                </p>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {agent.specialty.slice(0, 3).map((spec, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {spec}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {getStudioAgents(selectedStudio.id).length === 0 && (
-                        <div className="text-center py-8">
-                          <p className="text-muted-foreground mb-4">
-                            No agents assigned to this studio yet
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {agents.filter(agent => !agent.studio?.name).slice(0, 4).map((agent) => (
-                              <div key={agent.id} className="p-3 border rounded-lg flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                  <TabsContent value="agents" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Studio Agents</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {getStudioAgents(selectedStudio.studio_id).map((agent) => (
+                              <div key={agent.id} className="p-4 border rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
                                     <Image
                                       src={agent.avatar}
                                       alt={agent.name}
@@ -609,26 +706,109 @@ function StudioPageContent() {
                                       className="object-cover"
                                     />
                                   </div>
-                                  <div>
-                                    <p className="font-medium text-sm">{agent.name}</p>
-                                    <p className="text-xs text-muted-foreground">{agent.collective}</p>
+                                  <div className="flex-grow">
+                                    <h3 className="font-medium">{agent.name}</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                      {agent.description}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {agent.specialty.slice(0, 3).map((spec, index) => (
+                                        <Badge key={index} variant="outline" className="text-xs">
+                                          {spec}
+                                        </Badge>
+                                      ))}
+                                    </div>
                                   </div>
                                 </div>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleAssignAgent(agent.id, selectedStudio.id)}
-                                >
-                                  Assign
-                                </Button>
                               </div>
                             ))}
                           </div>
+                          
+                          {getStudioAgents(selectedStudio.studio_id).length === 0 && (
+                            <div className="text-center py-8">
+                              <p className="text-muted-foreground mb-4">
+                                No agents assigned to this studio yet
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {getUnassignedAgents().slice(0, 4).map((agent) => (
+                                  <div key={agent.id} className="p-3 border rounded-lg flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                                        <Image
+                                          src={agent.avatar}
+                                          alt={agent.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-sm">{agent.name}</p>
+                                        <p className="text-xs text-muted-foreground">{agent.collective}</p>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleAssignAgent(agent.id, selectedStudio.studio_id)}
+                                    >
+                                      Assign
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="artworks" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>Studio Portfolio</CardTitle>
+                          {loadingArtworks && (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {studioArtworks.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {studioArtworks.map((artwork) => (
+                              <div key={artwork.id} className="group relative overflow-hidden rounded-lg border">
+                                <div className="aspect-square relative">
+                                  <Image
+                                    src={artwork.file_url}
+                                    alt={artwork.prompt}
+                                    fill
+                                    className="object-cover transition-transform group-hover:scale-105"
+                                  />
+                                </div>
+                                <div className="p-3">
+                                  <h4 className="font-medium text-sm line-clamp-1">
+                                    {artwork.prompt}
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground">
+                                    {artwork.model_name} • {new Date(artwork.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <p className="text-muted-foreground">
+                              No artworks created in this studio yet
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
               </div>
             ) : (
               <Card>

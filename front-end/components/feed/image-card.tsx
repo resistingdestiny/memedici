@@ -7,10 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Share2, Bookmark, Play, ShoppingBag } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Play, ShoppingBag, Calendar, Cpu, Building2 } from "lucide-react";
 import { type FeedItem } from "@/lib/types";
 import { useFeed } from "@/lib/stores/use-feed";
-import { agentData } from "@/lib/stubs";
 
 interface ImageCardProps {
   item: FeedItem;
@@ -24,8 +23,19 @@ export function ImageCard({ item }: ImageCardProps) {
   
   const likeItem = useFeed((state) => state.likeItem);
   
-  // Get agent data for collective info
-  const agent = item.creator.agentId ? agentData.find(a => a.id === item.creator.agentId) : null;
+  // Format creation date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return null;
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch {
+      return null;
+    }
+  };
   
   return (
     <Card
@@ -41,6 +51,10 @@ export function ImageCard({ item }: ImageCardProps) {
               width={800}
               height={1200}
               className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+              onError={(e) => {
+                // Fallback for broken images
+                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Ctext x='200' y='150' text-anchor='middle' dy='.35em' font-family='Arial, sans-serif' font-size='16' fill='%23666'%3EArtwork%3C/text%3E%3C/svg%3E";
+              }}
             />
             {item.type === "video" && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -62,8 +76,11 @@ export function ImageCard({ item }: ImageCardProps) {
                         <div>
                           <p className="font-medium text-white">{item.creator.name}</p>
                           <p className="text-xs text-white/70">AI Artist</p>
-                          {agent && (
-                            <p className="text-xs text-white/60">{agent.collective}</p>
+                          {item.studioName && (
+                            <p className="text-xs text-white/60 flex items-center gap-1">
+                              <Building2 className="h-3 w-3" />
+                              {item.studioName}
+                            </p>
                           )}
                         </div>
                       </Link>
@@ -76,8 +93,11 @@ export function ImageCard({ item }: ImageCardProps) {
                         <div>
                           <p className="font-medium text-white">{item.creator.name}</p>
                           <p className="text-xs text-white/70">AI Artist</p>
-                          {agent && (
-                            <p className="text-xs text-white/60">{agent.collective}</p>
+                          {item.studioName && (
+                            <p className="text-xs text-white/60 flex items-center gap-1">
+                              <Building2 className="h-3 w-3" />
+                              {item.studioName}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -94,11 +114,23 @@ export function ImageCard({ item }: ImageCardProps) {
                   <Badge variant="secondary" className="bg-background/20">
                     {item.type === "video" ? "Video" : item.type === "product" ? "Product" : "Image"}
                   </Badge>
-                  {["AI", "Art", "Digital"].map((tag) => (
-                    <Badge key={tag} variant="secondary" className="bg-background/20">
-                      {tag}
+                  {item.artStyle && (
+                    <Badge variant="secondary" className="bg-background/20">
+                      {item.artStyle}
                     </Badge>
-                  ))}
+                  )}
+                  {item.modelName && (
+                    <Badge variant="secondary" className="bg-background/20 flex items-center gap-1">
+                      <Cpu className="h-3 w-3" />
+                      {item.modelName}
+                    </Badge>
+                  )}
+                  {formatDate(item.createdAt) && (
+                    <Badge variant="secondary" className="bg-background/20 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(item.createdAt)}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-sm text-white/90 line-clamp-2">{item.title}</p>
               </div>
@@ -138,8 +170,11 @@ export function ImageCard({ item }: ImageCardProps) {
               </Avatar>
               <div>
                 <p className="text-sm font-medium truncate">{item.creator.name}</p>
-                {agent && (
-                  <p className="text-xs text-muted-foreground">{agent.collective}</p>
+                {item.studioName && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    {item.studioName}
+                  </p>
                 )}
               </div>
             </Link>
@@ -151,16 +186,33 @@ export function ImageCard({ item }: ImageCardProps) {
               </Avatar>
               <div>
                 <p className="text-sm font-medium truncate">{item.creator.name}</p>
-                {agent && (
-                  <p className="text-xs text-muted-foreground">{agent.collective}</p>
+                {item.studioName && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    {item.studioName}
+                  </p>
                 )}
               </div>
             </>
           )}
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {item.likes.toLocaleString()} likes
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-sm text-muted-foreground">
+            {item.likes.toLocaleString()} likes
+          </p>
+          {formatDate(item.createdAt) && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {formatDate(item.createdAt)}
+            </p>
+          )}
+        </div>
+        {item.modelName && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+            <Cpu className="h-3 w-3" />
+            {item.modelName}
+          </p>
+        )}
       </div>
     </Card>
   );

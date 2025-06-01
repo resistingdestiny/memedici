@@ -172,100 +172,56 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
 }) {
   const galleryRef = useRef<THREE.Group>(null);
 
-  // Real artwork URLs for the gallery - Positioned around the robot in a circle
-  const realArtworks = [
-    {
-      id: "art-1",
-      title: "🎨 YOUR NIGHTCAFE CREATION",
-      image: "/api/proxy-image?url=" + encodeURIComponent("https://creator.nightcafe.studio/jobs/84lwOA5gRcR8SMq6m8ZD/84lwOA5gRcR8SMq6m8ZD--1--ljlvd.jpg"),
-      position: [0, 8, -15] as [number, number, number], // Behind robot - moved higher
-      rotation: [0, 0, 0] as [number, number, number],
-      scale: [6, 4.5, 0.1] as [number, number, number] // Made bigger
-    },
-    {
-      id: "art-2", 
-      title: "Digital Renaissance",
-      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [15, 7, -8] as [number, number, number], // Right side - moved higher
-      rotation: [0, -Math.PI/4, 0] as [number, number, number],
-      scale: [5, 5, 0.1] as [number, number, number] // Made bigger
-    },
-    {
-      id: "art-3",
-      title: "Cyber Baroque",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      position: [-15, 7, -8] as [number, number, number], // Left side - moved higher
-      rotation: [0, Math.PI/4, 0] as [number, number, number],
-      scale: [5, 5, 0.1] as [number, number, number] // Made bigger
-    },
-    {
-      id: "art-4",
-      title: "AI Abstraction",
-      image: "https://images.unsplash.com/photo-1578662015879-be14ced36384?w=800&h=600&fit=crop",
-      position: [12, 6, 12] as [number, number, number], // Behind right - moved higher
-      rotation: [0, -Math.PI/2, 0] as [number, number, number],
-      scale: [5, 6, 0.1] as [number, number, number] // Made bigger
-    },
-    {
-      id: "art-5",
-      title: "Quantum Canvas",
-      image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=800&h=600&fit=crop",
-      position: [-12, 6, 12] as [number, number, number], // Behind left - moved higher
-      rotation: [0, Math.PI/2, 0] as [number, number, number],
-      scale: [5, 6, 0.1] as [number, number, number] // Made bigger
-    },
-    {
-      id: "art-6",
-      title: "Holographic Memory",
-      image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=600&fit=crop",
-      position: [0, 10, 15] as [number, number, number], // High up behind - moved even higher
-      rotation: [Math.PI/6, Math.PI, 0] as [number, number, number],
-      scale: [6, 4, 0.1] as [number, number, number] // Made bigger
-    }
-  ];
+  // Use real artwork data from the studio - only show if artworks actually exist
+  const realArtworks = studio.recentArtworks && studio.recentArtworks.length > 0
+    ? studio.recentArtworks.map((artwork: any, index: number) => ({
+        id: artwork.id,
+        title: artwork.title,
+        image: artwork.image,
+        position: [
+          // Position artworks in a circle around the center
+          Math.cos(index * (Math.PI * 2 / studio.recentArtworks.length)) * 12,
+          6 + Math.sin(index * 0.5) * 2, // Varying heights
+          Math.sin(index * (Math.PI * 2 / studio.recentArtworks.length)) * 12
+        ] as [number, number, number],
+        rotation: [0, index * (Math.PI * 2 / studio.recentArtworks.length), 0] as [number, number, number],
+        scale: [4, 3, 0.1] as [number, number, number]
+      }))
+    : []; // Empty array if no artworks
 
-  // Get studio-specific artists that appear in gallery view
+  // Only show agents that are actually assigned to this studio
   const getStudioArtists = () => {
-    const studioAgentMap: { [key: string]: string } = {
-      "leonardo-studio": "leonardo-ai",
-      "raphael-studio": "raphael-ai", 
-      "michelangelo-studio": "michelangelo-ai",
-      "caravaggio-studio": "caravaggio-ai",
-      "da-vinci-studio": "da-vinci-ai",
-      "picasso-studio": "picasso-ai",
-      "monet-studio": "monet-ai",
-      "van-gogh-studio": "van-gogh-ai"
-    };
-
-    // Return multiple agents for some studios
-    const agents = [
-      {
-        id: `${studio.id}-ai-agent-1`,
-        agentId: studioAgentMap[studio.id] || "leonardo-ai",
-        position: [0, 0, 0] as [number, number, number],
-        isActive: false,
-        platformId: 0
-      }
-    ];
-
-    // Add second agent for some studios
-    if (Math.random() > 0.5) {
-      agents.push({
-        id: `${studio.id}-ai-agent-2`,
-        agentId: Object.values(studioAgentMap)[Math.floor(Math.random() * Object.values(studioAgentMap).length)],
-        position: [25, 0, 0] as [number, number, number], // Position second platform to the right
-        isActive: false,
-        platformId: 1
-      });
+    if (!studio.agent) {
+      return []; // No agents if none are assigned
     }
 
-    return agents;
+    // Return the single assigned agent
+    return [{
+      id: `${studio.id}-agent`,
+      agentId: studio.agent.agent_id || studio.agent.id,
+      name: studio.agent.name,
+      specialty: studio.agent.specialty?.[0] || studio.studioData.art_style,
+      position: [0, 0, 0] as [number, number, number],
+      isActive: true,
+      platformId: 0,
+      agent: studio.agent
+    }];
   };
 
   const studioArtists = getStudioArtists();
   
-  // Split artworks between platforms
+  // Only show platforms and robots if there are actual assigned agents
+  const shouldShowAgentContent = studioArtists.length > 0;
+  
+  // Split artworks between platforms (if multiple agents) or show all for single agent
   const getArtworksForPlatform = (platformId: number) => {
+    if (realArtworks.length === 0) return [];
+    
+    if (studioArtists.length === 1) {
+      // Single agent gets all artworks
+      return realArtworks;
+    }
+    
     const artworksPerPlatform = Math.ceil(realArtworks.length / studioArtists.length);
     const startIndex = platformId * artworksPerPlatform;
     const endIndex = Math.min(startIndex + artworksPerPlatform, realArtworks.length);
@@ -286,9 +242,9 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
   // Random spinning feature selection
   const getRandomSpinningFeature = () => {
     const features = [
-      { glbFile: "cyberpunk_robot.glb", shouldSpin: true, name: "Cyberpunk Guardian" },
-      { glbFile: "solaria_core.glb", shouldSpin: true, name: "Solaria Core" },
-      { glbFile: "diamond_hands.glb", shouldSpin: false, name: "Diamond Hands" }
+      { glbFile: "https://siliconroads.com/cyberpunk_robot.glb", shouldSpin: true, name: "Cyberpunk Guardian" },
+      { glbFile: "https://siliconroads.com/solaria_core.glb", shouldSpin: true, name: "Solaria Core" },
+      { glbFile: "https://siliconroads.com/diamond_hands.glb", shouldSpin: false, name: "Diamond Hands" }
     ];
     return features[Math.floor(Math.random() * features.length)];
   };
@@ -312,34 +268,20 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
   useEffect(() => {
     console.log('🎨 Gallery loaded for studio:', studio.name);
     console.log('🤖 Studio artists:', studioArtists.length);
-    console.log('🎲 Random feature:', randomFeature.name);
+    console.log('🖼️ Real artworks:', realArtworks.length);
+    console.log('🏛️ Should show agent content:', shouldShowAgentContent);
+    
+    if (studio.agent) {
+      console.log('👨‍🎨 Assigned agent:', studio.agent.name);
+    } else {
+      console.log('❌ No agent assigned to this studio');
+    }
     
     studioArtists.forEach((artist, i) => {
       const artworksForPlatform = getArtworksForPlatform(i);
       console.log(`Platform ${i + 1}: ${artworksForPlatform.length} artworks`);
     });
-    
-    // Test the NightCafe URL specifically
-    const testNightCafeUrl = async () => {
-      try {
-        console.log('🔍 Testing NightCafe URL via our proxy...');
-        const proxyUrl = realArtworks[0].image; // This is now our proxy URL
-        const response = await fetch(proxyUrl, { 
-          method: 'HEAD'
-        });
-        console.log('✅ NightCafe proxy test result:', response.status, response.statusText);
-        if (response.ok) {
-          console.log('🎉 NightCafe image should load successfully!');
-        } else {
-          console.warn('⚠️ NightCafe proxy returned:', response.status);
-        }
-      } catch (error) {
-        console.error('❌ NightCafe proxy test failed:', error);
-      }
-    };
-    
-    testNightCafeUrl();
-  }, [studio.name]);
+  }, [studio.name, realArtworks.length, studioArtists.length]);
 
   return (
     <>
@@ -407,11 +349,11 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
       <directionalLight position={[0, 20, 0]} intensity={1.5} color="#ffffff" castShadow />
       <pointLight position={[0, 15, 0]} intensity={2} color="#ffffff" distance={50} />
       
-      {/* MULTIPLE FLOATING PLATFORMS - ONE FOR EACH AGENT */}
-      {studioArtists.map((artist, index) => (
+      {/* ONLY SHOW PLATFORMS IF THERE ARE ASSIGNED AGENTS */}
+      {shouldShowAgentContent && studioArtists.map((artist, index) => (
         <AnimatedScaledGLB 
           key={`platform-${artist.id}`}
-          glbFile="fucursor.glb"
+          glbFile="https://siliconroads.com/fucursor.glb"
           position={[artist.position[0], 2, artist.position[2]]}
           targetSizeOverride={12}
           playAllAnimations={true}
@@ -419,11 +361,27 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
         />
       ))}
 
-      {/* FLOATING ARTWORKS - GROUPED BY PLATFORM */}
-      <group ref={galleryRef}>
-        {studioArtists.map((artist, platformId) => (
-          <group key={artist.id}>
-            {getArtworksForPlatform(platformId).map((artwork, index) => (
+      {/* FLOATING ARTWORKS - ONLY SHOW IF ARTWORKS EXIST */}
+      {realArtworks.length > 0 && (
+        <group ref={galleryRef}>
+          {shouldShowAgentContent ? (
+            // Show artworks grouped by platform if agents exist
+            studioArtists.map((artist, platformId) => (
+              <group key={artist.id}>
+                {getArtworksForPlatform(platformId).map((artwork, index) => (
+                  <FloatingArtwork 
+                    key={artwork.id} 
+                    artwork={artwork} 
+                    index={index} 
+                    studio={studio}
+                    onLightboxOpen={onLightboxOpen}
+                  />
+                ))}
+              </group>
+            ))
+          ) : (
+            // Show artworks without platform grouping if no agents
+            realArtworks.map((artwork, index) => (
               <FloatingArtwork 
                 key={artwork.id} 
                 artwork={artwork} 
@@ -431,16 +389,16 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
                 studio={studio}
                 onLightboxOpen={onLightboxOpen}
               />
-            ))}
-          </group>
-        ))}
-      </group>
+            ))
+          )}
+        </group>
+      )}
 
-      {/* ROBOTS ON TOP OF THEIR PLATFORMS */}
-      {studioArtists.map((artist) => (
+      {/* ROBOTS ON TOP OF THEIR PLATFORMS - ONLY IF AGENTS ARE ASSIGNED */}
+      {shouldShowAgentContent && studioArtists.map((artist) => (
         <AnimatedScaledGLB
           key={`robot-${artist.id}`}
-          glbFile="robot_playground.glb"
+          glbFile="https://siliconroads.com/robot_playground.glb"
           position={[artist.position[0], 6, artist.position[2]]}
           targetSizeOverride={8}
           playAllAnimations={true}
@@ -449,25 +407,44 @@ export function StudioGallery({ studio, onLightboxOpen, onArtistClick }: {
           onClick={() => onArtistClick?.({
             id: artist.id,
             agentId: artist.agentId,
-            name: "Gallery Robot",
-            specialty: "AI Gallery Curator", 
+            name: artist.agent?.name || "Gallery Assistant",
+            specialty: artist.specialty,
             type: "AI Assistant",
             isAIAgent: true,
-            isActive: artist.isActive
+            isActive: artist.isActive,
+            avatar: artist.agent?.avatar,
+            description: artist.agent?.description,
+            stats: artist.agent?.stats
           })}
         />
       ))}
 
-      {/* RANDOM SPINNING FEATURE */}
-      <group ref={featureRef} position={[0, 8, -30]}>
-        <AnimatedScaledGLB
-          glbFile={randomFeature.glbFile}
-          targetSizeOverride={6}
-          playAllAnimations={true}
-          castShadow
-          receiveShadow
-        />
-      </group>
+      {/* EMPTY STUDIO MESSAGE IF NO AGENTS OR ARTWORKS */}
+      {!shouldShowAgentContent && realArtworks.length === 0 && (
+        <Html position={[0, 5, 0]} center>
+          <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-600 rounded-lg px-6 py-4 text-gray-300 text-center shadow-lg">
+            <div className="text-2xl font-bold mb-2">{studio.studioData.name}</div>
+            <div className="text-lg opacity-70 mb-3">Empty Studio</div>
+            <div className="text-sm opacity-60">
+              This studio is available for an agent to claim and start creating artworks.
+            </div>
+            <div className="text-xs text-blue-400 mt-2">Theme: {studio.studioData.theme}</div>
+          </div>
+        </Html>
+      )}
+
+      {/* RANDOM SPINNING FEATURE - ONLY IF THERE'S CONTENT IN THE STUDIO */}
+      {(shouldShowAgentContent || realArtworks.length > 0) && (
+        <group ref={featureRef} position={[0, 8, -30]}>
+          <AnimatedScaledGLB
+            glbFile={randomFeature.glbFile}
+            targetSizeOverride={6}
+            playAllAnimations={true}
+            castShadow
+            receiveShadow
+          />
+        </group>
+      )}
 
       {/* MINIMAL SPARKLES FOR AMBIANCE */}
       <Sparkles count={30} scale={25} size={0.8} speed={0.2} color="#00ffff" />

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, Float, Sparkles, RoundedBox, Sphere } from "@react-three/drei";
 import * as THREE from "three";
-import { ScaledGLB } from "./GLBScaler";
+import { ScaledGLB, AnimatedScaledGLB } from "./GLBScaler";
 
 export function RoamingArtist({ 
   artistId, 
@@ -127,19 +127,21 @@ export function RoamingArtist({
     onArtistClick(artist);
   };
 
-  const handlePointerOver = () => setIsHovered(true);
-  const handlePointerOut = () => setIsHovered(false);
+  const handlePointerEnter = () => setIsHovered(true);
+  const handlePointerLeave = () => setIsHovered(false);
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* CYBERPUNK ROBOT GLB MODEL (static) with automatic scaling */}
-      <ScaledGLB 
-        glbFile="cyberpunk_robot.glb"
+      {/* CYBERPUNK ROBOT GLB MODEL */}
+      <AnimatedScaledGLB
+        glbFile="https://siliconroads.com/cyberpunk_robot.glb"
+        targetSizeOverride={2.5}
+        playAllAnimations={true}
         castShadow
         receiveShadow
         onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       />
 
       {/* COMMENT OUT ALL THE COMPLEX CUSTOM APPEARANCE */}

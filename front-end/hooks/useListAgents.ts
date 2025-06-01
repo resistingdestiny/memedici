@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAgents, transformAgentData, Agent as APIAgent } from '@/lib/api';
 import { AgentConfig } from '@/lib/types';
-import { Agent, agentData } from '@/lib/stubs';
 
 interface UseListAgentsReturn {
   data: AgentConfig[];
@@ -9,24 +8,6 @@ interface UseListAgentsReturn {
   isError: boolean;
   error?: Error;
   refetch: () => void;
-}
-
-// Convert dummy Agent to AgentConfig format
-function convertDummyToAgentConfig(agent: Agent): AgentConfig {
-  return {
-    id: agent.id,
-    display_name: agent.name,
-    archetype: agent.collective,
-    origin_story: agent.description,
-    core_traits: agent.specialty,
-    primary_mediums: agent.specialty, // Using specialty as mediums fallback
-    avatar: agent.avatar,
-    collective: agent.collective,
-    featured: agent.featured,
-    gallery: agent.gallery,
-    stats: agent.stats,
-    samples: agent.samples,
-  };
 }
 
 // Convert API Agent to AgentConfig format
@@ -58,43 +39,28 @@ export function useListAgents(): UseListAgentsReturn {
     setIsError(false);
     setError(undefined);
 
-    console.log('[useListAgents] Starting fetch...');
+    console.log('[useListAgents] Fetching real agents from deployed backend...');
 
     try {
-      // Fetch real agents from API
-      console.log('[useListAgents] Calling getAgents API...');
+      // Fetch real agents from deployed API
       const response = await getAgents();
       console.log('[useListAgents] API Response:', response);
       
       const realAgents = response.agents || [];
-      console.log('[useListAgents] Real agents from API:', realAgents.length);
+      console.log('[useListAgents] Real agents from deployed backend:', realAgents.length);
 
       // Transform API agents to AgentConfig format
       const transformedApiAgents = realAgents.map(transformAgentData).map(convertAPIAgentToAgentConfig);
       console.log('[useListAgents] Transformed API agents:', transformedApiAgents.length, transformedApiAgents);
-
-      // Convert dummy agents to AgentConfig format
-      const dummyAgents = agentData.map(convertDummyToAgentConfig);
-      console.log('[useListAgents] Dummy agents:', dummyAgents.length);
-
-      // Merge data: real agents first, then dummy agents that don't conflict
-      const realAgentIds = new Set(transformedApiAgents.map(agent => agent.id));
-      const uniqueDummyAgents = dummyAgents.filter(agent => !realAgentIds.has(agent.id));
       
-      // Combine with real agents first
-      const combinedData = [...transformedApiAgents, ...uniqueDummyAgents];
-      console.log('[useListAgents] Final combined data:', combinedData.length, combinedData);
-      
-      setData(combinedData);
+      setData(transformedApiAgents);
     } catch (err) {
-      console.error('[useListAgents] Error fetching agents:', err);
+      console.error('[useListAgents] Error fetching agents from deployed backend:', err);
       setIsError(true);
-      setError(err instanceof Error ? err : new Error('Failed to fetch agents'));
+      setError(err instanceof Error ? err : new Error('Failed to fetch agents from deployed backend'));
       
-      // Fallback to dummy data on error
-      const dummyAgents = agentData.map(convertDummyToAgentConfig);
-      console.log('[useListAgents] Using dummy data as fallback:', dummyAgents.length);
-      setData(dummyAgents);
+      // Set empty data on error - no dummy fallback
+      setData([]);
     } finally {
       setIsLoading(false);
     }
@@ -107,15 +73,6 @@ export function useListAgents(): UseListAgentsReturn {
   useEffect(() => {
     fetchAgents();
   }, []);
-
-  // Ensure we always have at least dummy data
-  useEffect(() => {
-    if (!isLoading && data.length === 0) {
-      console.log('[useListAgents] No data found, falling back to dummy agents');
-      const dummyAgents = agentData.map(convertDummyToAgentConfig);
-      setData(dummyAgents);
-    }
-  }, [data.length, isLoading]);
 
   return {
     data,

@@ -22,11 +22,25 @@ import {
   Studio,
   Agent
 } from "@/lib/api";
+import { Studio as CityStudio } from "@/lib/stores/use-city";
 import { useToast } from "@/hooks/use-toast";
 
-interface StudioWithAgents extends Studio {
+interface StudioWithAgents {
+  // Essential properties we know we need
+  id: string;
+  name: string;
+  description?: string;
+  theme?: string;
+  art_style?: string;
+  studio_id?: string;
+  studio_items?: any[];
+  
+  // Added properties for agents
   agents?: Agent[];
   agentCount?: number;
+  
+  // Allow any other properties from the API
+  [key: string]: any;
 }
 
 export default function StudiosPage() {
@@ -43,12 +57,35 @@ export default function StudiosPage() {
 
   useEffect(() => {
     // Filter studios based on search term
-    const filtered = studios.filter(studio =>
-      studio.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      studio.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      studio.theme?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      studio.art_style?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    console.log('Filtering studios...', { studiosCount: studios.length, searchTerm });
+    
+    // If no search term, show all studios
+    if (!searchTerm.trim()) {
+      console.log('No search term, showing all studios');
+      setFilteredStudios(studios);
+      return;
+    }
+    
+    const filtered = studios.filter(studio => {
+      const matchesName = studio.name?.toLowerCase()?.includes(searchTerm.toLowerCase());
+      const matchesDescription = studio.description?.toLowerCase()?.includes(searchTerm.toLowerCase());
+      const matchesTheme = studio.theme?.toLowerCase()?.includes(searchTerm.toLowerCase());
+      const matchesArtStyle = studio.art_style?.toLowerCase()?.includes(searchTerm.toLowerCase());
+      
+      const matches = matchesName || matchesDescription || matchesTheme || matchesArtStyle;
+      
+      if (!matches) {
+        console.log('Studio filtered out:', studio, {
+          matchesName,
+          matchesDescription,
+          matchesTheme,
+          matchesArtStyle
+        });
+      }
+      
+      return matches;
+    });
+    console.log('Filtered studios result:', { originalCount: studios.length, filteredCount: filtered.length, filtered });
     setFilteredStudios(filtered);
   }, [studios, searchTerm]);
 
@@ -63,19 +100,42 @@ export default function StudiosPage() {
       const studiosData = studiosResponse.studios || [];
       const agentsData = agentsResponse.agents || [];
       
+      console.log('Studios data received:', studiosData);
+      console.log('Agents data received:', agentsData);
+      
       // Enhance studios with agent counts
       const enhancedStudios = studiosData.map((studio: Studio) => {
+        // Ensure studio has required properties
+        if (!studio || typeof studio !== 'object') {
+          console.warn('Invalid studio object:', studio);
+          return null;
+        }
+        
+        // Log the studio structure to understand what ID field it has
+        console.log('Studio structure:', studio);
+        console.log('Studio keys:', Object.keys(studio));
+        
+        // For now, let's be more flexible with ID validation
+        const studioId = (studio as any).id || (studio as any).studio_id || (studio as any).name;
+        if (!studioId) {
+          console.warn('Studio missing any identifiable field:', studio);
+          return null;
+        }
+        
         const studioAgents = agentsData.filter((agent: Agent) => 
-          agent.studio?.name === studio.id || agent.collective === studio.id
+          agent && (agent.studio?.name === studioId || agent.collective === studioId)
         );
         
         return {
           ...studio,
+          id: studioId, // Ensure we have an ID
+          name: (studio as any).name || `Studio ${studioId}`, // Ensure name is always present
           agents: studioAgents,
           agentCount: studioAgents.length
-        };
-      });
+        } as StudioWithAgents;
+      }).filter(Boolean); // Remove any null entries
       
+      console.log('Enhanced studios:', enhancedStudios);
       setStudios(enhancedStudios);
       setAgents(agentsData);
     } catch (error) {
@@ -175,7 +235,7 @@ export default function StudiosPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">
-                        {studio.name}
+                        {studio.name || 'Unnamed Studio'}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {studio.description}

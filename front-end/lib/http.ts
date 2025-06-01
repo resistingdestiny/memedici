@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 export const httpClient = axios.create({
-  baseURL: 'https://memedici-backend.onrender.com',
+  baseURL: process.env.NODE_ENV === 'development' 
+    ? '/api' // Use Next.js proxy in development  
+    : 'https://memedici-backend.onrender.com',
   timeout: 30000, // 30 seconds timeout
   headers: {
     'Content-Type': 'application/json',

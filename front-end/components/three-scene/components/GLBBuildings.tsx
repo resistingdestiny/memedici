@@ -53,7 +53,7 @@ export function ExchangeBuilding({ position, marketId }: { position: [number, nu
   return (
     <group ref={groupRef} position={position}>
       <ScaledGLB 
-        glbFile="ams_s2.glb"
+        glbFile="https://siliconroads.com/ams_s2.glb"
         castShadow
         receiveShadow
         onClick={handleClick}
@@ -157,7 +157,7 @@ export function AgentBuilderHub({ position, hubId }: { position: [number, number
   return (
     <group ref={groupRef} position={position}>
       <ScaledGLB 
-        glbFile="cyberpunk_bar.glb"
+        glbFile="https://siliconroads.com/cyberpunk_bar.glb"
         castShadow
         receiveShadow
         onClick={handleClick}

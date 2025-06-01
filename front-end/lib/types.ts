@@ -15,6 +15,11 @@ export interface FeedItem {
   price?: number | null;
   tags?: string[];
   description?: string;
+  // Additional fields from real artwork data
+  createdAt?: string;
+  modelName?: string;
+  studioName?: string;
+  artStyle?: string;
 }
 
 // API Types for Memedici Backend

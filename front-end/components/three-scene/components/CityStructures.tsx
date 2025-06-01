@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html, Float, Sparkles, RoundedBox, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { useCityStore } from "@/lib/stores/use-city";
-import { ScaledGLB } from "./GLBScaler";
+import { ScaledGLB, AnimatedScaledGLB } from "./GLBScaler";
 
 // Remove Text import to avoid troika-worker issues
 // import { Text } from "@react-three/drei";
@@ -45,8 +45,10 @@ export function MysteriousContraption() {
   return (
     <group ref={contraptionRef} position={[0, 0, 0]}>
       {/* MYSTERIOUS CONTRAPTION GLB MODEL with automatic scaling */}
-      <ScaledGLB 
-        glbFile="16_mysterious_contraption.glb"
+      <AnimatedScaledGLB 
+        glbFile="https://siliconroads.com/16_mysterious_contraption.glb"
+        targetSizeOverride={20}
+        playAllAnimations={true}
         castShadow
         receiveShadow
       />
