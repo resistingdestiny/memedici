@@ -24,11 +24,12 @@
 [context.branch-deploy]
   command = "npm run clean && npm run build"
 
-# Redirect rules for SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# SPA redirects now handled by _redirects file in public directory
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
+#   force = false
 
 # Headers for security and performance
 [[headers]]
@@ -38,6 +39,13 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache and serve GLB files correctly
+[[headers]]
+  for = "/glb/*"
+  [headers.values]
+    Content-Type = "model/gltf-binary"
+    Cache-Control = "public, max-age=31536000, immutable"
     
 # Cache static assets
 [[headers]]

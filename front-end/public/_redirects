@@ -1,0 +1,11 @@
+# Static assets - serve as-is
+/glb/*  /glb/:splat  200
+/hdr/*  /hdr/:splat  200
+/_next/*  /_next/:splat  200
+/static/*  /static/:splat  200
+/favicon.ico  /favicon.ico  200
+/robots.txt  /robots.txt  200
+/sitemap.xml  /sitemap.xml  200
+
+# SPA fallback for everything else
+/*  /index.html  200 

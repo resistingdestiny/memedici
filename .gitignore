@@ -116,7 +116,11 @@ dist
 
 # Gatsby files
 .cache/
-public
+# Only ignore Gatsby public directory, not Next.js public
+gatsby/public/
+
+# Allow Next.js public directory
+!front-end/public/
 
 # Vuepress build output
 .vuepress/dist

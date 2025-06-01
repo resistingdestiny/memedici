@@ -28,7 +28,9 @@ export function RainbowKitProviders({
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={theme === 'dark' ? darkTheme() : lightTheme()}
-          showRecentTransactions={true}
+          showRecentTransactions={false}
+          modalSize="compact"
+          coolMode={false}
         >
           {children}
         </RainbowKitProvider>

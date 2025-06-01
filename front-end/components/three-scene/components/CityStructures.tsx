@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html, Float, Sparkles, RoundedBox, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { useCityStore } from "@/lib/stores/use-city";
+import { ScaledGLB, AnimatedScaledGLB } from "./GLBScaler";
 
 // Remove Text import to avoid troika-worker issues
 // import { Text } from "@react-three/drei";
@@ -27,102 +28,49 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export function CyberpunkPlaza() {
-  const plazaRef = useRef<THREE.Group>(null);
+// NEW: Mysterious Contraption at the center using GLB
+export function MysteriousContraption() {
+  const contraptionRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    if (plazaRef.current) {
-      plazaRef.current.rotation.y += 0.001;
+    if (contraptionRef.current) {
+      // Slow mysterious rotation
+      contraptionRef.current.rotation.y += 0.002;
+      
+      // Subtle floating animation
+      contraptionRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.5;
     }
   });
 
   return (
-    <group ref={plazaRef} position={[0, 0, 0]}>
-      {/* Central Plaza Platform - Enhanced with PBR materials */}
-      <mesh position={[0, 0.5, 0]} receiveShadow castShadow>
-        <cylinderGeometry args={[15, 15, 1, 16]} />
-        <meshStandardMaterial 
-          color="#1a1a2e"
-          emissive="#0066cc"
-          emissiveIntensity={0.2}
-          roughness={0.3}
-          metalness={0.8}
-          envMapIntensity={1.0}
-        />
-      </mesh>
-
-      {/* Neon Ring - Enhanced with better emission */}
-      <mesh position={[0, 1.1, 0]} castShadow>
-        <torusGeometry args={[12, 0.5, 8, 32]} />
-        <meshStandardMaterial 
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={1.0}
-          roughness={0.1}
-          metalness={0.9}
-          transparent
-          opacity={0.9}
-        />
-      </mesh>
-
-      {/* Central Hologram - Enhanced materials */}
-      <Float speed={1} rotationIntensity={0.5} floatIntensity={0.3}>
-        <mesh position={[0, 5, 0]} castShadow>
-          <octahedronGeometry args={[2]} />
-          <meshStandardMaterial 
-            color="#ff00ff"
-            emissive="#ff00ff"
-            emissiveIntensity={1.2}
-            roughness={0.0}
-            metalness={0.0}
-            transparent
-            opacity={0.8}
-            envMapIntensity={2.0}
-          />
-        </mesh>
-      </Float>
-
-      {/* Add surrounding energy pillars */}
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        const x = Math.cos(angle) * 8;
-        const z = Math.sin(angle) * 8;
-        return (
-          <Float key={i} speed={0.5 + i * 0.1} rotationIntensity={0.1} floatIntensity={0.2}>
-            <mesh position={[x, 2, z]} castShadow>
-              <cylinderGeometry args={[0.3, 0.3, 4]} />
-              <meshStandardMaterial
-                color="#00ffff"
-                emissive="#00ffff"
-                emissiveIntensity={0.8}
-                roughness={0.2}
-                metalness={0.9}
-                transparent
-                opacity={0.7}
-              />
-            </mesh>
-          </Float>
-        );
-      })}
-
-      {/* Enhanced Ambient Sparkles with layering */}
+    <group ref={contraptionRef} position={[0, 0, 0]}>
+      {/* MYSTERIOUS CONTRAPTION GLB MODEL with automatic scaling */}
+      <AnimatedScaledGLB 
+        glbFile="https://siliconroads.com/16_mysterious_contraption.glb"
+        targetSizeOverride={40}
+        playAllAnimations={true}
+        castShadow
+        receiveShadow
+      />
+      
+      {/* Enhanced Ambient Sparkles around the contraption */}
       <Sparkles
         count={200}
-        scale={[30, 10, 30]}
+        scale={[30, 15, 30]}
         size={2}
-        speed={0.5}
-        color="#00ffff"
-        position={[0, 3, 0]}
+        speed={0.3}
+        color="#ff00ff"
+        position={[0, 8, 0]}
       />
       
       {/* Secondary sparkle layer */}
       <Sparkles
         count={100}
-        scale={[20, 8, 20]}
+        scale={[20, 10, 20]}
         size={1}
-        speed={0.8}
-        color="#0088ff"
-        position={[0, 5, 0]}
+        speed={0.5}
+        color="#00ffff"
+        position={[0, 12, 0]}
       />
     </group>
   );
@@ -167,6 +115,12 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
           console.log('  Current hubId:', hubId);
           console.log('  Will set pinnedAgentHub to:', isPinned ? null : hubId);
           setPinnedAgentHub(isPinned ? null : hubId);
+          
+          // Clear hover state when unpinning to ensure clean state
+          if (isPinned) {
+            setHoveredAgentHub(null);
+          }
+          
           console.log('  ✅ setPinnedAgentHub called successfully');
           
           // Clear interaction flag after a delay
@@ -176,15 +130,25 @@ export function AgentBuildingHub({ position, hubId }: { position: [number, numbe
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();
-          console.log('🔥 AGENT HUB HOVERED! Setting hover state');
-          console.log('  Setting hoveredAgentHub to:', hubId);
-          setHoveredAgentHub(hubId);
+          // Only set hover state if not already pinned
+          if (!isPinned) {
+            console.log('🔥 AGENT HUB HOVERED! Setting hover state');
+            console.log('  Setting hoveredAgentHub to:', hubId);
+            setHoveredAgentHub(hubId);
+          } else {
+            console.log('🔥 AGENT HUB HOVERED! But already pinned, ignoring hover');
+          }
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredAgentHub to: null');
-          setHoveredAgentHub(null);
+          // Only clear hover state if not pinned
+          if (!isPinned) {
+            console.log('🔥 AGENT HUB UNHOVERED! Clearing hover state');
+            console.log('  Setting hoveredAgentHub to: null');
+            setHoveredAgentHub(null);
+          } else {
+            console.log('🔥 AGENT HUB UNHOVERED! But pinned, keeping modal open');
+          }
         }}
       >
         <meshStandardMaterial
@@ -290,6 +254,12 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
           console.log('  Current marketId:', marketId);
           console.log('  Will set pinnedMarketplace to:', isPinned ? null : marketId);
           setPinnedMarketplace(isPinned ? null : marketId);
+          
+          // Clear hover state when unpinning to ensure clean state
+          if (isPinned) {
+            setHoveredMarketplace(null);
+          }
+          
           console.log('  ✅ setPinnedMarketplace called successfully');
           
           // Clear interaction flag after a delay
@@ -299,15 +269,25 @@ export function TradingMarketplace({ position, marketId }: { position: [number, 
         }}
         onPointerEnter={(e) => {
           e.stopPropagation();
-          console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
-          console.log('  Setting hoveredMarketplace to:', marketId);
-          setHoveredMarketplace(marketId);
+          // Only set hover state if not already pinned
+          if (!isPinned) {
+            console.log('🔥 MARKETPLACE HOVERED! Setting hover state');
+            console.log('  Setting hoveredMarketplace to:', marketId);
+            setHoveredMarketplace(marketId);
+          } else {
+            console.log('🔥 MARKETPLACE HOVERED! But already pinned, ignoring hover');
+          }
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
-          console.log('  Setting hoveredMarketplace to: null');
-          setHoveredMarketplace(null);
+          // Only clear hover state if not pinned
+          if (!isPinned) {
+            console.log('🔥 MARKETPLACE UNHOVERED! Clearing hover state');
+            console.log('  Setting hoveredMarketplace to: null');
+            setHoveredMarketplace(null);
+          } else {
+            console.log('🔥 MARKETPLACE UNHOVERED! But pinned, keeping modal open');
+          }
         }}
       >
         <cylinderGeometry args={[25, 25, 3, 16]} />

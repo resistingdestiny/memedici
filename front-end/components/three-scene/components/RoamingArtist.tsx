@@ -2,9 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Float, Sparkles, RoundedBox, Sphere, MeshTransmissionMaterial } from "@react-three/drei";
+import { Html, Float, Sparkles, RoundedBox, Sphere } from "@react-three/drei";
 import * as THREE from "three";
-import { ScaledGLB } from "./GLBScaler";
+import { ScaledGLB, AnimatedScaledGLB } from "./GLBScaler";
+import { useCityStore } from "@/lib/stores/use-city";
 
 export function RoamingArtist({ 
   artistId, 
@@ -13,7 +14,9 @@ export function RoamingArtist({
   homeStudio, 
   initialPosition, 
   color, 
-  onArtistClick 
+  onArtistClick,
+  isFocused = false,
+  glbFile = "https://siliconroads.com/cyberpunk_robot.glb" // Default fallback
 }: { 
   artistId: string; 
   name: string; 
@@ -22,9 +25,13 @@ export function RoamingArtist({
   initialPosition: [number, number, number]; 
   color: string;
   onArtistClick: (artist: any) => void;
+  isFocused?: boolean;
+  glbFile?: string; // New optional prop for GLB file
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  const innerGlowRef = useRef<THREE.Mesh>(null);
   // Comment out all the individual refs for the complex appearance
   // const headRef = useRef<THREE.Mesh>(null);
   // const ringRef = useRef<THREE.Mesh>(null);
@@ -34,6 +41,9 @@ export function RoamingArtist({
   // const faceScreenRef = useRef<THREE.Mesh>(null);
   // const antennaRefs = useRef<THREE.Mesh[]>([]);
   // const lightRef = useRef<THREE.PointLight>(null);
+  
+  // Get studios from the city store for dynamic building avoidance
+  const { studios } = useCityStore();
   
   const [position] = useState<THREE.Vector3>(new THREE.Vector3(...initialPosition));
   const [velocity] = useState<THREE.Vector3>(new THREE.Vector3(
@@ -50,8 +60,8 @@ export function RoamingArtist({
 
   useFrame((state) => {
     if (groupRef.current) {
-      // Only move if not hovered
-      if (!isHovered) {
+      // Only move if not hovered AND not focused
+      if (!isHovered && !isFocused) {
         // Update velocity more frequently for more noticeable movement
         if (Math.random() < 0.01) {
           velocity.set(
@@ -63,9 +73,59 @@ export function RoamingArtist({
         }
 
         // Movement boundaries for the larger city
-        const bounds = 150;
+        const bounds = 350;
         
-        // Update position with faster movement
+        // Building avoidance zones - keep agents away from buildings
+        const buildingZones = [
+          { pos: [120, 0, 0], radius: 70, name: "Agent Builder Hub" },
+          { pos: [0, 0, 140], radius: 80, name: "Exchange Building" },
+          { pos: [0, 0, 0], radius: 50, name: "Central Plaza" },
+          // Add dynamic studio positions
+          ...studios.map(studio => ({
+            pos: studio.position,
+            radius: 50, // Safe distance from studios
+            name: studio.name
+          }))
+        ];
+        
+        // Check for building collisions before moving
+        const testPosition = position.clone().add(velocity.clone().multiplyScalar(0.02));
+        let shouldAvoidBuilding = false;
+        let strongestAvoidance = new THREE.Vector3(0, 0, 0);
+        
+        for (const building of buildingZones) {
+          const distanceToBuilding = Math.sqrt(
+            Math.pow(testPosition.x - building.pos[0], 2) + 
+            Math.pow(testPosition.z - building.pos[2], 2)
+          );
+          
+          if (distanceToBuilding < building.radius) {
+            // Agent is getting too close to a building, steer away
+            const avoidanceStrength = (building.radius - distanceToBuilding) / building.radius; // Stronger when closer
+            const avoidanceVector = new THREE.Vector3(
+              testPosition.x - building.pos[0],
+              0,
+              testPosition.z - building.pos[2]
+            ).normalize().multiplyScalar(2.0 * avoidanceStrength); // Scale by proximity
+            
+            // Accumulate avoidance forces
+            strongestAvoidance.add(avoidanceVector);
+            shouldAvoidBuilding = true;
+            
+            // Only log occasionally to avoid spam
+            if (Math.random() < 0.01) {
+              console.log(`🚧 Agent ${name} avoiding ${building.name} (distance: ${distanceToBuilding.toFixed(1)})`);
+            }
+          }
+        }
+        
+        // Apply avoidance if needed
+        if (shouldAvoidBuilding) {
+          velocity.add(strongestAvoidance);
+          velocity.normalize().multiplyScalar(1.0);
+        }
+        
+        // Update position with collision-checked movement
         position.add(velocity.clone().multiplyScalar(0.02));
         
         // Bounce off boundaries
@@ -103,6 +163,21 @@ export function RoamingArtist({
       
       // Subtle rotation
       groupRef.current.rotation.y += Math.sin(time * 0.5) * 0.001;
+      
+      // Pulsing glow animation for better visibility
+      if (glowRef.current && innerGlowRef.current) {
+        const pulseIntensity = 0.3 + Math.sin(time * 2) * 0.2;
+        const innerPulseIntensity = 0.5 + Math.sin(time * 3) * 0.3;
+        
+        // Animate glow material emissive intensity
+        (glowRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulseIntensity;
+        (innerGlowRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = innerPulseIntensity;
+        
+        // Slightly scale the glow spheres for additional effect
+        const scaleVariation = 1 + Math.sin(time * 1.5) * 0.1;
+        glowRef.current.scale.setScalar(scaleVariation);
+        innerGlowRef.current.scale.setScalar(scaleVariation * 0.8);
+      }
     }
   });
 
@@ -122,206 +197,137 @@ export function RoamingArtist({
       position: position.toArray()
     };
     
+    // Directly open the full agent panel
     onArtistClick(artist);
   };
 
-  const handlePointerOver = () => setIsHovered(true);
-  const handlePointerOut = () => setIsHovered(false);
+  const handlePointerEnter = () => {
+    setIsHovered(true);
+  };
+  
+  const handlePointerLeave = () => {
+    setIsHovered(false);
+  };
 
   return (
     <group ref={groupRef} position={initialPosition}>
-      {/* CYBERPUNK ROBOT GLB MODEL with automatic scaling */}
-      <ScaledGLB 
-        glbFile="cyberpunk_robot.glb"
+      {/* GLOW EFFECT FOR BETTER VISIBILITY */}
+      <mesh ref={glowRef} position={[0, 3, 0]}>
+        <sphereGeometry args={[8]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.3}
+          transparent
+          opacity={0.1}
+          roughness={1.0}
+          metalness={0.0}
+        />
+      </mesh>
+      
+      {/* PULSING INNER GLOW */}
+      <mesh ref={innerGlowRef} position={[0, 3, 0]}>
+        <sphereGeometry args={[5]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.5}
+          transparent
+          opacity={0.15}
+          roughness={1.0}
+          metalness={0.0}
+        />
+      </mesh>
+      
+      {/* ENHANCED POINT LIGHT FOR GLOW */}
+      <pointLight
+        position={[0, 3, 0]}
+        color={color}
+        intensity={2.0}
+        distance={25}
+        decay={2}
+      />
+      
+      {/* SECONDARY GLOW LIGHT */}
+      <pointLight
+        position={[0, 1, 0]}
+        color={color}
+        intensity={1.0}
+        distance={15}
+        decay={1.5}
+      />
+
+      {/* CYBERPUNK ROBOT GLB MODEL */}
+      <AnimatedScaledGLB
+        glbFile={glbFile}
+        targetSizeOverride={15.0}
+        playAllAnimations={true}
         castShadow
         receiveShadow
         onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       />
 
-      {/* COMMENT OUT ALL THE COMPLEX CUSTOM APPEARANCE */}
-      {/* 
-      <RoundedBox ref={meshRef} args={[0.8, 2, 0.8]} radius={0.1} position={[0, 1, 0]} castShadow receiveShadow
+      {/* ENHANCED LARGER HOVER AREA - SURROUNDS THE ENTIRE AGENT */}
+      <mesh
+        position={[0, 6, 0]}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        visible={false}
+      >
+        <sphereGeometry args={[15]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
+      {/* INVISIBLE LARGER CLICKABLE AREA FOR EASIER CLICKING */}
+      <mesh
+        position={[0, 3.75, 0]}
         onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}>
-        <meshStandardMaterial
-          color={isHovered ? "#00ff88" : color}
-          emissive={isHovered ? "#004400" : color}
-          emissiveIntensity={isHovered ? 0.3 : 0.1}
-          roughness={0.2}
-          metalness={0.8}
-          envMapIntensity={1.5}
-          transparent
-          opacity={0.9}
-        />
-      </RoundedBox>
-
-      <Sphere ref={headRef} args={[0.4, 32, 32]} position={[0, 1.5, 0]} castShadow>
-        <meshStandardMaterial 
-          color="#ffffff"
-          emissive={color}
-          emissiveIntensity={0.6}
-          roughness={0.1}
-          metalness={1.0}
-          envMapIntensity={2.0}
-        />
-      </Sphere>
-
-      <mesh ref={faceScreenRef} position={[0, 1.5, 0.35]}>
-        <planeGeometry args={[0.6, 0.4]} />
-        <meshStandardMaterial 
-          color="#001133"
-          emissive={color}
-          emissiveIntensity={0.8}
-          roughness={0.9}
-          metalness={0.0}
-          transparent
-          opacity={0.9}
-        />
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        visible={false}
+      >
+        <sphereGeometry args={[12]} />
+        <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      <mesh ref={eyeLeftRef} position={[-0.15, 1.6, 0.35]}>
-        <sphereGeometry args={[0.05]} />
-        <meshStandardMaterial 
-          color="#ff0000"
-          emissive="#ff0000"
-          emissiveIntensity={3}
-          roughness={0.0}
-          metalness={0.0}
-        />
-      </mesh>
-      <mesh ref={eyeRightRef} position={[0.15, 1.6, 0.35]}>
-        <sphereGeometry args={[0.05]} />
-        <meshStandardMaterial 
-          color="#ff0000"
-          emissive="#ff0000"
-          emissiveIntensity={3}
-          roughness={0.0}
-          metalness={0.0}
-        />
-      </mesh>
-
-      <mesh ref={mouthRef} position={[0, 1.3, 0.35]}>
-        <boxGeometry args={[0.3, 0.03, 0.01]} />
-        <meshStandardMaterial 
-          color={color}
-          emissive={color}
-          emissiveIntensity={1.0}
-          roughness={0.0}
-          metalness={1.0}
-        />
-      </mesh>
-
-      <mesh ref={ringRef} position={[0, 1.5, 0]}>
-        <torusGeometry args={[1, 0.05, 8, 32]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={2.0}
-          roughness={0.0}
-          metalness={1.0}
-          transparent
-          opacity={0.9}
-        />
-      </mesh>
-
-      {[0.5, 1, 1.5, 2].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[0, 0, 0]}>
-          <ringGeometry args={[0.2, 1.2, 16]} />
-          <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={1.0}
-            roughness={0.0}
-            metalness={0.5}
-            transparent
-            opacity={0.4}
-          />
-        </mesh>
-      ))}
-
-      {[0, 1, 2].map((i) => (
-        <mesh 
-          key={i}
-          ref={(el) => el && (antennaRefs.current[i] = el)}
-          position={[
-            Math.cos(i * Math.PI * 2 / 3) * 0.6,
-            3.5,
-            Math.sin(i * Math.PI * 2 / 3) * 0.6
-          ]}
-        >
-          <cylinderGeometry args={[0.02, 0.02, 1]} />
-          <meshStandardMaterial 
-            color={color}
-            emissive={color}
-            emissiveIntensity={1.0}
-            roughness={0.0}
-            metalness={1.0}
-          />
-        </mesh>
-      ))}
-
-      <Float speed={0.5} rotationIntensity={0.2} floatIntensity={0.2}>
-        <mesh position={[0, 2.5, 0]}>
-          <torusGeometry args={[1.5, 0.1, 8, 16]} />
-          <meshStandardMaterial 
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.5}
-            roughness={0.1}
-            metalness={0.9}
-            transparent
-            opacity={0.7}
-          />
-        </mesh>
-      </Float>
-
-      <pointLight 
-        ref={lightRef}
-        position={[0, 3, 0]} 
-        color={color} 
-        intensity={0.8}
-        distance={5}
-        decay={2}
-      />
-
+      {/* SPARKLES FOR ENHANCED VISIBILITY */}
       <Sparkles 
-        count={50} 
-        scale={3} 
-        size={2} 
-        speed={1} 
+        count={40} 
+        scale={12} 
+        size={3} 
+        speed={0.8} 
         color={color}
-        opacity={0.8}
+        opacity={0.6}
       />
       
       <Sparkles 
-        count={30} 
-        scale={2} 
-        size={1.5} 
-        speed={1.5} 
-        color="#ffff00"
-        opacity={0.6}
+        count={20} 
+        scale={8} 
+        size={2} 
+        speed={1.2} 
+        color="#ffffff"
+        opacity={0.4}
       />
-      */}
 
       {/* Keep the hover information panel */}
       {isHovered && (
-        <Html position={[0, 4, 0]} center>
-          <div className="bg-black/90 backdrop-blur-xl border border-cyan-400 rounded-xl px-4 py-3 text-cyan-400 font-mono animate-in fade-in duration-200 shadow-lg shadow-cyan-400/25 min-w-[200px]">
-            <div className="text-lg font-bold text-center">{name}</div>
-            <div className="text-sm text-center mb-2">{specialty}</div>
+        <Html position={[0, 8, 0]} center>
+          <div className="bg-black/95 backdrop-blur-xl border-2 border-cyan-400 rounded-xl px-6 py-4 text-cyan-400 font-mono animate-in fade-in duration-200 shadow-xl shadow-cyan-400/40 min-w-[250px] transform hover:scale-105 transition-transform">
+            <div className="text-xl font-bold text-center mb-1">{name}</div>
+            <div className="text-sm text-center mb-3 text-cyan-300">{specialty}</div>
             {homeStudio && (
-              <div className="text-xs text-green-400 text-center mb-2">📍 {homeStudio}</div>
+              <div className="text-xs text-green-400 text-center mb-2 font-semibold">📍 {homeStudio}</div>
             )}
-            <div className="text-xs text-purple-400 text-center mb-3">
-              {homeStudio ? 'Studio Artist' : 'Independent Artist'}
+            <div className="text-xs text-purple-400 text-center mb-4">
+              {homeStudio ? '🏛️ Studio Artist' : '🌟 Independent Artist'}
             </div>
             <div className="text-center">
-              <div className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs py-1 px-3 rounded transition-colors cursor-pointer">
-                🗨️ Click to Chat
+              <div className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm py-3 px-6 rounded-lg transition-all cursor-pointer font-bold shadow-lg transform hover:scale-105">
+                💬 Click to Open Agent Panel
               </div>
+              <div className="text-xs text-gray-300 mt-2 opacity-75">Chat • Profile • AI Tools</div>
             </div>
           </div>
         </Html>

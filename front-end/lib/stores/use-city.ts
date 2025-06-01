@@ -1,11 +1,12 @@
 "use client";
 
 import { create } from "zustand";
+import { getStudios, getAgents, Studio as ApiStudio, Agent } from "@/lib/api";
 
 export interface Studio {
   id: string;
   name: string;
-  agentId: string;
+  agentId?: string; // Make optional since studios might not have agents
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];
@@ -16,6 +17,19 @@ export interface Studio {
     position: [number, number, number];
     rotation: [number, number, number];
   }[];
+  // API data fields
+  studio_id: string;
+  studioData: {
+    name: string;
+    description: string;
+    theme: string;
+    art_style: string;
+    items_count: number;
+    featured_items: any[];
+  };
+  assigned_agents: string[];
+  agent_count: number;
+  agent?: Agent; // The actual agent data if assigned
 }
 
 interface CityState {
@@ -62,6 +76,9 @@ interface CityState {
   initializeStudios: () => void;
   setHoveredAgentHub: (hubId: string | null) => void;
   setHoveredMarketplace: (marketId: string | null) => void;
+  // Add new function for API-based studios
+  generateStudiosFromAgents: (agents: any[]) => void;
+  loadStudiosFromAPI: () => Promise<void>;
 }
 
 export const useCityStore = create<CityState>((set, get) => ({
@@ -128,8 +145,27 @@ export const useCityStore = create<CityState>((set, get) => ({
       return;
     }
     
-    // Create simple colored placeholder images as data URIs
+    // Don't initialize with mock data anymore - redirect to loadStudiosFromAPI
+    console.log('🏛️ Redirecting to loadStudiosFromAPI for real data...');
+    get().loadStudiosFromAPI();
+  },
+  setHoveredAgentHub: (hubId: string | null) => set({ hoveredAgentHub: hubId }),
+  setHoveredMarketplace: (marketId: string | null) => set({ hoveredMarketplace: marketId }),
+  // Add new function for API-based studios
+  generateStudiosFromAgents: (agents: any[]) => {
+    console.log('🏛️ Generating studios from API agents:', agents.length);
+    
+    // Don't regenerate if we already have studios
+    const existingStudios = get().studios;
+    if (existingStudios.length > 0) {
+      console.log('🏛️ Studios already exist, not regenerating');
+      return;
+    }
+
+    // Helper function to create placeholder images
     const createPlaceholderImage = (color: string) => {
+      if (typeof window === 'undefined') return '';
+      
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 512;
@@ -146,267 +182,275 @@ export const useCityStore = create<CityState>((set, get) => ({
       return canvas.toDataURL();
     };
 
-    // Create studios based on agent data - SPREAD OUT MUCH MORE
-    const studios: Studio[] = [
-      {
-        id: "leonardo-studio",
-        name: "Leonardo's Workshop",
-        agentId: "leonardo",
-        position: [-40, 0, -30], // Much further spread out
-        rotation: [0, Math.PI / 4, 0],
-        scale: [1.2, 1, 1.2], // Slightly larger and wider
-        recentArtworks: [
-          {
-            id: "art-1",
-            title: "Modern Mona Lisa",
-            image: createPlaceholderImage('#8B4513'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-2",
-            title: "Digital Last Supper",
-            image: createPlaceholderImage('#DAA520'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-8",
-            title: "Vitruvian AI",
-            image: createPlaceholderImage('#CD853F'),
-            position: [0, 3, -1],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-9",
-            title: "The Flying Machine 2.0",
-            image: createPlaceholderImage('#DEB887'),
-            position: [-1, 1.5, 1],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "raphael-studio",
-        name: "Raphael's Atelier",
-        agentId: "raphael",
-        position: [45, 0, -25], // Far to the right
-        rotation: [0, -Math.PI / 3, 0],
-        scale: [1, 1.3, 1], // Taller and more elegant
-        recentArtworks: [
-          {
-            id: "art-3",
-            title: "Modern School of Athens",
-            image: createPlaceholderImage('#4169E1'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-10",
-            title: "Digital Sistine Madonna",
-            image: createPlaceholderImage('#6495ED'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-11",
-            title: "Renaissance Metaverse",
-            image: createPlaceholderImage('#87CEEB'),
-            position: [0, 3, -1],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "michelangelo-studio",
-        name: "Michelangelo's Forge",
-        agentId: "michelangelo",
-        position: [0, 0, 50], // Far back
-        rotation: [0, Math.PI, 0],
-        scale: [1.4, 1.2, 1.4], // Massive and imposing
-        recentArtworks: [
-          {
-            id: "art-4",
-            title: "Cybernetic Creation",
-            image: createPlaceholderImage('#DC143C'),
-            position: [0, 2, -2],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-12",
-            title: "Digital David",
-            image: createPlaceholderImage('#FF6347'),
-            position: [-2, 2.5, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-13",
-            title: "The Sistine Cloud",
-            image: createPlaceholderImage('#FF4500'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-14",
-            title: "Pieta 3.0",
-            image: createPlaceholderImage('#B22222'),
-            position: [1, 1.5, 1],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "caravaggio-studio",
-        name: "Caravaggio's Studio",
-        agentId: "caravaggio",
-        position: [-35, 0, 35], // Far left back area
-        rotation: [0, Math.PI / 2.5, 0],
-        scale: [0.9, 1.1, 0.9], // Narrower but taller, mysterious
-        recentArtworks: [
-          {
-            id: "art-5",
-            title: "Modern Bacchus",
-            image: createPlaceholderImage('#8A2BE2'),
-            position: [0, 2, 2],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-15",
-            title: "Digital Chiaroscuro",
-            image: createPlaceholderImage('#4B0082'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-16",
-            title: "The Calling of St. AI",
-            image: createPlaceholderImage('#6A0DAD'),
-            position: [2, 2.5, 0],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "da-vinci-studio",
-        name: "Da Vinci's Lab",
-        agentId: "davinci",
-        position: [40, 0, 30], // Far right back
-        rotation: [0, -Math.PI / 1.8, 0],
-        scale: [1.1, 1.4, 1.1], // Tall and innovative looking
-        recentArtworks: [
-          {
-            id: "art-17",
-            title: "Neural Network Portrait",
-            image: createPlaceholderImage('#228B22'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-18",
-            title: "Quantum Salvator Mundi",
-            image: createPlaceholderImage('#32CD32'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-19",
-            title: "The Annunciation 2.0",
-            image: createPlaceholderImage('#9ACD32'),
-            position: [0, 3, -1],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "picasso-studio",
-        name: "Picasso's Cubist Lab",
-        agentId: "picasso",
-        position: [-60, 0, 0], // Far left side
-        rotation: [0, Math.PI / 6, 0],
-        scale: [1.3, 0.8, 1.3], // Wide and angular, cubist style
-        recentArtworks: [
-          {
-            id: "art-20",
-            title: "Guernica Reloaded",
-            image: createPlaceholderImage('#696969'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-21",
-            title: "Les Demoiselles d'AI",
-            image: createPlaceholderImage('#A9A9A9'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-22",
-            title: "Blue Period Bot",
-            image: createPlaceholderImage('#191970'),
-            position: [0, 3, -1],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-23",
-            title: "Cubist Self-Portrait",
-            image: createPlaceholderImage('#2F4F4F'),
-            position: [1, 1.5, 1],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "monet-studio",
-        name: "Monet's Digital Garden",
-        agentId: "monet",
-        position: [25, 0, -45], // Front right area
-        rotation: [0, -Math.PI / 5, 0],
-        scale: [1, 0.9, 1], // Organic, garden-like proportions
-        recentArtworks: [
-          {
-            id: "art-24",
-            title: "Water Lilies VR",
-            image: createPlaceholderImage('#98FB98'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-25",
-            title: "Impression Algorithm",
-            image: createPlaceholderImage('#90EE90'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          }
-        ]
-      },
-      {
-        id: "van-gogh-studio",
-        name: "Van Gogh's Swirling Studio",
-        agentId: "vangogh",
-        position: [-25, 0, -40], // Front left area
-        rotation: [0, Math.PI / 7, 0],
-        scale: [1.2, 1.1, 1.2], // Expressive proportions
-        recentArtworks: [
-          {
-            id: "art-26",
-            title: "Starry Night Code",
-            image: createPlaceholderImage('#FFD700'),
-            position: [-2, 2, 0],
-            rotation: [0, 0, 0]
-          },
-          {
-            id: "art-27",
-            title: "Sunflowers.exe",
-            image: createPlaceholderImage('#FFA500'),
-            position: [2, 2, 0],
-            rotation: [0, 0, 0]
-          }
-        ]
+    // Generate studio positions in a circle around the city
+    const generateStudioPositions = (count: number) => {
+      const positions: [number, number, number][] = [];
+      const baseRadius = 240; // Distance from center - increased from 80 to spread buildings out more
+      
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const radius = baseRadius + (Math.random() - 0.5) * 60; // Increased variation from 20 to 60
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        positions.push([x, 0, z]);
       }
-    ];
-    
+      return positions;
+    };
+
+    const studioPositions = generateStudioPositions(agents.length);
+
+    // Create studios based on real agents
+    const studios: Studio[] = agents.map((agent, index) => {
+      const position = studioPositions[index] || [0, 0, 0];
+      const agentName = agent.name || agent.identity?.display_name || `Agent ${index + 1}`;
+      const studioName = agent.studio?.name || `${agentName}'s Studio`;
+      
+      // Generate color based on agent specialty or use a default
+      const getColorForSpecialty = (specialty: string[]) => {
+        const colorMap: Record<string, string> = {
+          'digital': '#4169E1',
+          'painting': '#FF6347',
+          'sculpture': '#8B4513',
+          'photography': '#32CD32',
+          'abstract': '#9932CC',
+          'portrait': '#FF69B4',
+          'landscape': '#228B22',
+          'conceptual': '#FF8C00',
+          'mixed': '#DAA520',
+          'generative': '#00CED1'
+        };
+        
+        const primarySpecialty = specialty[0]?.toLowerCase() || 'digital';
+        for (const [key, color] of Object.entries(colorMap)) {
+          if (primarySpecialty.includes(key)) {
+            return color;
+          }
+        }
+        return `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+      };
+
+      const studioColor = getColorForSpecialty(agent.specialty || ['digital']);
+
+      // Generate sample artworks for the studio
+      const artworkTitles = [
+        'Neural Canvas',
+        'Digital Dreams',
+        'AI Imagination',
+        'Synthetic Vision',
+        'Generated Beauty',
+        'Algorithmic Art',
+        'Creative Code',
+        'Virtual Masterpiece'
+      ];
+
+      const recentArtworks = Array.from({ length: Math.min(4, artworkTitles.length) }, (_, artIndex) => ({
+        id: `${agent.agent_id}-art-${artIndex}`,
+        title: artworkTitles[artIndex],
+        image: createPlaceholderImage(studioColor),
+        position: [
+          (artIndex % 2 === 0 ? -2 : 2),
+          2 + (artIndex * 0.5),
+          artIndex < 2 ? 0 : -1
+        ] as [number, number, number],
+        rotation: [0, 0, 0] as [number, number, number]
+      }));
+
+      return {
+        id: agent.agent_id,
+        name: studioName,
+        agentId: agent.agent_id,
+        position,
+        rotation: [0, (Math.random() - 0.5) * Math.PI, 0] as [number, number, number],
+        scale: [
+          1 + (Math.random() - 0.5) * 0.4,
+          1 + (Math.random() - 0.5) * 0.6,
+          1 + (Math.random() - 0.5) * 0.4
+        ] as [number, number, number],
+        recentArtworks,
+        studio_id: agent.studio?.studio_id || agent.agent_id,
+        studioData: agent.studio || {
+          name: studioName,
+          description: "",
+          theme: "",
+          art_style: "",
+          items_count: 0,
+          featured_items: []
+        },
+        assigned_agents: [agent.agent_id],
+        agent_count: 1,
+        agent: agent
+      };
+    });
+
+    console.log('🏛️ Generated studios:', studios.length);
     set({ studios });
   },
-  setHoveredAgentHub: (hubId: string | null) => set({ hoveredAgentHub: hubId }),
-  setHoveredMarketplace: (marketId: string | null) => set({ hoveredMarketplace: marketId })
+  loadStudiosFromAPI: async () => {
+    try {
+      console.log('🏗️ Loading studios from API...');
+      
+      // Fetch both studios and agents data
+      const [studiosResponse, agentsResponse] = await Promise.all([
+        getStudios(),
+        getAgents()
+      ]);
+      
+      const apiStudios: ApiStudio[] = studiosResponse.studios || [];
+      const agents: Agent[] = agentsResponse.agents || [];
+      
+      console.log('📥 API Studios loaded:', apiStudios.length);
+      console.log('👥 API Agents loaded:', agents.length);
+      
+      // If no API studios, create some empty platforms for available studios
+      let studiosToProcess = apiStudios;
+      if (apiStudios.length === 0) {
+        console.log('🏗️ No API studios found, creating empty platforms...');
+        // Create some empty studio platforms
+        studiosToProcess = [
+          { studio_id: 'empty-1', studio: { name: 'Available Studio 1', description: '', theme: 'Modern', art_style: 'Contemporary', items_count: 0, featured_items: [] }, assigned_agents: [], agent_count: 0 },
+          { studio_id: 'empty-2', studio: { name: 'Available Studio 2', description: '', theme: 'Renaissance', art_style: 'Classical', items_count: 0, featured_items: [] }, assigned_agents: [], agent_count: 0 },
+          { studio_id: 'empty-3', studio: { name: 'Available Studio 3', description: '', theme: 'Cyberpunk', art_style: 'Digital', items_count: 0, featured_items: [] }, assigned_agents: [], agent_count: 0 },
+          { studio_id: 'empty-4', studio: { name: 'Available Studio 4', description: '', theme: 'Baroque', art_style: 'Ornate', items_count: 0, featured_items: [] }, assigned_agents: [], agent_count: 0 },
+          { studio_id: 'empty-5', studio: { name: 'Available Studio 5', description: '', theme: 'Impressionist', art_style: 'Impressionism', items_count: 0, featured_items: [] }, assigned_agents: [], agent_count: 0 }
+        ] as ApiStudio[];
+      }
+      
+      // Generate positions for studios in a circle formation
+      const generateStudioPositions = (count: number) => {
+        const radius = 120; // Base radius - increased from 40 to spread buildings out more
+        const positions: [number, number, number][] = [];
+        
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * 2 * Math.PI;
+          
+          // Check if this studio will use cyberpunk building (need to determine which GLB will be used)
+          const studioData = studiosToProcess[i];
+          const isCyberpunkThemed = studioData?.studio?.theme?.toLowerCase().includes('cyberpunk') || 
+                                   studioData?.studio?.art_style?.toLowerCase().includes('digital') ||
+                                   studioData?.studio?.art_style?.toLowerCase().includes('cyberpunk');
+          
+          // For cyberpunk-themed studios, use much larger radius to isolate them
+          let currentRadius;
+          if (isCyberpunkThemed) {
+            currentRadius = radius * 2.5 + Math.sin(i * 0.7) * 50; // 2.5x further out (300+ units from center)
+            console.log(`🏙️ Placing cyberpunk studio "${studioData.studio.name}" at isolated position (radius: ${currentRadius.toFixed(1)})`);
+          } else {
+            currentRadius = radius + Math.sin(i * 0.7) * 30; // Normal radius variation
+          }
+          
+          const x = Math.cos(angle) * currentRadius;
+          const z = Math.sin(angle) * currentRadius;
+          const y = 0;
+          positions.push([x, y, z]);
+        }
+        
+        return positions;
+      };
+      
+      const positions = generateStudioPositions(studiosToProcess.length);
+      
+      // Convert API studios to 3D studios
+      const cityStudios: Studio[] = studiosToProcess.map((apiStudio, index) => {
+        // Find assigned agent data
+        const assignedAgent = apiStudio.assigned_agents.length > 0 
+          ? agents.find(agent => apiStudio.assigned_agents.includes(agent.agent_id || agent.id))
+          : null;
+          
+        // Only generate artworks if the studio actually has items
+        const generateRealArtworks = (studioData: any, itemsCount: number) => {
+          if (itemsCount === 0 || !studioData.featured_items || studioData.featured_items.length === 0) {
+            return []; // No artworks if none exist
+          }
+          
+          // Use actual featured items from the API
+          return studioData.featured_items.slice(0, 4).map((item: any, i: number) => ({
+            id: item.id || `${apiStudio.studio_id}_art_${i}`,
+            title: item.title || item.name || `${studioData.theme} Artwork ${i + 1}`,
+            image: item.image || item.url || generatePlaceholderImage(getThemeColor(studioData.theme)),
+            position: [
+              Math.random() * 6 - 3, // -3 to 3
+              Math.random() * 3 + 1, // 1 to 4
+              Math.random() * 6 - 3  // -3 to 3
+            ] as [number, number, number],
+            rotation: [0, Math.random() * Math.PI * 2, 0] as [number, number, number]
+          }));
+        };
+        
+        const generatePlaceholderImage = (color: string) => {
+          if (typeof window === 'undefined') return '';
+          return `data:image/svg+xml;base64,${btoa(`
+            <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+              <rect width="512" height="512" fill="${color}"/>
+              <text x="256" y="256" font-family="Arial" font-size="24" text-anchor="middle" fill="white">
+                ${apiStudio.studio.theme}
+              </text>
+            </svg>
+          `)}`;
+        };
+        
+        const getThemeColor = (theme: string) => {
+          switch (theme?.toLowerCase()) {
+            case 'metaphysical-futurism': return '#00ffff';
+            case 'renaissance': return '#daa520';
+            case 'baroque': return '#8b4513';
+            case 'cubism': return '#ff6347';
+            case 'impressionism': return '#98fb98';
+            case 'post-impressionism': return '#dda0dd';
+            case 'modern': return '#4169e1';
+            case 'cyberpunk': return '#ff00ff';
+            case 'classical': return '#ffd700';
+            case 'contemporary': return '#00ced1';
+            default: return '#696969';
+          }
+        };
+        
+        return {
+          id: apiStudio.studio_id,
+          name: apiStudio.studio.name,
+          agentId: assignedAgent?.agent_id || assignedAgent?.id,
+          position: positions[index],
+          rotation: [0, Math.random() * Math.PI * 2, 0] as [number, number, number],
+          scale: [1, 1, 1] as [number, number, number],
+          recentArtworks: generateRealArtworks(apiStudio.studio, apiStudio.studio.items_count),
+          studio_id: apiStudio.studio_id,
+          studioData: apiStudio.studio,
+          assigned_agents: apiStudio.assigned_agents,
+          agent_count: apiStudio.agent_count,
+          agent: assignedAgent || undefined
+        };
+      });
+      
+      console.log('🏛️ Generated city studios:', cityStudios.length);
+      console.log('🎨 Studios with agents:', cityStudios.filter(s => s.agent).length);
+      console.log('🏗️ Empty studios:', cityStudios.filter(s => !s.agent).length);
+      
+      set({ studios: cityStudios });
+      
+    } catch (error) {
+      console.error('❌ Error loading studios from API:', error);
+      // Fallback to creating empty studios if API fails
+      const fallbackStudios: Studio[] = [
+        {
+          id: 'fallback-1',
+          name: 'Available Studio',
+          position: [20, 0, 20],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          recentArtworks: [],
+          studio_id: 'fallback-1',
+          studioData: {
+            name: 'Available Studio',
+            description: 'A studio waiting for an artist',
+            theme: 'Modern',
+            art_style: 'Contemporary',
+            items_count: 0,
+            featured_items: []
+          },
+          assigned_agents: [],
+          agent_count: 0
+        }
+      ];
+      set({ studios: fallbackStudios });
+    }
+  }
 })); 

@@ -1,3 +1,6 @@
+import { httpClient } from './http';
+import { ChatRequest, ChatResponse } from './types';
+
 export interface Agent {
   id: string;
   name: string;
@@ -404,21 +407,123 @@ export async function getAgent(id: string): Promise<Agent | null> {
   return agentData.find(agent => agent.id === id) || null;
 }
 
-export async function sendPrompt(agentId: string, promptText: string): Promise<Prompt> {
+// Real API functions with agent-specific enhancement
+export async function sendPrompt(agentId: string, promptText: string): Promise<ChatResponse> {
   console.log(`Sending prompt to agent ${agentId}: ${promptText}`);
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1200));
   
-  const promptId = `prompt-${Date.now()}`;
+  // Get agent data from API to enhance prompt with agent-specific characteristics
+  let agent = agentData.find(a => a.id === agentId); // Fallback to dummy data
+  let enhancedPrompt = promptText;
   
-  return {
-    id: promptId,
-    text: promptText,
-    agentId,
-    userId: "user-1",
-    createdAt: new Date().toISOString(),
-    status: 'pending'
+  try {
+    // Try to get real agent data from API first
+    const apiResponse = await httpClient.get(`/agents/${agentId}`);
+    if (apiResponse.data) {
+      const apiAgent = apiResponse.data;
+      
+      // Create comprehensive style context from real agent data
+      const identity = apiAgent.identity || {};
+      const creative = apiAgent.creative_specs || {};
+      const technical = apiAgent.technical_config || {};
+      const studio = apiAgent.studio || {};
+      
+      const styleElements = [];
+      
+      // Core identity
+      if (identity.display_name) {
+        styleElements.push(`As ${identity.display_name}`);
+      }
+      if (identity.archetype) {
+        styleElements.push(`(${identity.archetype})`);
+      }
+      
+      // Artistic characteristics
+      if (creative.primary_mediums?.length > 0) {
+        styleElements.push(`specializing in ${creative.primary_mediums.join(', ')}`);
+      }
+      if (identity.core_traits?.length > 0) {
+        styleElements.push(`with ${identity.core_traits.join(', ')} characteristics`);
+      }
+      if (creative.colour_palette?.length > 0) {
+        styleElements.push(`using a palette of ${creative.colour_palette.join(', ')}`);
+      }
+      if (creative.signature_motifs?.length > 0) {
+        styleElements.push(`featuring motifs like ${creative.signature_motifs.join(', ')}`);
+      }
+      if (creative.influences?.length > 0) {
+        styleElements.push(`influenced by ${creative.influences.join(', ')}`);
+      }
+      
+      // Studio context
+      if (studio.theme) {
+        styleElements.push(`in a ${studio.theme} studio environment`);
+      }
+      if (studio.art_style) {
+        styleElements.push(`with ${studio.art_style} artistic approach`);
+      }
+      
+      // Voice and style
+      if (identity.voice_style) {
+        styleElements.push(`Expression style: ${identity.voice_style}`);
+      }
+      if (creative.prompt_formula) {
+        styleElements.push(`Creative approach: ${creative.prompt_formula}`);
+      }
+      
+      const styleContext = [
+        styleElements.join(', ') + '.',
+        identity.origin_story ? `Background: ${identity.origin_story}` : '',
+        `\nUser request: "${promptText}"`,
+        `\nCreate artwork that embodies your distinctive artistic vision and style.`
+      ].filter(Boolean).join(' ');
+      
+      enhancedPrompt = styleContext;
+      
+      console.log('Enhanced prompt with real agent data:', enhancedPrompt);
+    }
+  } catch (apiError) {
+    console.warn(`Failed to fetch agent ${agentId} for style enhancement, using fallback:`, apiError);
+    
+    // Fallback to dummy data enhancement
+    if (agent) {
+      const styleContext = [
+        `As ${agent.name}, a specialist in ${agent.specialty.join(', ')},`,
+        `create artwork that reflects your signature style.`,
+        `Your artistic focus: ${agent.description}`,
+        `Specialty techniques: ${agent.specialty.join(', ')}`,
+        `Collective tradition: ${agent.collective}`,
+        `\nUser request: ${promptText}`,
+        `\nEnsure the artwork embodies ${agent.name}'s distinctive ${agent.specialty.join(', ')} approach.`
+      ].join(' ');
+      
+      enhancedPrompt = styleContext;
+      console.log('Enhanced prompt with dummy data:', enhancedPrompt);
+    }
+  }
+  
+  const chatRequest: ChatRequest = {
+    message: enhancedPrompt,
+    agent_id: agentId,
+    thread_id: "default"
   };
+  
+  try {
+    const response = await httpClient.post<ChatResponse>('/chat', chatRequest);
+    
+    // Log the response for debugging
+    console.log('Chat API Response:', response.data);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error sending prompt:', error);
+    // Return an error response that matches the expected interface
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send prompt',
+      agent_id: agentId,
+      thread_id: "default"
+    };
+  }
 }
 
 export async function stake(agentId: string, amount: number): Promise<boolean> {

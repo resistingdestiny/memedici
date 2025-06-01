@@ -83,6 +83,7 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.158.0",
     "three-mesh-bvh": "^0.8.0",
+    "three-stdlib": "^2.36.0",
     "typescript": "5.2.2",
     "vaul": "^0.9.9",
     "viem": "^2.30.5",
